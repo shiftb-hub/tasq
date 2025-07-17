@@ -16,10 +16,160 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Post {
+// model Post {
+//   id         String   @id @default(uuid())
+//   title      String
+//   content    String
+//   createdAt  DateTime @default(now()) @map("created_at")
+//   @@map("posts")
+// }
+
+enum Role {
+  STUDENT
+  TA
+  TEACHER
+  ADMIN
+}
+
+model User {
+  id              String       @id @default(uuid())
+  email           String       @unique
+  name            String
+  role            Role         @default(STUDENT)
+  slackId         String
+  instagramId     String
+  job             String
+  currentChapter  Int?
+  tasks           Task[]                       // 自分が作成したタスク
+  studyLogs       StudyLog[]
+  teacherTasks    TeacherTask[] @relation("TeacherBookmarkedTasks")
+  teacherStudents TeacherStudent[] @relation("TeacherToStudent")
+  studentTeachers TeacherStudent[] @relation("StudentToTeacher")
+  assignmentLogs  AssignmentLog[] @relation("ResponderAssignments")
+  comments        Comment[]      @relation("AuthorComments")
+  notifications   Notification[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Task {
+  id                String         @id @default(uuid())
+  title             String
+  description       String?
+  userId            String
+  user              User           @relation(fields: [userId], references: [id])
+  statusId          String?
+  status            Status?        @relation(fields: [statusId], references: [id])
+  relatedChapter    Int?
+  tags              TaskTag[]
+  activityTypes     TaskActivityType[]
+  assignmentLog     AssignmentLog?
+  studyLogs         StudyLog[]
+  comments          Comment[]
+  teacherTasks      TeacherTask[]  @relation("BookmarkedTasks")
+  createdAt         DateTime       @default(now())
+}
+
+model Status {
+  id        String   @id @default(uuid())
+  name      String
+  order     Int
+  icon      String?
+  tasks     Task[]
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String
+  order     Int
+  icon      String?
+  taskTags  TaskTag[]
+}
+
+model ActivityType {
+  id        String   @id @default(uuid())
+  name      String
+  order     Int
+  note      String?
+  taskActivityTypes TaskActivityType[]
+}
+
+model TaskTag {
+  id        String   @id @default(uuid())
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    String
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  tagId     String
+}
+
+model TaskActivityType {
+  id             String        @id @default(uuid())
+  task           Task          @relation(fields: [taskId], references: [id])
+  taskId         String
+  activityType   ActivityType  @relation(fields: [activityTypeId], references: [id])
+  activityTypeId String
+}
+
+model TeacherStudent {
+  id          String   @id @default(uuid())
+  teacher     User     @relation("TeacherToStudent", fields: [teacherId], references: [id])
+  teacherId   String
+  student     User     @relation("StudentToTeacher", fields: [studentId], references: [id])
+  studentId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeacherTask {
+  id          String   @id @default(uuid())
+  teacher     User     @relation("TeacherBookmarkedTasks", fields: [teacherId], references: [id])
+  teacherId   String
+  task        Task     @relation("BookmarkedTasks", fields: [taskId], references: [id])
+  taskId      String
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StudyLog {
   id         String   @id @default(uuid())
-  title      String
-  content    String
-  createdAt  DateTime @default(now()) @map("created_at")
-  @@map("posts")
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  taskId     String?
+  task       Task?    @relation(fields: [taskId], references: [id])
+  startedAt  DateTime
+  endedAt    DateTime
+  summary    String?
+  trouble    String?
+  createdAt  DateTime @default(now())
+}
+
+model AssignmentLog {
+  id          String   @id @default(uuid())
+  taskId      String   @unique
+  task        Task     @relation(fields: [taskId], references: [id])
+  responderId String
+  responder   User     @relation("ResponderAssignments", fields: [responderId], references: [id])
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  authorId  String
+  author    User     @relation("AuthorComments", fields: [authorId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String    // e.g., NEW_TASK_STATUS, NEW_COMMENT
+  payload   Json
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
