@@ -1,17 +1,18 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { baseClient as supabaseClient } from "@/app/_libs/supabase/baseClient";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/app/_components/ui/button";
+import { Input } from "@/app/_components/ui/input";
+import { Label } from "@/app/_components/ui/label";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
+import { Checkbox } from "@/app/_components/ui/checkbox";
 
 import { LuSend } from "react-icons/lu";
 import { SignupRequest, signupRequestSchema } from "@/app/_types/SignupRequest";
-import { appBaseUrl } from "@/config/app-config";
+import { appBaseUrl } from "@/app/_configs/app-config";
 
 const c_Email = "email";
 const c_Password = "password";
@@ -33,7 +34,7 @@ const Page: React.FC = () => {
 
   const onSubmit = async (formValues: SignupRequest) => {
     console.log("onSubmit", formValues);
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabaseClient.auth.signUp({
       email: formValues.email,
       password: formValues.password,
       options: {
