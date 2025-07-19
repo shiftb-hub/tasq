@@ -7,6 +7,7 @@ import {
 } from "@/app/_libs/errors";
 import { User } from "@prisma/client";
 import { UserService } from "@/app/_services/userService";
+import { isDevelopmentEnv } from "@/app/_configs/app-config";
 
 // SSR対応のため、ページコンポーネントは非同期関数として定義
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ const Page: React.FC = async () => {
     <div className="flex flex-col gap-y-4">
       <div className="text-2xl font-bold">セッティング</div>
       <pre>{JSON.stringify(user, null, 2)}</pre>
+      {isDevelopmentEnv && <pre>{JSON.stringify(user, null, 2)}</pre>}
       {errMsg && <div className="text-red-500">{errMsg}</div>}
       <DevAuthButton />
     </div>

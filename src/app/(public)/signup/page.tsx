@@ -115,7 +115,7 @@ const Page: React.FC = () => {
               type="password"
               id={c_Password}
               placeholder="password"
-              aria-invalid={!!fieldErrors.email}
+              aria-invalid={!!fieldErrors.password}
             />
             <FormErrorMessage msg={fieldErrors.password?.message} />
           </div>
