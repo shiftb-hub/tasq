@@ -35,3 +35,40 @@ export class AppUserNotFoundError extends Error {
     }
   }
 }
+
+/**
+ * ユーザーが必要な権限を持たないために操作が拒否された場合のエラー
+ */
+export class UserPermissionDeniedError extends Error {
+  readonly userId: string;
+  readonly actualRole: string;
+  readonly requiredRole?: string;
+  readonly action?: string;
+  readonly timestamp: Date;
+
+  constructor({
+    userId,
+    actualRole,
+    requiredRole,
+    action,
+    message = "User does not have sufficient permissions to perform this action",
+  }: {
+    userId: string;
+    actualRole: string;
+    requiredRole?: string;
+    action?: string;
+    message?: string;
+  }) {
+    super(message);
+    this.name = "UserPermissionDeniedError";
+    this.userId = userId;
+    this.actualRole = actualRole;
+    this.requiredRole = requiredRole;
+    this.action = action;
+    this.timestamp = new Date();
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, UserPermissionDeniedError);
+    }
+  }
+}

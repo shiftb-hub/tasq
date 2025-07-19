@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { publicPaths } from "@/app/_configs/app-config";
+import { ApiResponseBuilder as ResBuilder } from "@/app/_types/ApiResponse";
+import { AppErrorCodes } from "@/app/_types/AppErrorCodes";
 
 export const updateSession = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({
@@ -44,11 +46,11 @@ export const updateSession = async (request: NextRequest) => {
     // APIルートの場合はJSONレスポンスを返す
     if (request.nextUrl.pathname.startsWith("/api/")) {
       return new NextResponse(
-        JSON.stringify({
-          error: "Authentication required",
-          message: "You must be logged in to access this resource",
-          code: "UNAUTHORIZED",
-        }),
+        JSON.stringify(
+          ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+            .withDescription("You must be logged in to access this resource")
+            .build(),
+        ),
         {
           status: 401,
           headers: {

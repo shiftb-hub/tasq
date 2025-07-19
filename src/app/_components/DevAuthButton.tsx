@@ -6,7 +6,8 @@ import { createSupabaseBrowserClient } from "@/app/_libs/supabase/browserClient"
 import { Button } from "@/app/_components/ui/button";
 import type { User } from "@supabase/supabase-js";
 
-export const AuthButton: React.FC = () => {
+// 開発テスト用
+export const DevAuthButton: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,7 +16,7 @@ export const AuthButton: React.FC = () => {
   useEffect(() => {
     const supabaseClient = createSupabaseBrowserClient();
 
-    // 初期ユーザー状態を取得
+    // 初期ユーザ状態を取得
     const getInitialUser = async () => {
       const {
         data: { user },
@@ -23,7 +24,6 @@ export const AuthButton: React.FC = () => {
       setUser(user);
       setIsLoading(false);
     };
-
     getInitialUser();
 
     // 認証状態の変更を監視
@@ -33,7 +33,6 @@ export const AuthButton: React.FC = () => {
       setUser(session?.user ?? null);
       setIsLoading(false);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -71,8 +70,13 @@ export const AuthButton: React.FC = () => {
   }
 
   return (
-    <Button type="button" onClick={handleAuth} disabled={isSubmitting}>
-      {user ? "ログアウト" : "ログイン"}
+    <Button
+      type="button"
+      onClick={handleAuth}
+      className="w-full"
+      disabled={isSubmitting}
+    >
+      {user ? `${user.email} を ログアウト` : "ログイン"}
     </Button>
   );
 };

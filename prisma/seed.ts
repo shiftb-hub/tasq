@@ -55,7 +55,7 @@ const main = async () => {
   }
 
   // 既存の全レコードを削除
-  await prisma.post.deleteMany();
+  await prisma.task.deleteMany();
   await prisma.user.deleteMany();
 
   // Userレコードの挿入
@@ -66,39 +66,41 @@ const main = async () => {
         id: user.id,
         name: user.name,
         role: user.role,
-        slackId: user.id, // Slack ID としてユーザIDを使用
+        slackId: user.slackId,
       },
     });
   }
 
-  // Postレコードの挿入
-  const p0 = await prisma.post.create({
+  // Taskレコードの挿入
+  const task0 = await prisma.task.create({
     data: {
       userId: testUsers[0].id,
-      title: "投稿0",
-      content: "投稿0の本文。<br/>投稿0の本文。投稿0の本文。",
+      title: "タスク01",
+      description: "タスク01の説明",
+      startedAt: new Date("2023-10-01T00:00:00.000Z"),
+      endedAt: new Date("2023-10-01T23:59:59.999Z"),
     },
   });
 
-  const p1 = await prisma.post.create({
+  const task1 = await prisma.task.create({
     data: {
       userId: testUsers[0].id,
-      title: "投稿1",
-      content: "投稿1の本文。<br/>投稿1の本文。投稿1の本文。",
+      title: "タスク02",
+      description: "タスク02の説明",
+      startedAt: new Date("2023-10-02T00:00:00.000Z"),
+      endedAt: new Date("2023-10-02T23:59:59.999Z"),
     },
   });
 
-  const p2 = await prisma.post.create({
+  const task2 = await prisma.task.create({
     data: {
       userId: testUsers[1].id,
-      title: "投稿2",
-      content: "投稿2の本文。<br/>投稿2の本文。投稿2の本文。",
+      title: "タスク03",
+      description: "タスク03の説明",
+      startedAt: new Date("2023-10-02T00:00:00.000Z"),
+      endedAt: new Date("2023-10-02T23:59:59.999Z"),
     },
   });
-
-  // console.log(JSON.stringify(p0, null, 2));
-  // console.log(JSON.stringify(p1, null, 2));
-  // console.log(JSON.stringify(p2, null, 2));
 };
 
 main()

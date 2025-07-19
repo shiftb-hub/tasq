@@ -25,6 +25,15 @@ class UserService {
     return await this.prisma.user.count();
   }
 
+  // 全てのユーザを取得
+  public async getAll<T extends PRS.UserInclude, U extends PRS.UserSelect>(
+    options?: UserReturnType<T, U>,
+  ): Promise<PRS.UserGetPayload<{ include: T; select: U }>[]> {
+    return (await this.prisma.user.findMany({
+      ...options,
+    })) as PRS.UserGetPayload<{ include: T; select: U }>[];
+  }
+
   // IDによるユーザ情報の取得 (該当なしの場合は例外をスロー)
   public async getById<T extends PRS.UserInclude, U extends PRS.UserSelect>(
     id: string,
