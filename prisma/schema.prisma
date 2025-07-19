@@ -1,25 +1,136 @@
-// ファイルの更新後は既存テーブルを削除して
-// npx prisma db push
-// npx prisma generate
-// ( >Developer: Reload Window ) 
-// npx prisma db seed
-
-// DBの確認
-// npx prisma studio or  http://127.0.0.1:54323 
-generator client {
-  provider = "prisma-client-js"
+enum Role {
+  STUDENT
+  TA
+  TEACHER
+  ADMIN
 }
 
-datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+model User {
+  id              String       @id @default(uuid())
+  name            String
+  role            Role         @default(STUDENT)
+  slackId         String?      @map("slack_id") //null許容
+  instagramId     String?      @map("instagram_id") //null許容
+  threadsId       String?      @map("threads_id")
+  githubId        String?      @map("github_id")
+  xId             String?      @map("x_id")
+  job             String? // 自由につけていい(照合的な感じ、TA(レビュワー)のレビュワーの部分)
+  currentChapter  Int?         @map("current_chapter")//STUDENTのみ
+  bio             String       @default("") // 自己紹介 biography
+  tasks           Task[]          // 自分が作成したタスク
+  studyLogs       StudyLog[]
+  teacherTasks    TeacherTask[]    @relation("TeacherBookmarkedTasks") //講師がブックマークしたタスク
+  teacherStudents TeacherStudent[] @relation("TeacherToStudent") //講師側がブックマークした生徒
+  studentTeachers TeacherStudent[] @relation("StudentToTeacher") //生徒が講師からブックマークされたことを確認
+  assignmentLogs  AssignmentLog[]  @relation("ResponderAssignments") //担当した講師のログ
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  @@map("users")
 }
 
-model Post {
+model Task {
+  id                String         @id @default(uuid())
+  title             String
+  description       String?
+  userId            String         @map("user_id")
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  statusId          String?        @map("status_id")  //statusへの参照
+  status            Status?        @relation(fields: [statusId], references: [id], onDelete: Cascade)
+  relatedChapter    Int?           @map("related_chapter")
+  tags              TaskTag[]
+  activityTypes     TaskActivityType[]
+  assignmentLog     AssignmentLog? //講師人の対応ログ
+  studyLogs         StudyLog[]
+  teacherTasks      TeacherTask[]  @relation("BookmarkedTasks") //講師人のブックマークしたタスク
+  startedAt  DateTime @map("started_at")
+  endedAt    DateTime @map("ended_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  @@map("tasks")
+}
+
+model Status { // in_progress, in_review, doneなど 管理者側で作ったものをユーザーが選択
+  id        String   @id @default(uuid())
+  name      String
+  order     Int      @unique
+  icon      String?
+  tasks     Task[]
+  @@map("status")
+}
+
+model Tag { // 感情(不安、確認したい、迷ってるなど)タグ ユーザーが作れる
+  id        String   @id @default(uuid())
+  name      String
+  order     Int      @unique
+  icon      String?
+  taskTags  TaskTag[]
+  @@map("tags")
+}
+
+model ActivityType { // 「じっくり考える」「ためす」「調べる」など、タスクの分類カテゴリ
+  id        String   @id @default(uuid())
+  name      String
+  order     Int      @unique
+  description       String?
+  taskActivityTypes TaskActivityType[]
+  @@map("activity_types")
+}
+
+model TaskTag { // Task ↔︎ Tag 中間テーブル
+  id        String   @id @default(uuid())
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    String
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  tagId     String
+}
+
+model TaskActivityType { // Task ↔ ActivityType 中間テーブル
+  id             String        @id @default(uuid())
+  task           Task          @relation(fields: [taskId], references: [id])
+  taskId         String
+  activityType   ActivityType  @relation(fields: [activityTypeId], references: [id])
+  activityTypeId String
+}
+
+model TeacherStudent { //講師が気になる生徒をブックマークする中間テーブル
+  id          String   @id @default(uuid())
+  teacher     User     @relation("TeacherToStudent", fields: [teacherId], references: [id])
+  teacherId   String
+  student     User     @relation("StudentToTeacher", fields: [studentId], references: [id])
+  studentId   String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+}
+
+model TeacherTask { // 講師が気になるタスクをブックマークする中間テーブル
+  id          String   @id @default(uuid())
+  teacher     User     @relation("TeacherBookmarkedTasks", fields: [teacherId], references: [id])
+  teacherId   String
+  task        Task     @relation("BookmarkedTasks", fields: [taskId], references: [id])
+  taskId      String
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+}
+
+model StudyLog { // 学習ログ
   id         String   @id @default(uuid())
-  title      String
-  content    String
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  taskId     String?  @map("task_id")
+  task       Task?    @relation(fields: [taskId], references: [id])
+  time       Int
+  summary    String?
+  trouble    String?
   createdAt  DateTime @default(now()) @map("created_at")
-  @@map("posts")
+}
+
+model AssignmentLog { // 講師がタスクに対して対応したログ
+  id          String   @id @default(uuid())
+  taskId      String   @unique @map("task_id")
+  task        Task     @relation(fields: [taskId], references: [id])
+  responderId String   @map("responder_id")
+  responder   User     @relation("ResponderAssignments", fields: [responderId], references: [id])
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
 }
