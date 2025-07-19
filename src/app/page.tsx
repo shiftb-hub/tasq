@@ -1,5 +1,5 @@
 import NextLink from "next/link";
-
+import { AuthButton } from "@/app/_components/AuthButton";
 const Page: React.FC = () => {
   return (
     <div>
@@ -8,10 +8,21 @@ const Page: React.FC = () => {
         <NextLink href="/signup" className="">
           サインアップ
         </NextLink>
+        <NextLink href="/login" className="">
+          ログイン
+        </NextLink>
         <NextLink href="/api/playground/hoge" className="">
-          APIテスト
+          APIテスト（public）
+        </NextLink>
+        <NextLink href="/api/playground/fuga" className="">
+          APIテスト（private）
+        </NextLink>
+
+        <NextLink href="/settings" className="">
+          設定
         </NextLink>
       </div>
+      <AuthButton />
     </div>
   );
 };

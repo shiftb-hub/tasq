@@ -16,10 +16,37 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  STUDENT
+  TA
+  TEACHER
+  ADMIN
+}
+
+model User {
+  id              String       @id @default(uuid())
+  name            String
+  role            Role         @default(STUDENT)
+  slackId         String?      @map("slack_id") //null許容
+  instagramId     String?      @map("instagram_id") //null許容
+
+  posts           Post[]
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  @@map("users")
+}
+
 model Post {
   id         String   @id @default(uuid())
   title      String
   content    String
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  @@index([userId])
   @@map("posts")
 }
+
