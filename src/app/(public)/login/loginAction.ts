@@ -10,6 +10,8 @@ import type {
   AuthError,
   SignInWithPasswordCredentials,
 } from "@supabase/supabase-js";
+import { isDevelopmentEnv } from "@/app/_configs/app-config";
+import { th } from "zod/v4/locales";
 
 // 戻り値の型定義
 type LoginActionResult = {
@@ -56,7 +58,9 @@ export const loginAction = async (
 ): Promise<LoginActionResult> => {
   try {
     // TODO:デバッグとUX調整のための遅延（本番では削除）
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (isDevelopmentEnv) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
     const supabase = await createSupabaseServerClient();
     const credentials: SignInWithPasswordCredentials = {
       email: loginRequest.email,
@@ -70,7 +74,10 @@ export const loginAction = async (
         errorMessageForUser: mapAuthErrorToUserMessage(error),
       };
     }
-    const userId = data.user?.id || "";
+    const userId = data.user?.id;
+    if (!userId) {
+      throw new Error("Supabase認証は成功したがユーザーIDの取得に失敗");
+    }
 
     // Supabase認証済みユーザーに対応する「AppUser」が存在しなければ新規作成
     const userService = new UserService(prisma);

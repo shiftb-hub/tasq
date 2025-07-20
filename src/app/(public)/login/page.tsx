@@ -94,7 +94,6 @@ const Page: React.FC = () => {
           return;
         }
         setRootError(result.errorMessageForUser!);
-        setIsSubmitting(false);
       } catch (e) {
         const ee =
           e instanceof Error ? { message: e.message, stack: e.stack } : e;
@@ -102,6 +101,8 @@ const Page: React.FC = () => {
         setRootError(
           "予期せぬエラーでログイン処理に失敗しました。再度お試しください。",
         );
+      } finally {
+        setIsSubmitting(false);
       }
     },
     [router, setRootError],
