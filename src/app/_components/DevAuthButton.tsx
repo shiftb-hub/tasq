@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/app/_libs/supabase/browserClient";
 import { Button } from "@/app/_components/ui/button";
 import type { User } from "@supabase/supabase-js";
+import { mutate } from "swr";
 
 // 開発テスト用
 export const DevAuthButton: React.FC = () => {
@@ -44,18 +45,19 @@ export const DevAuthButton: React.FC = () => {
         // ログイン済みの場合：ログアウト処理
         const supabaseClient = createSupabaseBrowserClient();
         const { error } = await supabaseClient.auth.signOut();
-
-        if (error) {
-          console.error("ログアウトエラー:", error);
-        } else {
+        if (!error) {
+          mutate(null);
+          router.refresh();
           router.push("/");
+          return;
         }
+        console.error("ログアウトの失敗。", JSON.stringify(error, null, 2));
       } else {
-        // 未ログインの場合：ログインページに遷移
-        router.push("/login"); // ログインページのパスに合わせて調整
+        // ログインしていない場合：ログインページに遷移
+        router.push("/login");
       }
     } catch (error) {
-      console.error("認証エラー:", error);
+      console.error("予期せぬ認証の失敗。", JSON.stringify(error, null, 2));
     } finally {
       setIsSubmitting(false);
     }

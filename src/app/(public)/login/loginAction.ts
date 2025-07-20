@@ -12,7 +12,7 @@ import type { LoginRequest } from "@/app/_types/LoginRequest";
 
 // 戻り値の型定義
 type LoginActionResult = {
-  success: false;
+  success: boolean;
   error: string;
 };
 
@@ -33,7 +33,7 @@ const mapAuthErrorToUserMessage = (authError: AuthError): string =>
   FALLBACK_ERROR_MESSAGE;
 
 /**
- * ユーザーログインを処理するServer Action
+ * ユーザーログインを処理する Server Action
  * 成功時はホームページにリダイレクト、失敗時はエラーメッセージを返す
  *
  * @param loginRequest - ログイン情報（メールアドレスとパスワード）
@@ -41,12 +41,12 @@ const mapAuthErrorToUserMessage = (authError: AuthError): string =>
  */
 export const loginAction = async (
   loginRequest: LoginRequest,
-): Promise<LoginActionResult | never> => {
+): Promise<LoginActionResult> => {
   let authError: AuthError | null = null;
 
   try {
-    // 擬似的に1秒の遅延を追加（デバッグ用）
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // TODO:デバッグやUX調整のための一時的な遅延（本番では削除）
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const supabase = await createSupabaseServerClient();
     const credentials: SignInWithPasswordCredentials = {
       email: loginRequest.email,
@@ -55,7 +55,7 @@ export const loginAction = async (
     const { error } = await supabase.auth.signInWithPassword(credentials);
     if (error) authError = error; // 認証エラーをセット
   } catch (error) {
-    console.error("Unexpected login error:", {
+    console.error("ログイン処理に予期せぬ失敗。", {
       email: loginRequest.email,
       error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
@@ -78,9 +78,6 @@ export const loginAction = async (
       error: mapAuthErrorToUserMessage(authError),
     } as LoginActionResult;
   }
-
-  // 成功時の処理（try-catchの外で実行してNEXT_REDIRECTエラーを回避）
-  console.info("User logged in successfully:", { email: loginRequest.email });
-  revalidatePath("/", "layout");
-  redirect("/");
+  revalidatePath("/", "layout"); // サーバサイドのキャッシュを更新
+  return { success: true } as LoginActionResult;
 };
