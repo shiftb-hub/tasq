@@ -1,27 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+// React と フォームライブラリ
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { mutate } from "swr";
 
+// UIコンポーネント・アイコン
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
-
+import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { LuSend } from "react-icons/lu";
 import { Loader2Icon } from "lucide-react";
+import AuthenticatedView from "./_components/AuthenticatedView";
 
-import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
-
+// 型定義・バリデーションスキーマ
 import type { LoginRequest } from "@/app/_types/LoginRequest";
 import { loginRequestSchema } from "@/app/_types/LoginRequest";
+
+// ServerActions / API系
 import { loginAction } from "./loginAction";
+import { logoutAction } from "@/app/_actions/logoutAction";
+
+// ユーティリティ
 import { twMerge } from "tailwind-merge";
+import { createSupabaseBrowserClient } from "@/app/_libs/supabase/browserClient";
 
 const c_Email = "email";
 const c_Password = "password";
 
 const Page: React.FC = () => {
+  const router = useRouter();
+  // 既ログインなら「アカウント」、そうでなければ「null」を保持
+  const [loggedInEmail, setLoggedInEmail] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<LoginRequest>({
@@ -32,47 +45,85 @@ const Page: React.FC = () => {
   const setFromValue = form.setValue;
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const email = searchParams.get(c_Email);
-    setFromValue(c_Email, email || "");
+    const initialize = async () => {
+      // 1. 認証状態をチェック
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user?.email) {
+        setLoggedInEmail(user.email);
+      }
+
+      // 2. クエリパラメータを取得
+      const searchParams = new URLSearchParams(window.location.search);
+      const email = searchParams.get(c_Email);
+      setFromValue(c_Email, email || "");
+    };
+
+    initialize();
   }, [setFromValue]);
 
-  // ユーザーがフィールドを変更した時のみルートエラーをクリア
-  const clearRootErrorOnChange = () => {
+  // ユーザーがフィールドを変更したときにルートエラーをクリア
+  const clearRootErrorOnChange = useCallback(() => {
     if (fieldErrors.root) {
       form.clearErrors("root");
     }
-  };
+  }, [fieldErrors.root, form]);
 
-  const setRootError = (errorMsg: string) => {
-    form.setError("root", {
-      type: "manual",
-      message: errorMsg,
-    });
-  };
+  // サーバサイドで発生した問題をルートエラーとして設定・通知
+  const setRootError = useCallback(
+    (errorMsg: string) => {
+      form.setError("root", {
+        type: "manual",
+        message: errorMsg,
+      });
+    },
+    [form],
+  );
 
-  const onSubmit = async (formValues: LoginRequest) => {
-    console.log("onSubmit", formValues);
-    setIsSubmitting(true);
-    try {
-      const result = await loginAction(formValues);
-
-      if (result && !result.success) {
-        setRootError(result.error);
+  // ログインフォーム送信の処理 Server Action（Custom Invocation）で処理
+  const onSubmit = useCallback(
+    async (formValues: LoginRequest) => {
+      setIsSubmitting(true);
+      try {
+        const result = await loginAction(formValues);
+        if (result.success) {
+          mutate(null); // SWRのキャッシュを全更新
+          router.push(result.redirectTo || "/");
+          return;
+        }
+        setRootError(result.errorMessageForUser!);
+      } catch (e) {
+        const ee =
+          e instanceof Error ? { message: e.message, stack: e.stack } : e;
+        console.error(`ログイン処理の失敗`, ee);
+        setRootError(
+          "予期せぬエラーでログイン処理に失敗しました。再度お試しください。",
+        );
+      } finally {
+        setIsSubmitting(false);
       }
-      // 成功時はredirectが実行されるため、ここには到達しない
-    } catch (error) {
-      console.error("Submit error:", error);
-      setRootError("予期しないエラーが発生しました");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    [router, setRootError],
+  );
 
+  // ログアウト処理のハンドラ
+  const handleLogout = useCallback(async () => {
+    await logoutAction();
+  }, []);
+
+  // 既にログインしている場合は、認証済みビューを表示
+  if (loggedInEmail) {
+    return <AuthenticatedView email={loggedInEmail} onLogout={handleLogout} />;
+  }
+
+  // フォーム管理とUI表示を同一コンポーネント内で保持（UIは意図的に分離していない）
   return (
     <div className="flex justify-center pt-12">
       <div className="w-full max-w-[460px]">
         <h1 className="mb-8 text-center text-3xl font-bold">ログイン</h1>
+
         <form
           noValidate
           onSubmit={form.handleSubmit(onSubmit)}
