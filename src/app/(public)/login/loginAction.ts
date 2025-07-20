@@ -1,83 +1,100 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+
+import prisma from "@/app/_libs/prisma";
+import { UserService } from "@/app/_services/userService";
+import { createSupabaseServerClient } from "@/app/_libs/supabase/serverClient";
+import type { LoginRequest } from "@/app/_types/LoginRequest";
 import type {
   AuthError,
   SignInWithPasswordCredentials,
 } from "@supabase/supabase-js";
 
-import { createSupabaseServerClient } from "@/app/_libs/supabase/serverClient";
-import type { LoginRequest } from "@/app/_types/LoginRequest";
-
 // 戻り値の型定義
 type LoginActionResult = {
   success: boolean;
-  error: string;
+  redirectTo: string | undefined;
+  errorMessageForUser: string | undefined;
 };
 
-// エラーメッセージの定数定義
+/// ユーザー向けのエラーメッセージの定義
+/// Supabase Auth error code と ユーザー向けエラーメッセージ の対応付け
+/// https://supabase.com/docs/guides/auth/debugging/error-codes#auth-error-codes-table
 const AUTH_ERROR_MESSAGES = {
-  invalid_credentials: "メールアドレスまたはパスワードが正しくありません",
-  email_not_confirmed: "メールアドレスが確認されていません",
-  over_request_rate_limit: "しばらく時間をおいてから再度お試しください",
-  user_not_found: "ユーザーが見つかりません",
-  signup_disabled: "新規登録が無効になっています",
+  invalid_credentials: "メールアドレスまたはパスワードが正しくありません。",
+  email_not_confirmed: "メールアドレスが確認されていません。",
+  over_request_rate_limit: "しばらく時間をおいてから再度お試しください。",
+  user_not_found: "ユーザーが見つかりません。",
+  signup_disabled: "新規登録が無効になっています。",
 } as const;
 
-const FALLBACK_ERROR_MESSAGE = "ログインに失敗しました";
-const UNEXPECTED_ERROR_MESSAGE = "予期しないエラーが発生しました";
-
-const mapAuthErrorToUserMessage = (authError: AuthError): string =>
-  AUTH_ERROR_MESSAGES[authError.code as keyof typeof AUTH_ERROR_MESSAGES] ??
-  FALLBACK_ERROR_MESSAGE;
+const mapAuthErrorToUserMessage = (authError: AuthError): string => {
+  const userMessage =
+    AUTH_ERROR_MESSAGES[authError.code as keyof typeof AUTH_ERROR_MESSAGES];
+  // 想定外の Auth error code が発生した場合はログ出力
+  if (!userMessage) {
+    console.error("Unknown auth error code encountered:", {
+      code: authError.code,
+      message: authError.message,
+      status: authError.status,
+    });
+    return "ログイン処理に失敗しました。";
+  }
+  return userMessage;
+};
 
 /**
  * ユーザーログインを処理する Server Action
  * 成功時はホームページにリダイレクト、失敗時はエラーメッセージを返す
  *
  * @param loginRequest - ログイン情報（メールアドレスとパスワード）
- * @returns 失敗時はエラー情報、成功時はリダイレクト（never）
+ * @returns ログイン結果（成功時はリダイレクト先を含む、失敗時はエラーメッセージを含む）
  */
 export const loginAction = async (
   loginRequest: LoginRequest,
 ): Promise<LoginActionResult> => {
-  let authError: AuthError | null = null;
-
   try {
-    // TODO:デバッグやUX調整のための一時的な遅延（本番では削除）
+    // TODO:デバッグとUX調整のための遅延（本番では削除）
     await new Promise((resolve) => setTimeout(resolve, 500));
     const supabase = await createSupabaseServerClient();
     const credentials: SignInWithPasswordCredentials = {
       email: loginRequest.email,
       password: loginRequest.password,
     };
-    const { error } = await supabase.auth.signInWithPassword(credentials);
-    if (error) authError = error; // 認証エラーをセット
-  } catch (error) {
-    console.error("ログイン処理に予期せぬ失敗。", {
-      email: loginRequest.email,
-      error: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    return {
-      success: false,
-      error: UNEXPECTED_ERROR_MESSAGE,
-    } as LoginActionResult;
-  }
+    const { data, error } = await supabase.auth.signInWithPassword(credentials);
+    if (error) {
+      return {
+        success: false,
+        redirectTo: undefined,
+        errorMessageForUser: mapAuthErrorToUserMessage(error),
+      };
+    }
+    const userId = data.user?.id || "";
 
-  // 認証エラーがある場合はエラーメッセージを返す
-  if (authError) {
-    console.warn("Authentication failed:", {
-      email: loginRequest.email,
-      errorCode: authError.status,
-      errorMessage: authError.message,
-    });
+    // Supabase認証済みユーザーに対応する「AppUser」が存在しなければ新規作成
+    const userService = new UserService(prisma);
+    const wasCreated = await userService.createIfNotExists(
+      userId,
+      loginRequest.email.split("@")[0],
+    );
+
+    revalidatePath("/", "layout"); // サーバサイドのキャッシュを更新
+
+    //「AppUser」が新規作成された場合は `/settings` に、それ以外は `/` にリダイレクト
+    return {
+      success: true,
+      redirectTo: wasCreated ? "/settings" : "/",
+      errorMessageForUser: undefined,
+    } satisfies LoginActionResult;
+  } catch (e) {
+    const ee = e instanceof Error ? { message: e.message, stack: e.stack } : e;
+    console.error(`ログイン処理の失敗（${loginRequest.email}）`, ee);
     return {
       success: false,
-      error: mapAuthErrorToUserMessage(authError),
-    } as LoginActionResult;
+      redirectTo: undefined,
+      errorMessageForUser:
+        "予期せぬエラーでログイン処理に失敗しました。再度お試しください。",
+    } satisfies LoginActionResult;
   }
-  revalidatePath("/", "layout"); // サーバサイドのキャッシュを更新
-  return { success: true } as LoginActionResult;
 };

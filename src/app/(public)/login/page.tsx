@@ -1,7 +1,7 @@
 "use client";
 
 // React と フォームライブラリ
-import { useState, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import { Label } from "@/app/_components/ui/label";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { LuSend } from "react-icons/lu";
 import { Loader2Icon } from "lucide-react";
+import AuthenticatedView from "./_components/AuthenticatedView";
 
 // 型定義・バリデーションスキーマ
 import type { LoginRequest } from "@/app/_types/LoginRequest";
@@ -43,89 +44,80 @@ const Page: React.FC = () => {
   const fieldErrors = form.formState.errors;
   const setFromValue = form.setValue;
 
-  // 既にログインしている場合はアカウント（メールアドレス）を取得
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-    const fetchAuthenticatedUser = async () => {
+    const initialize = async () => {
+      // 1. 認証状態をチェック
+      const supabase = createSupabaseBrowserClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user?.email) setLoggedInEmail(user.email);
-    };
-    fetchAuthenticatedUser();
-  }, []);
+      if (user?.email) {
+        setLoggedInEmail(user.email);
+      }
 
-  // `/logion?email=xxx` のクエリパラメータからメールアドレス（初期値）を取得
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const email = searchParams.get(c_Email);
-    setFromValue(c_Email, email || "");
+      // 2. クエリパラメータを取得
+      const searchParams = new URLSearchParams(window.location.search);
+      const email = searchParams.get(c_Email);
+      setFromValue(c_Email, email || "");
+    };
+
+    initialize();
   }, [setFromValue]);
 
   // ユーザーがフィールドを変更したときにルートエラーをクリア
-  const clearRootErrorOnChange = () => {
+  const clearRootErrorOnChange = useCallback(() => {
     if (fieldErrors.root) {
       form.clearErrors("root");
     }
-  };
+  }, [fieldErrors.root, form]);
 
   // サーバサイドで発生した問題をルートエラーとして設定・通知
-  const setRootError = (errorMsg: string) => {
-    form.setError("root", {
-      type: "manual",
-      message: errorMsg,
-    });
-  };
+  const setRootError = useCallback(
+    (errorMsg: string) => {
+      form.setError("root", {
+        type: "manual",
+        message: errorMsg,
+      });
+    },
+    [form],
+  );
 
   // ログインフォーム送信の処理 Server Action（Custom Invocation）で処理
-  const onSubmit = async (formValues: LoginRequest) => {
-    setIsSubmitting(true);
-    try {
-      const result = await loginAction(formValues);
-      if (result.success) {
-        mutate(null); // SWRのキャッシュを全更新
-        router.push("/");
-        return;
+  const onSubmit = useCallback(
+    async (formValues: LoginRequest) => {
+      setIsSubmitting(true);
+      try {
+        const result = await loginAction(formValues);
+        if (result.success) {
+          mutate(null); // SWRのキャッシュを全更新
+          router.push(result.redirectTo || "/");
+          return;
+        }
+        setRootError(result.errorMessageForUser!);
+        setIsSubmitting(false);
+      } catch (e) {
+        const ee =
+          e instanceof Error ? { message: e.message, stack: e.stack } : e;
+        console.error(`ログイン処理の失敗`, ee);
+        setRootError(
+          "予期せぬエラーでログイン処理に失敗しました。再度お試しください。",
+        );
       }
-      setRootError(result.error);
-      setIsSubmitting(false);
-    } catch (error) {
-      console.error(
-        "ログイン処理に予期せぬ失敗。",
-        JSON.stringify(error, null, 2),
-      );
-      setRootError(
-        "ログイン処理において、予期しないエラーが発生しました。再度、お試しください。",
-      );
-    }
-  };
+    },
+    [router, setRootError],
+  );
 
+  // ログアウト処理のハンドラ
+  const handleLogout = useCallback(async () => {
+    await logoutAction();
+  }, []);
+
+  // 既にログインしている場合は、認証済みビューを表示
   if (loggedInEmail) {
-    return (
-      <div className="flex justify-center pt-12">
-        <div className="w-full max-w-[460px]">
-          <h1 className="mb-8 text-center text-3xl font-bold">ログイン</h1>
-          <div>
-            <p className="mt-3 text-sm break-all">
-              現在、<span className="font-bold">{loggedInEmail}</span>
-              として既にログインしています。
-              <br />
-              別のアカウントでログインするためには、一度、
-              <Button
-                variant="link"
-                className="px-1"
-                onClick={async () => await logoutAction()}
-              >
-                ログアウト
-              </Button>
-              してください。
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <AuthenticatedView email={loggedInEmail} onLogout={handleLogout} />;
   }
 
+  // フォーム管理とUI表示を同一コンポーネント内で保持（UIは意図的に分離していない）
   return (
     <div className="flex justify-center pt-12">
       <div className="w-full max-w-[460px]">

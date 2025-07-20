@@ -49,6 +49,9 @@ const Page: React.FC = () => {
   const onSubmit = async (formValues: SignupRequest) => {
     console.log("onSubmit", formValues);
     const supabase = createSupabaseBrowserClient();
+
+    // Supabase で AutoConfirm が ON の場合、signUp () 完了時点で
+    // ログイン状態になることに注意。
     const { error } = await supabase.auth.signUp({
       email: formValues.email,
       password: formValues.password,
@@ -74,13 +77,14 @@ const Page: React.FC = () => {
           );
           break;
       }
-    } else {
-      setIsSignUpCompleted(true);
-      router.push(`/login?${c_Email}=${formValues.email}`);
-      // setMsg(
-      //   `登録いただいたメールアドレス ( ${formValues.email} ) 宛に、認証メールを送信しました。メールに記載のURLをクリックして、登録手続きを完了してください。`,
-      // );
+      return;
     }
+
+    // ローカル環境の開発用 Supabase では、サインアップで自動ログインになるため、
+    // 一旦、ログアウト処理をしておく。本番環境では以下のログアウト処理は不要。
+    await supabase.auth.signOut();
+
+    setIsSignUpCompleted(true);
   };
 
   return (
@@ -152,6 +156,7 @@ const Page: React.FC = () => {
         {isSignUpCompleted && (
           <div className="mt-4">
             サインアップが完了しました。
+            {/* 登録いただいたメールアドレス ( {form.getValues(c_Email)} ) 宛に、認証メールを送信しました。メールに記載のURLをクリックして、登録手続きを完了してください。 */}
             <NextLink
               href={`/login?${c_Email}=${form.getValues(c_Email)}`}
               className="text-blue-500 underline"
