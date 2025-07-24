@@ -72,16 +72,6 @@ type AssignmentLog = {
 
 const prisma = new PrismaClient();
 
-// データクリア処理（外部キー制約を考慮した順序）
-const clearData = async () => {
-  console.log("🗑️ 既存データをクリアしています...");
-=======
-import { createClient } from "@supabase/supabase-js";
-import { PrismaClient } from "@prisma/client";
-import { Role } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
 // 開発用のテストユーザの定義
 const testUsers = [
   {
@@ -110,18 +100,43 @@ const testUsers = [
   },
 ];
 
+// データクリア処理（外部キー制約を考慮した順序）
+const clearData = async () => {
+  console.log("🗑️ 既存データをクリアしています...");
+
   try {
-    // 依存関係の順序でデータを削除
+    // 依存関係の順序でデータを削除（外部キー制約を考慮）
+    console.log("📝 AssignmentLogを削除中...");
     await prisma.assignmentLog.deleteMany();
+
+    console.log("📝 StudyLogを削除中...");
     await prisma.studyLog.deleteMany();
+
+    console.log("📝 TeacherTaskを削除中...");
     await prisma.teacherTask.deleteMany();
+
+    console.log("📝 TeacherStudentを削除中...");
     await prisma.teacherStudent.deleteMany();
+
+    console.log("📝 TaskActivityTypeを削除中...");
     await prisma.taskActivityType.deleteMany();
+
+    console.log("📝 TaskTagを削除中...");
     await prisma.taskTag.deleteMany();
+
+    console.log("📝 Taskを削除中...");
     await prisma.task.deleteMany();
+
+    console.log("📝 ActivityTypeを削除中...");
     await prisma.activityType.deleteMany();
+
+    console.log("📝 Tagを削除中...");
     await prisma.tag.deleteMany();
+
+    console.log("📝 Statusを削除中...");
     await prisma.status.deleteMany();
+
+    console.log("📝 Userを削除中...");
     await prisma.user.deleteMany();
 
     console.log("✅ データクリアが完了しました");
@@ -390,11 +405,10 @@ const createUsers = async () => {
     for (let i = 0; i < count; i++) {
       const gender = Math.random() > 0.5 ? "male" : "female";
       const name = generateJapaneseName(gender);
-      const email = `${role.toLowerCase()}${i + 1}-${Date.now()}@test.example.com`;
       const userId = `${role.toLowerCase()}-${i + 1}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
       // SNSアカウントの生成（ランダムに2-3個）
-      const snsAccounts: Record<string, string> = {};
+      const snsAccounts: Record<string, string | null> = {};
       const snsKeys = Object.keys(snsAccountTemplates);
       const selectedSns = snsKeys
         .sort(() => Math.random() - 0.5)
@@ -416,7 +430,11 @@ const createUsers = async () => {
           job: getRandomElement(jobs[role]),
           bio: getRandomElement(bioTemplates[role]),
           currentChapter: role === "STUDENT" ? getRandomInt(1, 10) : null,
-          ...snsAccounts,
+          slackId: snsAccounts.slackId || null,
+          instagramId: snsAccounts.instagramId || null,
+          threadsId: snsAccounts.threadsId || null,
+          githubId: snsAccounts.githubId || null,
+          xId: snsAccounts.xId || null,
         },
       });
 
@@ -650,21 +668,28 @@ const createTeacherRelations = async (users: User[], tasks: Task[]) => {
 
         // 解決済みの場合は対応ログも生成
         if (resolved && Math.random() < 0.8) {
-          // 既存のAssignmentLogをチェック
-          const existingLog = await prisma.assignmentLog.findUnique({
-            where: { taskId: task.id },
-          });
-
-          if (!existingLog) {
-            const assignmentLog = await prisma.assignmentLog.create({
-              data: {
-                taskId: task.id,
-                responderId: teacher.id,
-                description:
-                  "タスクについて確認し、適切なアドバイスを行いました。実装方針について具体的な提案を行い、学習者の理解を深めることができました。",
-              },
+          try {
+            // 既存のAssignmentLogをチェック
+            const existingLog = await prisma.assignmentLog.findUnique({
+              where: { taskId: task.id },
             });
-            assignmentLogs.push(assignmentLog);
+
+            if (!existingLog) {
+              const assignmentLog = await prisma.assignmentLog.create({
+                data: {
+                  taskId: task.id,
+                  responderId: teacher.id,
+                  description:
+                    "タスクについて確認し、適切なアドバイスを行いました。実装方針について具体的な提案を行い、学習者の理解を深めることができました。",
+                },
+              });
+              assignmentLogs.push(assignmentLog);
+            }
+          } catch (error) {
+            console.warn(
+              `AssignmentLog作成でエラー (taskId: ${task.id}):`,
+              error,
+            );
           }
         }
       }
@@ -807,57 +832,68 @@ const main = async () => {
         "\n⚠️ シードデータの生成は完了しましたが、検証で問題が見つかりました",
       );
     }
+
+    // 追加のテストデータ作成
+    console.log("🔧 追加のテストデータを作成中...");
+
+    // テストユーザーの作成（既存のユーザーに追加）
+    for (const user of testUsers) {
+      if (user.id === "33333333-3333-3333-3333-333333333333") continue;
+
+      // 既存ユーザーをチェック
+      const existingUser = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+
+      if (!existingUser) {
+        await prisma.user.create({
+          data: {
+            id: user.id,
+            name: user.name,
+            role: user.role,
+            slackId: user.slackId,
+            bio: "テストユーザーです",
+          },
+        });
+      }
+    }
+
+    // テストタスクの作成
+    await prisma.task.create({
+      data: {
+        userId: testUsers[0].id,
+        title: "タスク01",
+        description: "タスク01の説明",
+        startedAt: new Date("2023-10-01T00:00:00.000Z"),
+        endedAt: new Date("2023-10-01T23:59:59.999Z"),
+      },
+    });
+
+    await prisma.task.create({
+      data: {
+        userId: testUsers[0].id,
+        title: "タスク02",
+        description: "タスク02の説明",
+        startedAt: new Date("2023-10-02T00:00:00.000Z"),
+        endedAt: new Date("2023-10-02T23:59:59.999Z"),
+      },
+    });
+
+    await prisma.task.create({
+      data: {
+        userId: testUsers[1].id,
+        title: "タスク03",
+        description: "タスク03の説明",
+        startedAt: new Date("2023-10-02T00:00:00.000Z"),
+        endedAt: new Date("2023-10-02T23:59:59.999Z"),
+      },
+    });
+
+    console.log("✅ 追加のテストデータ作成が完了しました");
   } catch (error) {
     console.error("❌ シード処理中にエラーが発生しました:", error);
     throw error;
   }
-  // 既存の全レコードを削除
-  await prisma.task.deleteMany();
-  await prisma.user.deleteMany();
-
-  // Userレコードの挿入
-  for (const user of testUsers) {
-    if (user.id === "33333333-3333-3333-3333-333333333333") continue;
-    await prisma.user.create({
-      data: {
-        id: user.id,
-        name: user.name,
-        role: user.role,
-        slackId: user.slackId,
-      },
-    });
-  }
-
-  // Taskレコードの挿入
-  const task0 = await prisma.task.create({
-    data: {
-      userId: testUsers[0].id,
-      title: "タスク01",
-      description: "タスク01の説明",
-      startedAt: new Date("2023-10-01T00:00:00.000Z"),
-      endedAt: new Date("2023-10-01T23:59:59.999Z"),
-    },
-  });
-
-  const task1 = await prisma.task.create({
-    data: {
-      userId: testUsers[0].id,
-      title: "タスク02",
-      description: "タスク02の説明",
-      startedAt: new Date("2023-10-02T00:00:00.000Z"),
-      endedAt: new Date("2023-10-02T23:59:59.999Z"),
-    },
-  });
-
-  const task2 = await prisma.task.create({
-    data: {
-      userId: testUsers[1].id,
-      title: "タスク03",
-      description: "タスク03の説明",
-      startedAt: new Date("2023-10-02T00:00:00.000Z"),
-      endedAt: new Date("2023-10-02T23:59:59.999Z"),
-    },
-  });
 };
 
 // エラーハンドリングを含む実行
