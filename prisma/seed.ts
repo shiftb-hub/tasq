@@ -1,5 +1,4 @@
 // 実行方法 → npx prisma db seed
-
 import { PrismaClient, Role } from "@prisma/client";
 
 // 型定義
@@ -76,6 +75,40 @@ const prisma = new PrismaClient();
 // データクリア処理（外部キー制約を考慮した順序）
 const clearData = async () => {
   console.log("🗑️ 既存データをクリアしています...");
+=======
+import { createClient } from "@supabase/supabase-js";
+import { PrismaClient } from "@prisma/client";
+import { Role } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+// 開発用のテストユーザの定義
+const testUsers = [
+  {
+    id: "11111111-1111-1111-1111-111111111111",
+    email: "user1@example.com",
+    password: "##user1",
+    name: "構文 誤次郎",
+    role: Role.STUDENT,
+    slackId: "@user1",
+  },
+  {
+    id: "22222222-2222-2222-2222-222222222222",
+    email: "user2@example.com",
+    password: "##user2",
+    name: "仕様 曖昧子",
+    role: Role.STUDENT,
+    slackId: "@user2",
+  },
+  {
+    id: "33333333-3333-3333-3333-333333333333",
+    email: "user3@example.com",
+    password: "##user3",
+    name: "保守 絶望太",
+    role: Role.STUDENT,
+    slackId: "@user3",
+  },
+];
 
   try {
     // 依存関係の順序でデータを削除
@@ -391,7 +424,6 @@ const createUsers = async () => {
       logProgress(`${role}ユーザーを作成中`, i + 1, count);
     }
   }
-
   console.log(`✅ ユーザーを${users.length}名作成しました`);
   return users;
 };
@@ -772,6 +804,53 @@ const main = async () => {
     console.error("❌ シード処理中にエラーが発生しました:", error);
     throw error;
   }
+  // 既存の全レコードを削除
+  await prisma.task.deleteMany();
+  await prisma.user.deleteMany();
+
+  // Userレコードの挿入
+  for (const user of testUsers) {
+    if (user.id === "33333333-3333-3333-3333-333333333333") continue;
+    await prisma.user.create({
+      data: {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        slackId: user.slackId,
+      },
+    });
+  }
+
+  // Taskレコードの挿入
+  const task0 = await prisma.task.create({
+    data: {
+      userId: testUsers[0].id,
+      title: "タスク01",
+      description: "タスク01の説明",
+      startedAt: new Date("2023-10-01T00:00:00.000Z"),
+      endedAt: new Date("2023-10-01T23:59:59.999Z"),
+    },
+  });
+
+  const task1 = await prisma.task.create({
+    data: {
+      userId: testUsers[0].id,
+      title: "タスク02",
+      description: "タスク02の説明",
+      startedAt: new Date("2023-10-02T00:00:00.000Z"),
+      endedAt: new Date("2023-10-02T23:59:59.999Z"),
+    },
+  });
+
+  const task2 = await prisma.task.create({
+    data: {
+      userId: testUsers[1].id,
+      title: "タスク03",
+      description: "タスク03の説明",
+      startedAt: new Date("2023-10-02T00:00:00.000Z"),
+      endedAt: new Date("2023-10-02T23:59:59.999Z"),
+    },
+  });
 };
 
 // エラーハンドリングを含む実行

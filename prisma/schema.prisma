@@ -1,11 +1,10 @@
 // ファイルの更新後は既存テーブルを削除して
 // npx prisma db push
 // npx prisma generate
-// ( >Developer: Reload Window )
 // npx prisma db seed
-
 // DBの確認
-// npx prisma studio or  http://127.0.0.1:54323
+// npx prisma studio or  http://127.0.0.1:54323 
+
 generator client {
   provider = "prisma-client-js"
 }
