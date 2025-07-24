@@ -44,3 +44,6 @@ next-env.d.ts
 
 # .github
 .github/
+
+# .kiro
+.kiro/

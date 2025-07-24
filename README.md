@@ -66,4 +66,3 @@ npm run start
 ```bash
 npx prisma studio
 ```
-
