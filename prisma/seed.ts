@@ -32,6 +32,30 @@ const testUsers = [
     role: Role.STUDENT,
     slackId: "@user3",
   },
+  {
+    id: "44444444-4444-4444-4444-444444444444",
+    email: "ta@example.com",
+    password: "##ta",
+    name: "質問 殺到丸",
+    role: Role.TA,
+    slackId: "@ta",
+  },
+  {
+    id: "55555555-5555-5555-5555-555555555555",
+    email: "teacher@example.com",
+    password: "##teacher",
+    name: "課題 鬼畜斎",
+    role: Role.TEACHER,
+    slackId: "@teacher",
+  },
+  {
+    id: "66666666-6666-6666-6666-666666666666",
+    email: "admin@example.com",
+    password: "##admin",
+    name: "権限 暴走造",
+    role: Role.ADMIN,
+    slackId: "@admin",
+  },
 ];
 
 const main = async () => {
