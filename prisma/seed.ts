@@ -390,7 +390,7 @@ const createUsers = async () => {
     for (let i = 0; i < count; i++) {
       const gender = Math.random() > 0.5 ? "male" : "female";
       const name = generateJapaneseName(gender);
-      const email = `${role.toLowerCase()}${i + 1}@test.example.com`;
+      const email = `${role.toLowerCase()}${i + 1}-${Date.now()}@test.example.com`;
       const userId = `${role.toLowerCase()}-${i + 1}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
       // SNSアカウントの生成（ランダムに2-3個）
@@ -650,15 +650,22 @@ const createTeacherRelations = async (users: User[], tasks: Task[]) => {
 
         // 解決済みの場合は対応ログも生成
         if (resolved && Math.random() < 0.8) {
-          const assignmentLog = await prisma.assignmentLog.create({
-            data: {
-              taskId: task.id,
-              responderId: teacher.id,
-              description:
-                "タスクについて確認し、適切なアドバイスを行いました。実装方針について具体的な提案を行い、学習者の理解を深めることができました。",
-            },
+          // 既存のAssignmentLogをチェック
+          const existingLog = await prisma.assignmentLog.findUnique({
+            where: { taskId: task.id },
           });
-          assignmentLogs.push(assignmentLog);
+
+          if (!existingLog) {
+            const assignmentLog = await prisma.assignmentLog.create({
+              data: {
+                taskId: task.id,
+                responderId: teacher.id,
+                description:
+                  "タスクについて確認し、適切なアドバイスを行いました。実装方針について具体的な提案を行い、学習者の理解を深めることができました。",
+              },
+            });
+            assignmentLogs.push(assignmentLog);
+          }
         }
       }
     }
