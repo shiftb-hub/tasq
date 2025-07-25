@@ -1,3 +1,5 @@
+"use client";
+
 import { ChevronUp, Settings } from "lucide-react";
 import {
   Avatar,
@@ -19,12 +21,17 @@ import {
   SidebarFooter,
 } from "@/app/_components/ui/sidebar";
 import type { User } from "@prisma/client";
+import { logoutAction } from "@/app/_actions/logoutAction";
+import Link from "next/link";
 
 interface Props {
   user: User;
 }
 
 export const AppSidebarFooter: React.FC<Props> = ({ user }) => {
+  const handleLogout = async () => {
+    await logoutAction();
+  };
   return (
     <SidebarFooter>
       <SidebarMenu>
@@ -78,12 +85,15 @@ export const AppSidebarFooter: React.FC<Props> = ({ user }) => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Settings />
-                プロフィール設定
+                <Link href="/settings" className="flex items-center gap-2">
+                  <Settings />
+                  プロフィール設定
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              {/* TODO: ログアウト */}
-              <DropdownMenuItem>ログアウト</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                ログアウト
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
