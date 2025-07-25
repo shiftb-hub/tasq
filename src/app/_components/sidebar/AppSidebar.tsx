@@ -39,11 +39,6 @@ export const AppSidebar = async () => {
                 url: "/teacher/tasks",
                 icon: AlertCircle,
               },
-              {
-                title: "受講生別タスク一覧",
-                url: "/teacher/tasks",
-                icon: ClipboardList,
-              },
             ],
           },
         ]
