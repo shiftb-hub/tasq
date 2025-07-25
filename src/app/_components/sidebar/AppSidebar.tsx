@@ -25,6 +25,7 @@ export const AppSidebar = async () => {
         { title: "タスク一覧", url: "/tasks", icon: ClipboardList },
         { title: "学習グラフ", url: "/logBoard", icon: BarChart },
         { title: "学習ログ一覧", url: "/learningLog", icon: BookOpen },
+        { title: "受講生一覧", url: "/students", icon: Users },
       ],
     },
     // 権限がTA, TEACHER, ADMINのときのみ追加
@@ -33,7 +34,6 @@ export const AppSidebar = async () => {
           {
             label: "講師向け機能",
             items: [
-              { title: "受講生一覧", url: "/teacher/students", icon: Users },
               {
                 title: "気になるタスク",
                 url: "/teacher/tasks",
