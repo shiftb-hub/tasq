@@ -51,7 +51,7 @@ export const AppSidebar = async () => {
   ];
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r">
+    <Sidebar collapsible="icon" className="border-r">
       <AppSidebarHeader />
       <SidebarContent>
         {navGroups.map((group) => (
