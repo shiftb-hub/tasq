@@ -6,6 +6,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/app/_components/ui/sidebar";
+import Link from "next/link";
 
 interface CustomSidebarGroupItem {
   title: string;
@@ -26,10 +27,10 @@ export const CustomSidebarGroup: React.FC<Props> = ({ label, items }) => (
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
