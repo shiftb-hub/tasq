@@ -30,7 +30,11 @@ interface Props {
 
 export const AppSidebarFooter: React.FC<Props> = ({ user }) => {
   const handleLogout = async () => {
-    await logoutAction();
+    try {
+      await logoutAction();
+    } catch (error) {
+      console.error("ログアウトに失敗しました:", error);
+    }
   };
   return (
     <SidebarFooter>
