@@ -25,6 +25,7 @@ enum Role {
 model User {
   id              String           @id @default(uuid())
   name            String
+  profileImageKey String?          @map("profile_image_key")
   role            Role             @default(STUDENT)
   slackId         String?          @map("slack_id") //null許容
   instagramId     String?          @map("instagram_id") //null許容
