@@ -1,5 +1,7 @@
 // 実行方法 → npx prisma db seed
 import { PrismaClient, Role } from "@prisma/client";
+import { createClient } from "@supabase/supabase-js";
+import { UserService } from "../src/app/_services/userService";
 
 // 型定義
 type User = {
@@ -72,6 +74,15 @@ type AssignmentLog = {
 
 const prisma = new PrismaClient();
 
+// Supabaseクライアント (ServiceRole) の作成
+if (!process.env.SB_SERVICE_ROLE_KEY) {
+  throw new Error("環境変数 SB_SERVICE_ROLE_KEY が設定されていません");
+}
+const supabase = createClient(
+  "http://localhost:54321",
+  process.env.SB_SERVICE_ROLE_KEY,
+);
+
 // 開発用のテストユーザの定義
 const testUsers = [
   {
@@ -98,29 +109,62 @@ const testUsers = [
     role: Role.STUDENT,
     slackId: "@user3",
   },
+  // 追加のテストユーザー（7名）
   {
     id: "44444444-4444-4444-4444-444444444444",
-    email: "ta@example.com",
-    password: "##ta",
-    name: "質問 殺到丸",
-    role: Role.TA,
-    slackId: "@ta",
+    email: "user4@example.com",
+    password: "##user4",
+    name: "実装 速太郎",
+    role: Role.STUDENT,
+    slackId: "@user4",
   },
   {
     id: "55555555-5555-5555-5555-555555555555",
-    email: "teacher@example.com",
-    password: "##teacher",
-    name: "課題 鬼畜斎",
-    role: Role.TEACHER,
-    slackId: "@teacher",
+    email: "user5@example.com",
+    password: "##user5",
+    name: "設計 美代子",
+    role: Role.TA,
+    slackId: "@user5",
   },
   {
     id: "66666666-6666-6666-6666-666666666666",
-    email: "admin@example.com",
-    password: "##admin",
-    name: "権限 暴走造",
+    email: "user6@example.com",
+    password: "##user6",
+    name: "品質 守",
+    role: Role.TA,
+    slackId: "@user6",
+  },
+  {
+    id: "77777777-7777-7777-7777-777777777777",
+    email: "user7@example.com",
+    password: "##user7",
+    name: "開発 統括太",
+    role: Role.TEACHER,
+    slackId: "@user7",
+  },
+  {
+    id: "88888888-8888-8888-8888-888888888888",
+    email: "user8@example.com",
+    password: "##user8",
+    name: "技術 伝道師",
+    role: Role.TEACHER,
+    slackId: "@user8",
+  },
+  {
+    id: "99999999-9999-9999-9999-999999999999",
+    email: "user9@example.com",
+    password: "##user9",
+    name: "運用 監視子",
     role: Role.ADMIN,
-    slackId: "@admin",
+    slackId: "@user9",
+  },
+  {
+    id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    email: "user10@example.com",
+    password: "##user10",
+    name: "学習 熱心男",
+    role: Role.STUDENT,
+    slackId: "@user10",
   },
 ];
 
@@ -817,10 +861,68 @@ const validateData = async () => {
 // メイン処理
 const main = async () => {
   try {
+    console.log("🌱 シードデータの生成を開始します...");
+
+    // テストユーザの作成 ( Supabase に testUsers が存在しなければ作成 )
+    console.log("🔐 Supabase認証ユーザーを作成中...");
+
+    // まず全ての既存ユーザーをメールアドレスで検索
+    const { data: allAuthUsers, error: listError } =
+      await supabase.auth.admin.listUsers();
+    if (listError) {
+      console.error("❌ 既存ユーザーリスト取得エラー:", listError);
+    }
+
+    const existingEmails = new Set(
+      allAuthUsers?.users.map((u) => u.email) || [],
+    );
+
+    for (const user of testUsers) {
+      try {
+        if (existingEmails.has(user.email)) {
+          // メールアドレスで既存ユーザーを検索
+          const existingUser = allAuthUsers?.users.find(
+            (u) => u.email === user.email,
+          );
+          if (existingUser) {
+            console.log(
+              `✅ Supabase認証ユーザー既存: ${user.email} (ID: ${existingUser.id})`,
+            );
+            // 既存ユーザーのIDをtestUsersに反映
+            user.id = existingUser.id;
+          }
+        } else {
+          // ユーザーが存在しない場合は作成（IDは指定しない）
+          const { data, error: createError } =
+            await supabase.auth.admin.createUser({
+              email: user.email,
+              password: user.password,
+              email_confirm: true,
+            });
+
+          if (createError) {
+            console.error(
+              `❌ Supabase認証ユーザー作成エラー (${user.email}):`,
+              createError,
+            );
+          } else if (data?.user) {
+            console.log(
+              `✅ Supabase認証ユーザー作成成功: ${user.email} (ID: ${data.user.id})`,
+            );
+            // 新しいIDをtestUsersに反映
+            user.id = data.user.id;
+          }
+        }
+      } catch (error) {
+        console.error(
+          `❌ Supabase認証ユーザー処理エラー (${user.email}):`,
+          error,
+        );
+      }
+    }
+
     // データクリア
     await clearData();
-
-    console.log("🌱 シードデータの生成を開始します...");
 
     // マスターデータの生成
     logProgress("マスターデータを生成中...");
@@ -860,58 +962,179 @@ const main = async () => {
     // 追加のテストデータ作成
     console.log("🔧 追加のテストデータを作成中...");
 
-    // テストユーザーの作成（既存のユーザーに追加）
+    // Supabase認証ユーザーの確認（更新されたIDで確認）
+    console.log("\n🔍 Supabase認証ユーザーの存在確認...");
+    const { data: currentAuthUsers } = await supabase.auth.admin.listUsers();
+    const currentEmails = new Map(
+      currentAuthUsers?.users.map((u) => [u.email, u.id]) || [],
+    );
+
     for (const user of testUsers) {
-      if (user.id === "33333333-3333-3333-3333-333333333333") continue;
+      const authId = currentEmails.get(user.email);
+      if (authId) {
+        console.log(`✅ 認証ユーザー確認: ${user.email} (ID: ${authId})`);
+      } else {
+        console.log(`❌ 認証ユーザー未作成: ${user.email}`);
+      }
+    }
 
-      // 既存ユーザーをチェック
-      const existingUser = await prisma.user.findUnique({
-        where: { id: user.id },
-      });
+    // auth.usersと紐付いていないpublic.usersのデータを削除
+    console.log("🧹 auth.usersと紐付いていないpublic.usersのデータを削除中...");
 
-      if (!existingUser) {
-        await prisma.user.create({
+    // Supabase auth.usersのIDリストを取得
+    const authUserIds = new Set<string>();
+    for (const user of testUsers) {
+      authUserIds.add(user.id);
+    }
+
+    // 既存のpublic.usersを確認
+    const existingUsers = await prisma.user.findMany({
+      select: { id: true, name: true },
+    });
+
+    // auth.usersに存在しないユーザーを削除
+    for (const existingUser of existingUsers) {
+      if (!authUserIds.has(existingUser.id)) {
+        // 関連データを先に削除（外部キー制約の順序を考慮）
+
+        // 1. StudyLogを削除
+        await prisma.studyLog.deleteMany({
+          where: { userId: existingUser.id },
+        });
+
+        // 2. ユーザーに関連するタスクを取得
+        const userTasks = await prisma.task.findMany({
+          where: { userId: existingUser.id },
+          select: { id: true },
+        });
+        const taskIds = userTasks.map((task) => task.id);
+
+        // 3. タスクに関連するデータを削除
+        if (taskIds.length > 0) {
+          await prisma.assignmentLog.deleteMany({
+            where: { taskId: { in: taskIds } },
+          });
+          await prisma.teacherTask.deleteMany({
+            where: { taskId: { in: taskIds } },
+          });
+          await prisma.taskActivityType.deleteMany({
+            where: { taskId: { in: taskIds } },
+          });
+          await prisma.taskTag.deleteMany({
+            where: { taskId: { in: taskIds } },
+          });
+          await prisma.studyLog.deleteMany({
+            where: { taskId: { in: taskIds } },
+          });
+        }
+
+        // 4. タスクを削除
+        await prisma.task.deleteMany({ where: { userId: existingUser.id } });
+
+        // 5. 講師・生徒関係を削除
+        await prisma.teacherStudent.deleteMany({
+          where: {
+            OR: [
+              { teacherId: existingUser.id },
+              { studentId: existingUser.id },
+            ],
+          },
+        });
+
+        // 6. 対応ログを削除（responderId）
+        await prisma.assignmentLog.deleteMany({
+          where: { responderId: existingUser.id },
+        });
+
+        // 7. ユーザーを削除
+        await prisma.user.delete({ where: { id: existingUser.id } });
+        console.log(
+          `   └─ 削除: ${existingUser.name} (ID: ${existingUser.id})`,
+        );
+      }
+    }
+
+    // テストユーザーをアプリDBに作成（運用フローを模倣）
+    // 実際の運用では初回ログイン時に作成されるが、テストのためここで作成
+    const userService = new UserService(prisma);
+
+    for (const user of testUsers) {
+      // UserService.createIfNotExistsを使用（運用フローと同じ方法）
+      const wasCreated = await userService.createIfNotExists(
+        user.id, // Supabase auth.users.id と同じIDを使用して紐付け
+        user.email.split("@")[0], // 運用フローと同じく、emailの@前の部分を初期名として使用
+      );
+
+      if (wasCreated) {
+        console.log(
+          `✅ アプリDBユーザー作成完了: ${user.email} (ID: ${user.id})`,
+        );
+
+        // テスト用に追加情報を更新（実際の運用では設定画面で更新される）
+        await prisma.user.update({
+          where: { id: user.id },
           data: {
-            id: user.id,
+            name: user.name, // テスト用の日本語名
+            role: user.role, // 指定されたロールに更新
+            slackId: user.slackId,
+            bio: "テストユーザーです",
+          },
+        });
+        console.log(`   └─ テスト用情報を追加: ${user.name} (${user.role})`);
+      } else {
+        console.log(`ℹ️  アプリDBユーザー既存: ${user.email}`);
+
+        // 既存ユーザーも情報を更新
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
             name: user.name,
             role: user.role,
             slackId: user.slackId,
             bio: "テストユーザーです",
           },
         });
+        console.log(`   └─ テスト用情報を更新: ${user.name} (${user.role})`);
       }
     }
 
-    // テストタスクの作成
-    await prisma.task.create({
-      data: {
-        userId: testUsers[0].id,
-        title: "タスク01",
-        description: "タスク01の説明",
-        startedAt: new Date("2023-10-01T00:00:00.000Z"),
-        endedAt: new Date("2023-10-01T23:59:59.999Z"),
-      },
-    });
+    // テストタスクの作成（user3は作成しないため、user1とuser2のみ）
+    const testUser1 = testUsers.find((u) => u.email === "user1@example.com");
+    const testUser2 = testUsers.find((u) => u.email === "user2@example.com");
 
-    await prisma.task.create({
-      data: {
-        userId: testUsers[0].id,
-        title: "タスク02",
-        description: "タスク02の説明",
-        startedAt: new Date("2023-10-02T00:00:00.000Z"),
-        endedAt: new Date("2023-10-02T23:59:59.999Z"),
-      },
-    });
+    if (testUser1) {
+      await prisma.task.create({
+        data: {
+          userId: testUser1.id,
+          title: "タスク01",
+          description: "タスク01の説明",
+          startedAt: new Date("2023-10-01T00:00:00.000Z"),
+          endedAt: new Date("2023-10-01T23:59:59.999Z"),
+        },
+      });
 
-    await prisma.task.create({
-      data: {
-        userId: testUsers[1].id,
-        title: "タスク03",
-        description: "タスク03の説明",
-        startedAt: new Date("2023-10-02T00:00:00.000Z"),
-        endedAt: new Date("2023-10-02T23:59:59.999Z"),
-      },
-    });
+      await prisma.task.create({
+        data: {
+          userId: testUser1.id,
+          title: "タスク02",
+          description: "タスク02の説明",
+          startedAt: new Date("2023-10-02T00:00:00.000Z"),
+          endedAt: new Date("2023-10-02T23:59:59.999Z"),
+        },
+      });
+    }
+
+    if (testUser2) {
+      await prisma.task.create({
+        data: {
+          userId: testUser2.id,
+          title: "タスク03",
+          description: "タスク03の説明",
+          startedAt: new Date("2023-10-02T00:00:00.000Z"),
+          endedAt: new Date("2023-10-02T23:59:59.999Z"),
+        },
+      });
+    }
 
     console.log("✅ 追加のテストデータ作成が完了しました");
   } catch (error) {
