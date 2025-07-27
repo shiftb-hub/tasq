@@ -24,7 +24,7 @@ export const FormTextField = <T extends FieldValues>({
   containerStyles,
   ...inputProps
 }: Props<T>) => {
-  const errMsg = validationErrors[fieldKey]?.message as string | undefined;
+  const errMsg = validationErrors[fieldKey]?.message?.toString();
   return (
     <div className={twMerge("flex flex-col gap-y-1.5", containerStyles)}>
       <Label htmlFor={fieldKey}>{labelText}</Label>
