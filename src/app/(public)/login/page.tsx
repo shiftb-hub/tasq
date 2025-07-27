@@ -9,8 +9,6 @@ import { mutate } from "swr";
 
 // UIコンポーネント・アイコン
 import { Button } from "@/app/_components/ui/button";
-import { Input } from "@/app/_components/ui/input";
-import { Label } from "@/app/_components/ui/label";
 import { FormTextField } from "@/app/_components/FormTextField";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { LuSend } from "react-icons/lu";
