@@ -11,7 +11,6 @@ import type {
   SignInWithPasswordCredentials,
 } from "@supabase/supabase-js";
 import { isDevelopmentEnv } from "@/app/_configs/app-config";
-import { th } from "zod/v4/locales";
 
 // 戻り値の型定義
 type LoginActionResult = {

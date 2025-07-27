@@ -11,6 +11,7 @@ import { mutate } from "swr";
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
+import { FormTextField } from "@/app/_components/FormTextField";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { LuSend } from "react-icons/lu";
 import { Loader2Icon } from "lucide-react";
@@ -132,35 +133,28 @@ const Page: React.FC = () => {
             isSubmitting && "cursor-not-allowed opacity-50",
           )}
         >
-          <div className="flex flex-col gap-y-1.5">
-            <Label htmlFor={c_Email}>メールアドレス</Label>
-            <Input
-              {...form.register(c_Email, {
-                onChange: clearRootErrorOnChange,
-              })}
-              type="email"
-              id={c_Email}
-              placeholder="name@example.com"
-              aria-invalid={!!fieldErrors.email}
-              disabled={isSubmitting}
-            />
-            <FormErrorMessage msg={fieldErrors.email?.message} />
-          </div>
+          <FormTextField<LoginRequest>
+            {...form.register(c_Email, {
+              onChange: clearRootErrorOnChange,
+            })}
+            fieldKey={c_Email}
+            labelText="メールアドレス"
+            placeholder="name@example.com"
+            validationErrors={fieldErrors}
+            disabled={isSubmitting}
+          />
 
-          <div className="flex flex-col gap-y-1.5">
-            <Label htmlFor={c_Password}>パスワード</Label>
-            <Input
-              {...form.register(c_Password, {
-                onChange: clearRootErrorOnChange,
-              })}
-              type="password"
-              id={c_Password}
-              placeholder="password"
-              aria-invalid={!!fieldErrors.password}
-              disabled={isSubmitting}
-            />
-            <FormErrorMessage msg={fieldErrors.password?.message} />
-          </div>
+          <FormTextField<LoginRequest>
+            {...form.register(c_Password, {
+              onChange: clearRootErrorOnChange,
+            })}
+            type="password"
+            fieldKey={c_Password}
+            labelText="パスワード"
+            placeholder="password"
+            validationErrors={fieldErrors}
+            disabled={isSubmitting}
+          />
 
           <FormErrorMessage msg={fieldErrors.root?.message} />
 
