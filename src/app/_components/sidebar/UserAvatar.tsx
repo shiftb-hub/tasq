@@ -19,7 +19,7 @@ export const UserAvatar: React.FC<Props> = ({ user }) => {
         alt={user.name}
       />
       <AvatarFallback className="rounded-lg">
-        {user.name.charAt(0)}
+        {user.name?.charAt(0) || "?"}
       </AvatarFallback>
     </Avatar>
   );
