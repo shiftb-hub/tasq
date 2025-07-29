@@ -1,7 +1,9 @@
 "use client";
 
 import type { InputHTMLAttributes } from "react";
-import type { FieldErrors, FieldValues } from "react-hook-form";
+import type { FieldValues, Path } from "react-hook-form";
+
+import { useFormContext } from "react-hook-form";
 
 import { Label } from "@/app/_components/ui/label";
 import { Input } from "@/app/_components/ui/input";
@@ -12,27 +14,48 @@ import { twMerge } from "tailwind-merge";
 interface Props<T extends FieldValues>
   extends InputHTMLAttributes<HTMLInputElement> {
   labelText: string;
-  fieldKey: string;
-  validationErrors: FieldErrors<T>;
+  fieldKey: Path<T>;
+  exampleText?: string;
+  placeholder?: string;
   containerStyles?: string;
+  registerOnChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  registerOnBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 }
 
+// レンダリングコストが小さいため memo は省略
 export const FormTextField = <T extends FieldValues>({
   labelText,
   fieldKey,
-  validationErrors,
+  exampleText,
   containerStyles,
+  placeholder = "未設定",
+  registerOnChange,
+  registerOnBlur,
   ...inputProps
 }: Props<T>) => {
-  const errMsg = validationErrors[fieldKey]?.message?.toString();
+  const { register, formState } = useFormContext<T>();
+  const errMsg = formState.errors[fieldKey]?.message as string | undefined;
   return (
     <div className={twMerge("flex flex-col gap-y-1.5", containerStyles)}>
-      <Label htmlFor={fieldKey}>{labelText}</Label>
+      <div className="flex flex-row items-baseline justify-start gap-x-2">
+        <Label htmlFor={fieldKey}>{labelText}</Label>
+        {exampleText && (
+          <p className="text-xs">
+            <span className="text-gray-500">例：</span>
+            <span className="text-blue-400">{exampleText}</span>
+          </p>
+        )}
+      </div>
       <Input
         type="text"
-        {...inputProps}
         id={fieldKey}
         aria-invalid={!!errMsg}
+        placeholder={placeholder}
+        {...register(fieldKey, {
+          onChange: registerOnChange,
+          onBlur: registerOnBlur,
+        })}
+        {...inputProps}
       />
       <FormErrorMessage msg={errMsg} />
     </div>

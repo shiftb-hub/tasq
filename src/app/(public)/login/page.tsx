@@ -2,7 +2,7 @@
 
 // React と フォームライブラリ
 import { useState, useCallback, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { mutate } from "swr";
@@ -63,14 +63,7 @@ const Page: React.FC = () => {
     initialize();
   }, [setFromValue]);
 
-  // ユーザーがフィールドを変更したときにルートエラーをクリア
-  const clearRootErrorOnChange = useCallback(() => {
-    if (fieldErrors.root) {
-      form.clearErrors("root");
-    }
-  }, [fieldErrors.root, form]);
-
-  // サーバサイドで発生した問題をルートエラーとして設定・通知
+  // サーバサイドで発生した問題をルートエラーとして設定
   const setRootError = useCallback(
     (errorMsg: string) => {
       form.setError("root", {
@@ -80,6 +73,11 @@ const Page: React.FC = () => {
     },
     [form],
   );
+
+  // ルートエラーのクリア
+  const clearRootError = useCallback(() => {
+    if (fieldErrors.root) form.clearErrors("root");
+  }, [fieldErrors.root, form]);
 
   // ログインフォーム送信の処理 Server Action（Custom Invocation）で処理
   const onSubmit = useCallback(
@@ -131,28 +129,24 @@ const Page: React.FC = () => {
             isSubmitting && "cursor-not-allowed opacity-50",
           )}
         >
-          <FormTextField<LoginRequest>
-            {...form.register(c_Email, {
-              onChange: clearRootErrorOnChange,
-            })}
-            fieldKey={c_Email}
-            labelText="メールアドレス"
-            placeholder="name@example.com"
-            validationErrors={fieldErrors}
-            disabled={isSubmitting}
-          />
+          <FormProvider {...form}>
+            <FormTextField<LoginRequest>
+              fieldKey={c_Email}
+              labelText="メールアドレス"
+              placeholder="name@example.com"
+              disabled={isSubmitting}
+              registerOnChange={clearRootError}
+            />
 
-          <FormTextField<LoginRequest>
-            {...form.register(c_Password, {
-              onChange: clearRootErrorOnChange,
-            })}
-            type="password"
-            fieldKey={c_Password}
-            labelText="パスワード"
-            placeholder="password"
-            validationErrors={fieldErrors}
-            disabled={isSubmitting}
-          />
+            <FormTextField<LoginRequest>
+              type="password"
+              fieldKey={c_Password}
+              labelText="パスワード"
+              placeholder="password"
+              disabled={isSubmitting}
+              registerOnChange={clearRootError}
+            />
+          </FormProvider>
 
           <FormErrorMessage msg={fieldErrors.root?.message} />
 
