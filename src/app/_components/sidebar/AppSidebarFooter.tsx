@@ -88,7 +88,7 @@ export const AppSidebarFooter: React.FC<Props> = ({ user }) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link href="/settings" className="flex items-center gap-2">
                   <Settings />
                   プロフィール設定
