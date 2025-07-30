@@ -142,18 +142,27 @@ class UserService {
    * @throws {Error} 指定されたIDのユーザーが存在しない場合やその他のデータベースエラー
    * @example
    * ```typescript
-   * await userService.update("user123", {
-   *   name: "新しい名前",
-   *   slackId: "new-slack-id"
+   * await userService.update("<uuid>", {
+   *   name: "仕様 曖昧子",
+   *   slackId: "@曖昧子"
    * });
    * ```
    */
   public async update(id: string, data: PRS.UserUpdateInput): Promise<boolean> {
     await this.prisma.user.update({
       where: { id },
+      // 特定のフィールドのみ更新 (idなどは更新させない)
       data: {
         name: data.name,
+        job: data.job,
+        currentChapter: data.currentChapter,
         slackId: data.slackId,
+        instagramId: data.instagramId,
+        threadsId: data.threadsId,
+        xId: data.xId,
+        githubId: data.githubId,
+        bio: data.bio,
+        profileImageKey: data.profileImageKey,
       },
     });
     return true;
