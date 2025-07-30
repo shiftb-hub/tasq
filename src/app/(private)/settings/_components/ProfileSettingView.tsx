@@ -1,7 +1,7 @@
 "use client";
 
 // React と フォームライブラリ
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -53,7 +53,6 @@ type Props = {
  */
 const ProfileEditorView: React.FC<Props> = (props) => {
   const { initValues } = props;
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ProfileUpdateRequest>({
     mode: "onChange",
@@ -97,7 +96,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
   const onSubmit = useCallback(
     async (formValues: ProfileUpdateRequest) => {
       console.log(JSON.stringify(formValues, null, 2)); // デバッグ用
-      setIsSubmitting(true);
+      // setIsSubmitting(true);
       clearRootError();
       try {
         const result = await profileUpdateAction(formValues);
@@ -115,8 +114,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
         setRootError(
           "フロントエンドで発生した予期せぬエラーでプロフィール更新処理に失敗しました。再度お試しください。",
         );
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [setRootError, clearRootError, form],
@@ -129,7 +126,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className={twMerge(
           "space-y-4",
-          isSubmitting && "cursor-not-allowed opacity-50",
+          form.formState.isSubmitting && "cursor-not-allowed opacity-50",
         )}
       >
         {/* 
@@ -139,11 +136,14 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           - プレビュー表示機能
           - 画像削除機能 など
         */}
+
+        {/* FormTextField / ChapterSelectField は useFormContext 経由で
+            formState.isSubmitting を参照し、true のときは自動で disabled になる */}
+
         <FormProvider {...form}>
           <FormTextField<ProfileUpdateRequest>
             fieldKey={c_Name}
             labelText={`名前（${initValues.role}）`}
-            disabled={isSubmitting}
             autoComplete="off"
           />
 
@@ -168,16 +168,13 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           <FormTextField<ProfileUpdateRequest>
             fieldKey={c_Job}
             labelText="ジョブ"
-            exampleText="「第92期生」「新米TA」など"
-            placeholder="未設定"
-            disabled={isSubmitting}
+            exampleText="第92期生、卒業生、新米TA など"
           />
 
           <div className="flex flex-col gap-y-1">
             <ChapterSelectField<ProfileUpdateRequest>
               labelText="現在、取組み中の章"
               fieldKey={c_CurrentChapter}
-              disabled={isSubmitting}
             />
             <SocialAccountVerifyLink
               platformName="ShiftB"
@@ -190,7 +187,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
               fieldKey={c_SlackId}
               labelText="Slack ID"
               exampleText="@竈門炭治郎"
-              disabled={isSubmitting}
             />
             <SocialAccountVerifyLink
               platformName="ShiftB Slack"
@@ -202,7 +198,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             <FormTextField<ProfileUpdateRequest>
               fieldKey={c_GithubId}
               labelText="GitHub ID"
-              disabled={isSubmitting}
             />
             <SocialAccountVerifyLink
               platformName="GitHub"
@@ -214,7 +209,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             <FormTextField<ProfileUpdateRequest>
               fieldKey={c_InstagramId}
               labelText="Instagram ID"
-              disabled={isSubmitting}
             />
             <SocialAccountVerifyLink
               platformName="Instagram"
@@ -226,7 +220,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             <FormTextField<ProfileUpdateRequest>
               fieldKey={c_ThreadsId}
               labelText="Threads ID"
-              disabled={isSubmitting}
             />
             <SocialAccountVerifyLink
               platformName="Threads"
@@ -238,7 +231,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             <FormTextField<ProfileUpdateRequest>
               fieldKey={c_XId}
               labelText="X ID"
-              disabled={isSubmitting}
             />
             <SocialAccountVerifyLink
               platformName="X"
@@ -246,11 +238,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             />
           </div>
 
-          <FormTextareaField
-            fieldKey={c_Bio}
-            labelText="自己紹介"
-            disabled={isSubmitting}
-          />
+          <FormTextareaField fieldKey={c_Bio} labelText="自己紹介" />
 
           {/* 
             NOTE: アバター画像のキー（現在はテキストフィールドとして表示）
@@ -261,7 +249,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           <FormTextField<ProfileUpdateRequest>
             fieldKey={c_ProfileImageKey}
             labelText="ProfileImageKey"
-            disabled={isSubmitting}
           />
         </FormProvider>
 
@@ -273,7 +260,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
               type="button"
               className="flex-1"
               variant="secondary"
-              disabled={isSubmitting}
+              disabled={form.formState.isSubmitting}
               onClick={restoreInitialValues}
             >
               <div className="flex items-center gap-x-1">
@@ -285,9 +272,9 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             <Button
               type="submit"
               className="flex-1"
-              disabled={!form.formState.isValid || isSubmitting}
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
             >
-              {isSubmitting ? (
+              {form.formState.isSubmitting ? (
                 <div className="flex items-center gap-x-1">
                   <Loader2Icon className="animate-spin" />
                   <span>プロフィールの更新処理中</span>

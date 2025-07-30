@@ -19,13 +19,11 @@ import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 type Props<T extends FieldValues> = {
   labelText: string;
   fieldKey: FieldPath<T>;
-  disabled: boolean;
 };
 
 const ChapterSelectFieldInner = <T extends FieldValues>({
   labelText,
   fieldKey,
-  disabled,
 }: Props<T>) => {
   const { control, formState } = useFormContext<T>();
   const errMsg = formState.errors[fieldKey]?.message as string | undefined;
@@ -44,7 +42,7 @@ const ChapterSelectFieldInner = <T extends FieldValues>({
               if (!open) field.onBlur();
             }}
             value={field.value !== null ? field.value?.toString() : "none"}
-            disabled={disabled}
+            disabled={formState.isSubmitting}
             name={field.name}
           >
             <SelectTrigger className="w-full" id={field.name}>

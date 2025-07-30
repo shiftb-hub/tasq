@@ -51,6 +51,9 @@ export const FormTextField = <T extends FieldValues>({
         id={fieldKey}
         aria-invalid={!!errMsg}
         placeholder={placeholder}
+        // 送信中 (isSubmitting === true) はコンポーネントを無効化
+        // 後続の {...inputProps} で disabled が指定されていれば、そちらで上書きされる
+        disabled={formState.isSubmitting}
         {...register(fieldKey, {
           onChange: registerOnChange,
           onBlur: registerOnBlur,
