@@ -19,7 +19,7 @@ export const roleSchema = z
   .transform((val) => val as Role)
   .optional();
 
-export const chapterSchema = z.int().min(1).max(14).optional();
+export const chapterSchema = z.int().min(1).max(14).nullable();
 
 export const jobSchema = z
   .string()

@@ -38,24 +38,29 @@ const ChapterSelectFieldInner = <T extends FieldValues>({
           <Label htmlFor={field.name}>{labelText}</Label>
           <Select
             onValueChange={(value) =>
-              field.onChange(value === "none" ? undefined : Number(value))
+              field.onChange(value === "none" ? null : Number(value))
             }
             onOpenChange={(open) => {
               if (!open) field.onBlur();
             }}
-            value={field.value !== undefined ? field.value?.toString() : "none"}
+            value={field.value !== null ? field.value?.toString() : "none"}
             disabled={disabled}
             name={field.name}
           >
             <SelectTrigger className="w-full" id={field.name}>
-              <SelectValue placeholder="（なし）" />
+              <SelectValue>
+                {field.value === null ? "（なし）" : ChapterTitles[field.value]}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent id={fieldKey}>
-              {Array.from({ length: 13 }, (_, i) => i + 1).map((chapterNum) => (
-                <SelectItem key={chapterNum} value={chapterNum.toString()}>
-                  {ChapterTitles[chapterNum as keyof typeof ChapterTitles]}
-                </SelectItem>
-              ))}
+              {Object.keys(ChapterTitles).map((key) => {
+                const chapterNum = Number(key) as keyof typeof ChapterTitles;
+                return (
+                  <SelectItem key={chapterNum} value={chapterNum.toString()}>
+                    {ChapterTitles[chapterNum]}
+                  </SelectItem>
+                );
+              })}
               <SelectItem value="none">（なし）</SelectItem>
             </SelectContent>
           </Select>

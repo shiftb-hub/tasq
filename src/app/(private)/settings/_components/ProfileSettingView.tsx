@@ -96,7 +96,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
   // 更新処理 (profileUpdateActionの実行）
   const onSubmit = useCallback(
     async (formValues: ProfileUpdateRequest) => {
-      // console.log(JSON.stringify(formValues, null, 2)); // デバッグ用
+      console.log(JSON.stringify(formValues, null, 2)); // デバッグ用
       setIsSubmitting(true);
       clearRootError();
       try {

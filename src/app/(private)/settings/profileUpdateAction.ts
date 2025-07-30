@@ -54,7 +54,7 @@ export const profileUpdateAction = async (
 
       // オプショナルフィールド（undefined → null変換）
       job: profileUpdateRequest.job ?? null,
-      currentChapter: profileUpdateRequest.currentChapter ?? null,
+      currentChapter: profileUpdateRequest.currentChapter,
       slackId: profileUpdateRequest.slackId ?? null,
       instagramId: profileUpdateRequest.instagramId ?? null,
       threadsId: profileUpdateRequest.threadsId ?? null,

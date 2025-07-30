@@ -32,7 +32,7 @@ const toSelfProfile = (user: AppUser, email: string): SelfProfile => {
     role: user.role,
     email: email,
     job: user.job ?? undefined, // null なら undefined に変換
-    currentChapter: user.currentChapter ?? undefined,
+    currentChapter: user.currentChapter,
     slackId: user.slackId ?? undefined,
     instagramId: user.instagramId ?? undefined,
     threadsId: user.threadsId ?? undefined,
