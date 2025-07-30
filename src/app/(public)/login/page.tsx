@@ -134,7 +134,6 @@ const Page: React.FC = () => {
               fieldKey={c_Email}
               labelText="メールアドレス"
               placeholder="name@example.com"
-              disabled={isSubmitting}
               registerOnChange={clearRootError}
             />
 
@@ -143,7 +142,6 @@ const Page: React.FC = () => {
               fieldKey={c_Password}
               labelText="パスワード"
               placeholder="password"
-              disabled={isSubmitting}
               registerOnChange={clearRootError}
             />
           </FormProvider>

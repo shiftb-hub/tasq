@@ -1,29 +1,29 @@
 "use client";
 
-import type { InputHTMLAttributes } from "react";
+import type { TextareaHTMLAttributes } from "react";
 import type { FieldValues, Path } from "react-hook-form";
 
 import { useFormContext } from "react-hook-form";
 
 import { Label } from "@/app/_components/ui/label";
-import { Input } from "@/app/_components/ui/input";
+import { Textarea } from "@/app/_components/ui/textarea";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 
 import { twMerge } from "tailwind-merge";
 
 interface Props<T extends FieldValues>
-  extends InputHTMLAttributes<HTMLInputElement> {
+  extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   labelText: string;
   fieldKey: Path<T>;
   exampleText?: string;
   placeholder?: string;
   containerStyles?: string;
-  registerOnChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  registerOnBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  registerOnChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  registerOnBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
 }
 
 // レンダリングコストが小さいため memo は省略
-export const FormTextField = <T extends FieldValues>({
+export const FormTextareaField = <T extends FieldValues>({
   labelText,
   fieldKey,
   exampleText,
@@ -31,7 +31,7 @@ export const FormTextField = <T extends FieldValues>({
   placeholder = "未設定",
   registerOnChange,
   registerOnBlur,
-  ...inputProps
+  ...textareaProps
 }: Props<T>) => {
   const { register, formState } = useFormContext<T>();
   const errMsg = formState.errors[fieldKey]?.message as string | undefined;
@@ -46,19 +46,15 @@ export const FormTextField = <T extends FieldValues>({
           </p>
         )}
       </div>
-      <Input
-        type="text"
+      <Textarea
         id={fieldKey}
         aria-invalid={!!errMsg}
         placeholder={placeholder}
-        // 送信中 (isSubmitting === true) はコンポーネントを無効化
-        // 後続の {...inputProps} で disabled が指定されていれば、そちらで上書きされる
-        disabled={formState.isSubmitting}
         {...register(fieldKey, {
           onChange: registerOnChange,
           onBlur: registerOnBlur,
         })}
-        {...inputProps}
+        {...textareaProps}
       />
       <FormErrorMessage msg={errMsg} />
     </div>
