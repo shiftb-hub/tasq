@@ -105,7 +105,9 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           form.reset(formValues); // デフォルト値の更新
           return;
         }
-        setRootError(result.errorMessageForUser!);
+        setRootError(
+          result.errorMessageForUser || "プロフィール更新に失敗しました。",
+        );
       } catch (e) {
         dumpError(e, "プロフィール更新処理 (Client) ", {
           formValues,
