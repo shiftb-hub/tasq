@@ -13,7 +13,7 @@ type Props = {
  * 入力されたアカウント情報の確認のために外部プラットフォームへのリンクを表示
  */
 export const SocialAccountVerifyLink: React.FC<Props> = (props) => {
-  const { platformName, url, className } = props;
+  const { platformName, url, className = "" } = props;
   return (
     <div className={twMerge("ml-1 text-right text-xs", className)}>
       <NextLink
