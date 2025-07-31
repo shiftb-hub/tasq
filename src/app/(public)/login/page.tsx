@@ -1,176 +1,46 @@
-"use client";
+// 認証
+import { maybeAuthenticateSupabaseUser } from "@/app/_libs/authenticateUser";
 
-// React と フォームライブラリ
-import { useState, useCallback, useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { mutate } from "swr";
-
-// UIコンポーネント・アイコン
-import { Button } from "@/app/_components/ui/button";
-import { FormTextField } from "@/app/_components/FormTextField";
-import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
-import { LuSend } from "react-icons/lu";
-import { Loader2Icon } from "lucide-react";
-import AuthenticatedView from "./_components/AuthenticatedView";
-
-// 型定義・バリデーションスキーマ
-import type { LoginRequest } from "@/app/_types/LoginRequest";
-import { loginRequestSchema } from "@/app/_types/LoginRequest";
-
-// ServerActions / API系
-import { loginAction } from "./loginAction";
-import { logoutAction } from "@/app/_actions/logoutAction";
+// UIコンポーネント
+import { ErrorPage } from "@/app/_components/ErrorPage";
+import { LoginPage } from "./_components/LoginPage";
+import { AlreadyLoggedInPage } from "@/app/_components/AlreadyLoggedInPage";
 
 // ユーティリティ
-import { twMerge } from "tailwind-merge";
-import { createSupabaseBrowserClient } from "@/app/_libs/supabase/browserClient";
+import { dumpError } from "@/app/_libs/dumpException";
 
-const c_Email = "email";
-const c_Password = "password";
+export const dynamic = "force-dynamic";
 
-const Page: React.FC = () => {
-  const router = useRouter();
-  // 既ログインなら「アカウント」、そうでなければ「null」を保持
-  const [loggedInEmail, setLoggedInEmail] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-  const form = useForm<LoginRequest>({
-    mode: "onChange",
-    resolver: zodResolver(loginRequestSchema),
-  });
-  const fieldErrors = form.formState.errors;
-  const setFromValue = form.setValue;
+/**
+ * ログインページ（SSR）
+ *
+ * @returns JSX.Element
+ */
+const Page: React.FC<Props> = async ({ searchParams }) => {
+  try {
+    const resolvedSearchParams = await searchParams;
+    const emailFromQuery = Array.isArray(resolvedSearchParams.email)
+      ? resolvedSearchParams.email[0]
+      : resolvedSearchParams.email;
 
-  useEffect(() => {
-    const initialize = async () => {
-      // 1. 認証状態をチェック
-      const supabase = createSupabaseBrowserClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user?.email) {
-        setLoggedInEmail(user.email);
-      }
-
-      // 2. クエリパラメータを取得
-      const searchParams = new URLSearchParams(window.location.search);
-      const email = searchParams.get(c_Email);
-      setFromValue(c_Email, email || "");
-    };
-
-    initialize();
-  }, [setFromValue]);
-
-  // サーバサイドで発生した問題をルートエラーとして設定
-  const setRootError = useCallback(
-    (errorMsg: string) => {
-      form.setError("root", {
-        type: "manual",
-        message: errorMsg,
-      });
-    },
-    [form],
-  );
-
-  // ルートエラーのクリア
-  const clearRootError = useCallback(() => {
-    if (fieldErrors.root) form.clearErrors("root");
-  }, [fieldErrors.root, form]);
-
-  // ログインフォーム送信の処理 Server Action（Custom Invocation）で処理
-  const onSubmit = useCallback(
-    async (formValues: LoginRequest) => {
-      setIsSubmitting(true);
-      try {
-        const result = await loginAction(formValues);
-        if (result.success) {
-          mutate(null); // SWRのキャッシュを全更新
-          router.push(result.redirectTo || "/");
-          return;
-        }
-        setRootError(result.errorMessageForUser!);
-      } catch (e) {
-        const ee =
-          e instanceof Error ? { message: e.message, stack: e.stack } : e;
-        console.error(`ログイン処理の失敗`, ee);
-        setRootError(
-          "予期せぬエラーでログイン処理に失敗しました。再度お試しください。",
-        );
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [router, setRootError],
-  );
-
-  // ログアウト処理のハンドラ
-  const handleLogout = useCallback(async () => {
-    await logoutAction();
-  }, []);
-
-  // 既にログインしている場合は、認証済みビューを表示
-  if (loggedInEmail) {
-    return <AuthenticatedView email={loggedInEmail} onLogout={handleLogout} />;
+    const supabaseUser = await maybeAuthenticateSupabaseUser();
+    if (!supabaseUser) {
+      return <LoginPage email={emailFromQuery} />;
+    }
+    // 既にログインしているときはログアウトを促すページを表示
+    const email = supabaseUser.email;
+    if (!email) {
+      throw new Error("Supabase user email is not available.");
+    }
+    return <AlreadyLoggedInPage email={email} action="ログイン" />;
+  } catch (e) {
+    dumpError(e, "ログインページ（SSR）");
+    return <ErrorPage message="問題が発生しました。" />;
   }
-
-  // フォーム管理とUI表示を同一コンポーネント内で保持（UIは意図的に分離していない）
-  return (
-    <div className="flex justify-center pt-12">
-      <div className="w-full max-w-[460px]">
-        <h1 className="mb-8 text-center text-3xl font-bold">ログイン</h1>
-
-        <form
-          noValidate
-          onSubmit={form.handleSubmit(onSubmit)}
-          className={twMerge(
-            "space-y-4",
-            isSubmitting && "cursor-not-allowed opacity-50",
-          )}
-        >
-          <FormProvider {...form}>
-            <FormTextField<LoginRequest>
-              fieldKey={c_Email}
-              labelText="メールアドレス"
-              placeholder="name@example.com"
-              registerOnChange={clearRootError}
-            />
-
-            <FormTextField<LoginRequest>
-              type="password"
-              fieldKey={c_Password}
-              labelText="パスワード"
-              placeholder="password"
-              registerOnChange={clearRootError}
-            />
-          </FormProvider>
-
-          <FormErrorMessage msg={fieldErrors.root?.message} />
-
-          <div>
-            <Button
-              className="w-full"
-              type="submit"
-              disabled={!form.formState.isValid || isSubmitting}
-            >
-              {isSubmitting ? (
-                <div className="flex items-center gap-x-1">
-                  <Loader2Icon className="animate-spin" />
-                  <span>ログイン処理中</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-x-1">
-                  <LuSend />
-                  <div>ログイン</div>
-                </div>
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
 };
 
 export default Page;
