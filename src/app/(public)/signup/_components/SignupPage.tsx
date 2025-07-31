@@ -1,6 +1,6 @@
 "use client";
 
-import NextLink from "next/link";
+import Link from "next/link";
 import { useState, useCallback, useEffect } from "react";
 import { createSupabaseBrowserClient } from "@/app/_libs/supabase/browserClient";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -151,20 +151,20 @@ export const SignupPage: React.FC = () => {
           <div className="mt-4">
             サインアップが完了しました。
             {/* 登録いただいたメールアドレス ( {form.getValues(c_Email)} ) 宛に、認証メールを送信しました。メールに記載のURLをクリックして、登録手続きを完了してください。 */}
-            <NextLink
+            <Link
               href={`/login?${c_Email}=${form.getValues(c_Email)}`}
               className="px-0.5 text-blue-500 underline"
             >
               ログインページ
-            </NextLink>
+            </Link>
             からログインしてください。
           </div>
         )}
         <div className="mt-2 text-sm">
           既にアカウントをお持ちの方は
-          <NextLink href="/login" className="px-0.5 text-blue-500 underline">
+          <Link href="/login" className="px-0.5 text-blue-500 underline">
             ログインページ
-          </NextLink>
+          </Link>
           をご利用ください。
         </div>
       </div>

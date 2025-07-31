@@ -1,15 +1,15 @@
-import NextLink from "next/link";
+import Link from "next/link";
 import { DevAuthButton } from "@/app/_components/DevAuthButton";
 const Page: React.FC = () => {
   return (
     <div>
       <div className="text-2xl font-bold">Main</div>
       <div className="mt-4 ml-2 flex flex-col gap-y-2">
-        <NextLink href="/signup">サインアップ</NextLink>
-        <NextLink href="/login">ログイン</NextLink>
-        <NextLink href="/api/playground/tasks">APIテスト（public）</NextLink>
-        <NextLink href="/api/playground/users">APIテスト（private）</NextLink>
-        <NextLink href="/settings">設定（private）</NextLink>
+        <Link href="/signup">サインアップ</Link>
+        <Link href="/login">ログイン</Link>
+        <Link href="/api/playground/tasks">APIテスト（public）</Link>
+        <Link href="/api/playground/users">APIテスト（private）</Link>
+        <Link href="/settings">設定（private）</Link>
         <div className="mt-4">
           <DevAuthButton />
         </div>
