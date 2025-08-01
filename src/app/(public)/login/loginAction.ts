@@ -13,13 +13,7 @@ import type {
 } from "@supabase/supabase-js";
 import { isDevelopmentEnv } from "@/app/_configs/app-config";
 import { dumpError } from "@/app/_libs/dumpException";
-
-// 戻り値の型定義
-type LoginActionResult = {
-  success: boolean;
-  redirectTo: string | undefined;
-  errorMessageForUser: string | undefined;
-};
+import type { LoginActionResult } from "./_types/LoginActionResult";
 
 /// ユーザー向けのエラーメッセージの定義
 /// Supabase Auth error code と ユーザー向けエラーメッセージ の対応付け
@@ -67,7 +61,6 @@ export const loginAction = async (
     if (!parsedRequest.success) {
       return {
         success: false,
-        redirectTo: undefined,
         errorMessageForUser:
           "メールアドレスまたはパスワードの書式が正しくありません。",
       } satisfies LoginActionResult;
@@ -88,7 +81,6 @@ export const loginAction = async (
         );
         return {
           success: false,
-          redirectTo: undefined,
           errorMessageForUser:
             "DB接続に失敗しました。しばらく時間をおいてから再度お試しください。",
         } satisfies LoginActionResult;
@@ -96,7 +88,6 @@ export const loginAction = async (
       // 通常の認証エラー処理
       return {
         success: false,
-        redirectTo: undefined,
         errorMessageForUser: mapAuthErrorToUserMessage(error),
       } satisfies LoginActionResult;
     }
@@ -122,13 +113,11 @@ export const loginAction = async (
     return {
       success: true,
       redirectTo: wasCreated ? "/settings" : "/",
-      errorMessageForUser: undefined,
     } satisfies LoginActionResult;
   } catch (e) {
     dumpError(e, "ログイン処理（ServerAction）", { rawLoginRequest });
     return {
       success: false,
-      redirectTo: undefined,
       errorMessageForUser:
         "予期せぬエラーによりログイン処理に失敗しました。再度お試しください。",
     } satisfies LoginActionResult;

@@ -68,7 +68,7 @@ export const LoginPage: React.FC<Props> = (props) => {
         const result = await loginAction(formValues);
         if (result.success) {
           mutate(null); // SWRのキャッシュを全更新
-          router.push(result.redirectTo || "/");
+          router.push(result.redirectTo);
           return;
         }
         setRootError(
