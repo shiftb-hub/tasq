@@ -9,7 +9,7 @@ export const api = {
       });
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error("Error fetching data", { cause: errorData });
+        throw new Error("データの取得に失敗しました。", { cause: errorData });
       }
       const data: ResponseType = await res.json();
       return data;
@@ -33,10 +33,8 @@ export const api = {
       });
 
       const responseData = await res.json();
-      if (!res.ok) {
-        const errorMessage = responseData.message || "登録に失敗しました。";
-        throw new Error(errorMessage);
-      }
+      if (!res.ok)
+        throw new Error(responseData.message || "登録に失敗しました。");
       return responseData as ResponseType;
     } catch (e) {
       throw new Error(e instanceof Error ? e.message : String(e));
