@@ -14,5 +14,6 @@ export const publicPaths = new Set([
   "/",
   "/login",
   "/signup",
+  "/error",
   "/api/playground/tasks",
 ]);
