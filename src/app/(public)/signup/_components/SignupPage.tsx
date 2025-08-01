@@ -138,6 +138,7 @@ export const SignupPage: React.FC = () => {
               placeholder="name@example.com"
               autoComplete="email"
               registerOnChange={clearRootError}
+              disabled={isSignUpCompleted || form.formState.isSubmitting}
             />
 
             <FormTextField<SignupRequest>
@@ -146,6 +147,7 @@ export const SignupPage: React.FC = () => {
               type="password"
               placeholder="password"
               registerOnChange={clearRootError}
+              disabled={isSignUpCompleted || form.formState.isSubmitting}
             />
 
             <FormTextField<SignupRequest>
@@ -154,6 +156,7 @@ export const SignupPage: React.FC = () => {
               type="password"
               placeholder="password"
               registerOnChange={clearRootError}
+              disabled={isSignUpCompleted || form.formState.isSubmitting}
             />
           </FormProvider>
 
@@ -163,7 +166,11 @@ export const SignupPage: React.FC = () => {
             <Button
               className="w-full"
               type="submit"
-              disabled={!form.formState.isValid}
+              disabled={
+                !form.formState.isValid ||
+                form.formState.isSubmitting ||
+                isSignUpCompleted
+              }
             >
               {form.formState.isSubmitting ? (
                 <div className="flex items-center gap-x-1">
@@ -179,25 +186,27 @@ export const SignupPage: React.FC = () => {
             </Button>
           </div>
         </form>
-        {isSignUpCompleted && (
-          <div className="mt-4">
-            サインアップが完了しました。
-            {/* 登録いただいたメールアドレス ( {form.getValues(c_Email)} ) 宛に、認証メールを送信しました。メールに記載のURLをクリックして、登録手続きを完了してください。 */}
-            <Link
-              href={`/login?${c_Email}=${form.getValues(c_Email)}`}
-              className="px-0.5 text-blue-500 underline"
-            >
-              ログインページ
-            </Link>
-            からログインしてください。
-          </div>
-        )}
         <div className="mt-2 text-sm">
-          既にアカウントをお持ちの方は
-          <Link href="/login" className="px-0.5 text-blue-500 underline">
-            ログインページ
-          </Link>
-          をご利用ください。
+          {isSignUpCompleted ? (
+            <>
+              サインアップが完了しました。
+              <Link
+                href={`/login?${c_Email}=${form.getValues(c_Email)}`}
+                className="px-0.5 text-blue-500 underline"
+              >
+                ログインページ
+              </Link>
+              からログインしてください。
+            </>
+          ) : (
+            <>
+              既にアカウントをお持ちの方は
+              <Link href="/login" className="px-0.5 text-blue-500 underline">
+                ログインページ
+              </Link>
+              をご利用ください。
+            </>
+          )}
         </div>
       </div>
     </div>
