@@ -26,6 +26,7 @@ import { profileUpdateRequestSchema } from "../_types/ProfileUpdateRequest";
 
 // ServerActions / API系
 import { profileUpdateAction } from "../profileUpdateAction";
+import { mutate } from "swr";
 
 // ユーティリティ
 import { dumpError } from "@/app/_libs/dumpException";
@@ -102,6 +103,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
         const result = await profileUpdateAction(formValues);
         if (result.success) {
           form.reset(formValues); // デフォルト値の更新
+          await mutate("/api/me");
           return;
         }
         setRootError(
