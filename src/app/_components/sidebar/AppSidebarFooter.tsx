@@ -19,12 +19,35 @@ import type { User } from "@prisma/client";
 import { logoutAction } from "@/app/_actions/logoutAction";
 import Link from "next/link";
 import { UserAvatar } from "./UserAvatar";
+import useSWR from "swr";
+import { api } from "@/app/_libs/api";
 
 interface Props {
   user: User;
 }
 
-export const AppSidebarFooter: React.FC<Props> = ({ user }) => {
+/**
+ * ユーザー情報を取得するフェッチャー関数
+ */
+const fetcher = async (url: string): Promise<User> => {
+  const data = await api.get<{ payload: User }>(url);
+  return data.payload;
+};
+
+export const AppSidebarFooter: React.FC<Props> = ({ user: initialUser }) => {
+  const { data: user = initialUser, error } = useSWR<User>("/api/me", fetcher, {
+    fallbackData: initialUser,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: true,
+    dedupingInterval: 60000,
+  });
+
+  // エラー時の処理
+  if (error) {
+    console.error("ユーザー情報取得エラー:", error);
+    // エラー時は初期値を使用
+  }
+
   const handleLogout = async () => {
     try {
       await logoutAction();
