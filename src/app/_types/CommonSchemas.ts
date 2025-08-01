@@ -1,8 +1,12 @@
 import { Role } from "@prisma/client";
 import { z } from "zod";
 
-export const emailSchema = z.email();
-export const passwordSchema = z.string().min(5);
+export const emailSchema = z.email({
+  message: "メールアドレスの形式が正しくありません。",
+});
+export const passwordSchema = z
+  .string()
+  .min(5, "パスワードは5文字以上で入力してください。");
 
 export const userNameSchema = z
   .string()

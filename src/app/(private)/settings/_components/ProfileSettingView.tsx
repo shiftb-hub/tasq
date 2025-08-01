@@ -17,7 +17,7 @@ import { SocialAccountVerifyLink } from "./SocialAccountVerifyLink";
 import { MdCancel } from "react-icons/md";
 import { FiCheckCircle, FiExternalLink } from "react-icons/fi";
 import { Loader2Icon } from "lucide-react";
-import NextLink from "next/link";
+import Link from "next/link";
 
 // 型定義・バリデーションスキーマ
 import type { SelfProfile } from "@/app/_types/Profile";
@@ -157,13 +157,13 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             />
             <p className="mt-1 ml-1 text-right text-xs text-slate-500">
               メールアドレス（ログインID）の変更は
-              <NextLink
+              <Link
                 href="/change-email"
                 className="inline-flex items-center px-1 text-blue-500"
               >
                 こちら
                 <FiExternalLink className="ml-0.5 inline-block" />
-              </NextLink>
+              </Link>
             </p>
           </div>
 

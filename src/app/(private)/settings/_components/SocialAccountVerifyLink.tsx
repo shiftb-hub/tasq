@@ -1,4 +1,4 @@
-import NextLink from "next/link";
+import Link from "next/link";
 import { FiExternalLink } from "react-icons/fi";
 import { twMerge } from "tailwind-merge";
 
@@ -16,7 +16,7 @@ export const SocialAccountVerifyLink: React.FC<Props> = (props) => {
   const { platformName, url, className = "" } = props;
   return (
     <div className={twMerge("ml-1 text-right text-xs", className)}>
-      <NextLink
+      <Link
         href={url}
         target="_blank"
         rel="noopener noreferrer"
@@ -24,7 +24,7 @@ export const SocialAccountVerifyLink: React.FC<Props> = (props) => {
       >
         {platformName}で確認する
         <FiExternalLink className="ml-0.5 inline-block" />
-      </NextLink>
+      </Link>
     </div>
   );
 };
