@@ -11,7 +11,7 @@ type Props = {
 export const AlreadyLoggedInPage: React.FC<Props> = (props) => {
   const { action, email } = props;
   return (
-    <div className="flex justify-center pt-12">
+    <div className="flex justify-center">
       <div className="w-full max-w-[460px]">
         <h1 className="mb-8 text-center text-3xl font-bold">{action}</h1>
         <div>
