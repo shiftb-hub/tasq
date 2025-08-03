@@ -3,6 +3,7 @@ export const api = {
     try {
       const res = await fetch(endpoint, {
         credentials: "include",
+        cache: "no-store", // 開発中はキャッシュを無効化して常に最新データを取得
         headers: {
           "Content-Type": "application/json",
         },
