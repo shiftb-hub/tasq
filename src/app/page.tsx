@@ -1,21 +1,7 @@
-import Link from "next/link";
-import { DevAuthButton } from "@/app/_components/DevAuthButton";
+import { redirect } from "next/navigation";
+
 const Page: React.FC = () => {
-  return (
-    <div>
-      <div className="text-2xl font-bold">Main</div>
-      <div className="mt-4 ml-2 flex flex-col gap-y-2">
-        <Link href="/signup">サインアップ</Link>
-        <Link href="/login">ログイン</Link>
-        <Link href="/api/playground/tasks">APIテスト（public）</Link>
-        <Link href="/api/playground/users">APIテスト（private）</Link>
-        <Link href="/settings">設定（private）</Link>
-        <div className="mt-4">
-          <DevAuthButton />
-        </div>
-      </div>
-    </div>
-  );
+  redirect("/login");
 };
 
 export default Page;
