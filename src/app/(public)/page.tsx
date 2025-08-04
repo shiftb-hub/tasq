@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { DevAuthButton } from "@/app/_components/DevAuthButton";
-
 const Page: React.FC = () => {
   return (
-    <div className="mx-4 mt-2 max-w-3xl md:mx-auto">
+    <div>
       <div className="text-2xl font-bold">Main</div>
       <div className="mt-4 ml-2 flex flex-col gap-y-2">
         <Link href="/signup">サインアップ</Link>
