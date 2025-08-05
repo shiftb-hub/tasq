@@ -1,9 +1,19 @@
-interface Props {
-  children: React.ReactNode;
-}
+import type { Metadata } from "next";
+import "../globals.css";
 
-const Layout: React.FC<Props> = ({ children }) => {
-  return <main className="mx-auto pt-12">{children}</main>;
+export const metadata: Metadata = {
+  title: "TASQ",
+  description: "...",
 };
 
-export default Layout;
+type Props = {
+  children: React.ReactNode;
+};
+
+const PublicLayout: React.FC<Props> = async (props) => {
+  return (
+    <main className="mx-4 mt-2 max-w-3xl md:mx-auto">{props.children}</main>
+  );
+};
+
+export default PublicLayout;
