@@ -5,7 +5,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-const PrivateLayout: React.FC<Props> = async (props) => {
+const PrivateLayout: React.FC<Props> = (props) => {
   return (
     <SidebarProvider>
       <AppSidebar />
