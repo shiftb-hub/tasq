@@ -21,6 +21,7 @@ import Link from "next/link";
 import { UserAvatar } from "./UserAvatar";
 import useSWR from "swr";
 import { api } from "@/app/_libs/api";
+import { ApiResponse } from "@/app/_types/ApiResponse";
 
 interface Props {
   user: User;
@@ -30,23 +31,27 @@ interface Props {
  * ユーザー情報を取得するフェッチャー関数
  */
 const fetcher = async (url: string): Promise<User> => {
-  const data = await api.get<{ payload: User }>(url);
-  return data.payload;
+  const res = await api.get<ApiResponse<User>>(url);
+  if (res.success) {
+    return res.payload;
+  }
+  throw res.error;
 };
 
 export const AppSidebarFooter: React.FC<Props> = ({ user: initialUser }) => {
-  const { data: user = initialUser, error } = useSWR<User>("/api/me", fetcher, {
+  const { data, error } = useSWR<User>("/api/me", fetcher, {
     fallbackData: initialUser,
     revalidateOnFocus: false,
     revalidateOnReconnect: true,
     dedupingInterval: 60000,
   });
 
-  // エラー時の処理
   if (error) {
-    console.error("ユーザー情報取得エラー:", error);
-    // エラー時は初期値を使用
+    console.error("ユーザー情報取得エラー:", JSON.stringify(error, null, 2));
   }
+
+  // SWR の fetcher が undefined を返した場合は initialUser にフォールバック
+  const user: User = data ?? initialUser;
 
   const handleLogout = async () => {
     try {
