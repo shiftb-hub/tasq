@@ -2,6 +2,7 @@
 
 import { Button } from "@/app/_components/ui/button";
 import { logoutAction } from "@/app/_actions/logoutAction";
+import { PageTitle } from "./PageTitle";
 
 type Props = {
   action: string;
@@ -11,9 +12,9 @@ type Props = {
 export const AlreadyLoggedInPage: React.FC<Props> = (props) => {
   const { action, email } = props;
   return (
-    <div className="flex justify-center pt-12">
+    <div className="flex justify-center">
       <div className="w-full max-w-[460px]">
-        <h1 className="mb-8 text-center text-3xl font-bold">{action}</h1>
+        <PageTitle>{action}</PageTitle>
         <div>
           <p className="mt-3 text-sm break-all">
             現在、<span className="mr-1 font-bold">{email}</span>

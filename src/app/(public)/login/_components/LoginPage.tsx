@@ -13,6 +13,7 @@ import { FormTextField } from "@/app/_components/FormTextField";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { LuSend } from "react-icons/lu";
 import { Loader2Icon } from "lucide-react";
+import { PageTitle } from "@/app/_components/PageTitle";
 
 // 型定義・バリデーションスキーマ
 import type { LoginRequest } from "@/app/_types/LoginRequest";
@@ -89,9 +90,9 @@ export const LoginPage: React.FC<Props> = (props) => {
 
   // フォーム管理とUI表示を同一コンポーネント内で保持（UIは意図的に分離していない）
   return (
-    <div className="flex justify-center pt-12">
+    <div className="flex justify-center">
       <div className="w-full max-w-[460px]">
-        <h1 className="mb-8 text-center text-3xl font-bold">ログイン</h1>
+        <PageTitle>ログイン</PageTitle>
 
         <form
           noValidate
