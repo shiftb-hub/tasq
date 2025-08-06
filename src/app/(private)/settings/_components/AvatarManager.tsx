@@ -52,13 +52,16 @@ export const AvatarManager = <T extends FieldValues>({
         .createSignedUrl(imageKey, 60 * 60);
       if (error) {
         console.error("署名付きURL生成エラー:", error);
+        setErrMsg("アバター画像の取得に失敗しました。");
+        setValue(fieldKey, undefined as PathValue<T, typeof fieldKey>);
         setAvatarUrl(undefined);
         return;
       }
       setAvatarUrl(data.signedUrl);
+      setErrMsg(null); // エラーメッセージをクリア
     };
     getSignedAvatarUrl();
-  }, [supabase.storage, setAvatarUrl, watch, fieldKey]);
+  }, [supabase.storage, setAvatarUrl, watch, fieldKey, setValue]);
 
   // MIME Type → 拡張子
   const mimeToExt: Record<string, string> = useMemo(
@@ -98,6 +101,7 @@ export const AvatarManager = <T extends FieldValues>({
 
         if (urlError) {
           console.error("画像URL取得に失敗: ", urlError);
+
           return;
         }
         setAvatarUrl(data.signedUrl);
@@ -159,6 +163,8 @@ export const AvatarManager = <T extends FieldValues>({
         </Avatar>
       </div>
 
+      <FormErrorMessage msg={errMsg} />
+
       <div className="flex flex-row items-center gap-x-2 pb-4">
         <div>
           <Button
@@ -185,8 +191,6 @@ export const AvatarManager = <T extends FieldValues>({
           </Button>
         </div>
       </div>
-
-      <FormErrorMessage msg={errMsg} />
 
       <input
         ref={fileInputRef}

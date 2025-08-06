@@ -5,7 +5,7 @@ import { createSupabaseBrowserClient } from "@/app/_libs/supabase/browserClient"
 import { avatarBucket } from "@/app/_configs/app-config";
 
 export const useAvatarUrl = (imageKey: string | null | undefined) => {
-  const defaultAvatarUrl = "/public/default-avatar.png";
+  const defaultAvatarUrl = "/default-avatar.png";
   const [avatarUrl, setAvatarUrl] = useState(defaultAvatarUrl);
 
   useEffect(() => {
