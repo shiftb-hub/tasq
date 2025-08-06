@@ -101,14 +101,14 @@ export const AvatarManager = <T extends FieldValues>({
           .createSignedUrl(filePath, 60 * 60); // 1時間有効
 
         if (urlError) {
-          console.error("画像URL取得に失敗: ", urlError);
-
+          console.error("アバター画像のURL取得に失敗: ", urlError);
+          setErrMsg("アバター画像のURL取得に失敗に失敗しました。");
           return;
         }
         setAvatarUrl(data.signedUrl);
       } catch (e) {
-        console.error("画像アップロードに失敗: ", e);
-        setErrMsg("アップロードに失敗しました。");
+        console.error("アバター画像のアップロードに失敗: ", e);
+        setErrMsg("アバター画像のアップロードに失敗しました。");
       } finally {
         setUploading(false);
       }
