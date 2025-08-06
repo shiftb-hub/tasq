@@ -67,7 +67,10 @@ export const LoginPage: React.FC<Props> = (props) => {
         clearRootError();
         const result = await loginAction(formValues);
         if (result.success) {
-          mutate(null); // SWRのキャッシュを全更新
+          // SWR全体の再検証を非同期で開始（例：タスク一覧などの再取得）
+          await mutate(null);
+          // "/api/me" はログイン状態に関わるため、旧キャッシュが表示されないよう即座に明示的に消す
+          await mutate("/api/me", null, false);
           router.push(result.redirectTo);
           return;
         }
