@@ -131,17 +131,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           form.formState.isSubmitting && "cursor-not-allowed opacity-50",
         )}
       >
-        {/* 
-          TODO: アバター画像設定用のコンポーネントを追加
-          - このブランチ（feat/profile-settings）は実装しない
-          - 画像アップロード用のUIコンポーネント
-          - プレビュー表示機能
-          - 画像削除機能 など
-        */}
-
-        {/* FormTextField / ChapterSelectField は useFormContext 経由で
-            formState.isSubmitting を参照し、true のときは自動で disabled になる */}
-
         <FormProvider {...form}>
           <AvatarManager<ProfileUpdateRequest>
             userId={initValues.id}
@@ -248,10 +237,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           <FormTextareaField fieldKey={c_Bio} labelText="自己紹介" />
 
           {/* 
-            NOTE: アバター画像のキー（現在はテキストフィールドとして表示）
-            - 将来的にはHiddenフィールドに変更予定
-            - 上記のアバター画像設定UIを通じて値を設定
-            - 現在は開発・デバッグ用としてテキストフィールドで表示
+            TODO: デバッグ用（アバター画像設定のデバッグが十分に完了してから削除）
           */}
           <FormTextField<ProfileUpdateRequest>
             fieldKey={c_ProfileImageKey}

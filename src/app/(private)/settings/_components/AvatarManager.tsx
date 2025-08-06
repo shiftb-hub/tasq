@@ -41,6 +41,7 @@ export const AvatarManager = <T extends FieldValues>({
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // アバター画像キーに基づきて署名付きURLを取得
   useEffect(() => {
     const getSignedAvatarUrl = async () => {
       const imageKey = watch(fieldKey);
@@ -59,6 +60,7 @@ export const AvatarManager = <T extends FieldValues>({
     getSignedAvatarUrl();
   }, [supabase.storage, setAvatarUrl, watch, fieldKey]);
 
+  // MIME Type → 拡張子
   const mimeToExt: Record<string, string> = useMemo(
     () => ({
       "image/png": "png",
@@ -72,7 +74,7 @@ export const AvatarManager = <T extends FieldValues>({
   const uploadAvatar = useCallback(
     async (file: File) => {
       try {
-        const mimeType = file.type; // 例: "image/png"
+        const mimeType = file.type; // ex: "image/png"
         const ext = mimeToExt[mimeType]; // 拡張子を取得
         if (!ext) throw new Error("許可されていないファイル形式です。");
 
@@ -82,7 +84,7 @@ export const AvatarManager = <T extends FieldValues>({
         const { error: uploadError } = await supabase.storage
           .from(avatarBucket)
           .upload(filePath, file, {
-            cacheControl: "3600",
+            cacheControl: String(60 * 60),
             upsert: false,
           });
 
@@ -95,13 +97,13 @@ export const AvatarManager = <T extends FieldValues>({
           .createSignedUrl(filePath, 60 * 60); // 1時間有効
 
         if (urlError) {
-          console.error("画像URL取得エラー:", urlError);
+          console.error("画像URL取得に失敗: ", urlError);
           return;
         }
         setAvatarUrl(data.signedUrl);
       } catch (e) {
-        console.error("アップロードエラー:", e);
-        setErrMsg("アップロードに失敗しました");
+        console.error("画像アップロードに失敗: ", e);
+        setErrMsg("アップロードに失敗しました。");
       } finally {
         setUploading(false);
       }
@@ -109,7 +111,7 @@ export const AvatarManager = <T extends FieldValues>({
     [mimeToExt, userId, supabase.storage, setValue, fieldKey],
   );
 
-  // 「画像をアップロード」ボタンの処理
+  // 「画像をアップロード」ボタンのイベントハンドラ
   const handleUpload = useCallback(() => {
     fileInputRef.current?.click();
   }, []);

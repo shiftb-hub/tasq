@@ -66,7 +66,7 @@ export const profileUpdateAction = async (
     } satisfies PRS.UserUpdateInput);
     if (!result) throw new Error("ユーザー情報の更新に失敗しました");
 
-    // 未使用のアバター画像を一括削除する処理
+    // 未使用のアバター画像を一括削除
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.storage
       .from(avatarBucket)
