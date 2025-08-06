@@ -9,6 +9,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Button } from "@/app/_components/ui/button";
 import { FormTextField } from "@/app/_components/FormTextField";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
+import { PageTitle } from "@/app/_components/PageTitle";
 
 import { LuSend } from "react-icons/lu";
 import { Loader2Icon } from "lucide-react";
@@ -125,7 +126,7 @@ export const SignupPage: React.FC = () => {
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-[460px]">
-        <h1 className="mb-8 text-center text-3xl font-bold">サインアップ</h1>
+        <PageTitle>サインアップ</PageTitle>
         <form
           className="space-y-4"
           noValidate
