@@ -3,7 +3,7 @@ type Props = {
 };
 
 const PublicLayout: React.FC<Props> = (props) => {
-  return <main className="mx-auto max-w-3xl px-4 pt-12">{props.children}</main>;
+  return <main className="mx-auto w-full px-4 py-8">{props.children}</main>;
 };
 
 export default PublicLayout;

@@ -140,10 +140,10 @@ export const AvatarManager = <T extends FieldValues>({
 
   return (
     <div
-      className={twMerge("flex flex-col items-center gap-y-2", containerStyles)}
+      className={twMerge("flex flex-col items-center gap-y-3", containerStyles)}
     >
       <div className="rounded-full border-2 border-gray-300 p-0.5">
-        <Avatar className="h-32 w-32">
+        <Avatar className="h-40 w-40">
           <AvatarImage
             src={avatarUrl ?? "/default-avatar.png"}
             alt="アバター画像"
@@ -157,7 +157,7 @@ export const AvatarManager = <T extends FieldValues>({
         </Avatar>
       </div>
 
-      <div className="flex flex-row items-center gap-x-2">
+      <div className="flex flex-row items-center gap-x-2 pb-4">
         <div>
           <Button
             type="button"

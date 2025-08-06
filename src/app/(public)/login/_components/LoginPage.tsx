@@ -91,7 +91,7 @@ export const LoginPage: React.FC<Props> = (props) => {
   // フォーム管理とUI表示を同一コンポーネント内で保持（UIは意図的に分離していない）
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-[460px]">
+      <div className="w-full max-w-md">
         <PageTitle>ログイン</PageTitle>
 
         <form

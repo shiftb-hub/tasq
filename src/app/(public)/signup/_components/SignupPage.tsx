@@ -125,7 +125,7 @@ export const SignupPage: React.FC = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-[460px]">
+      <div className="w-full max-w-md">
         <PageTitle>サインアップ</PageTitle>
         <form
           className="space-y-4"
