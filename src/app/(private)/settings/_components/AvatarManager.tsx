@@ -77,6 +77,7 @@ export const AvatarManager = <T extends FieldValues>({
   const uploadAvatar = useCallback(
     async (file: File) => {
       try {
+        setUploading(true);
         const mimeType = file.type; // ex: "image/png"
         const ext = mimeToExt[mimeType]; // 拡張子を取得
         if (!ext) throw new Error("許可されていないファイル形式です。");
