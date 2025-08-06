@@ -13,6 +13,7 @@ import {
 
 // プロフィールの情報
 export const selfProfileSchema = z.object({
+  id: z.uuid(),
   name: userNameSchema,
   role: roleSchema,
   email: emailSchema,

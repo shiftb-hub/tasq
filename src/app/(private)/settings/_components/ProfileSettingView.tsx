@@ -12,6 +12,7 @@ import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { FormTextField } from "@/app/_components/FormTextField";
 import { FormTextareaField } from "@/app/_components/FormTextAreaField";
 import { FormTextReadonly } from "@/app/_components/FormTextReadonly";
+import { AvatarManager } from "./AvatarManager";
 import { ChapterSelectField } from "@/app/_components/ChapterSelectField";
 import { SocialAccountVerifyLink } from "./SocialAccountVerifyLink";
 import { MdCancel } from "react-icons/md";
@@ -97,7 +98,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
   const onSubmit = useCallback(
     async (formValues: ProfileUpdateRequest) => {
       console.log(JSON.stringify(formValues, null, 2)); // デバッグ用
-      // setIsSubmitting(true);
       clearRootError();
       try {
         const result = await profileUpdateAction(formValues);
@@ -143,6 +143,11 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             formState.isSubmitting を参照し、true のときは自動で disabled になる */}
 
         <FormProvider {...form}>
+          <AvatarManager<ProfileUpdateRequest>
+            userId={initValues.id}
+            fieldKey={c_ProfileImageKey}
+          />
+
           <FormTextField<ProfileUpdateRequest>
             fieldKey={c_Name}
             labelText={`名前（${initValues.role}）`}

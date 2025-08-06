@@ -28,6 +28,7 @@ export const dynamic = "force-dynamic";
  */
 const toSelfProfile = (user: AppUser, email: string): SelfProfile => {
   return selfProfileSchema.parse({
+    id: user.id,
     name: user.name,
     role: user.role,
     email: email,
@@ -48,7 +49,7 @@ const toSelfProfile = (user: AppUser, email: string): SelfProfile => {
  */
 const withPageLayout = (content: React.ReactNode) => (
   <div className="mb-4 flex justify-center pt-12">
-    <div className="w-full max-w-[460px]">
+    <div className="w-full max-w-[480px]">
       <h1 className="mb-8 text-center text-3xl font-bold">プロフィール設定</h1>
       {content}
     </div>
