@@ -4,6 +4,7 @@ import { authenticateSupabaseUser } from "@/app/_libs/authenticateUser";
 
 // UIコンポーネント・アイコン
 import ProfileEditorView from "./_components/ProfileSettingView";
+import { PageTitle } from "@/app/_components/PageTitle";
 
 // 型定義・バリデーションスキーマ
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -49,7 +50,7 @@ const toSelfProfile = (user: AppUser, email: string): SelfProfile => {
 const withPageLayout = (content: React.ReactNode) => (
   <div className="mb-4 flex justify-center">
     <div className="w-full max-w-[460px]">
-      <h1 className="mb-8 text-center text-3xl font-bold">プロフィール設定</h1>
+      <PageTitle>プロフィール設定</PageTitle>
       {content}
     </div>
   </div>
