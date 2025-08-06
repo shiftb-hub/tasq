@@ -123,7 +123,7 @@ export const SignupPage: React.FC = () => {
   );
 
   return (
-    <div className="flex justify-center pt-12">
+    <div className="flex justify-center">
       <div className="w-full max-w-[460px]">
         <h1 className="mb-8 text-center text-3xl font-bold">サインアップ</h1>
         <form

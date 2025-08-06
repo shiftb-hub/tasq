@@ -10,7 +10,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-const RootLayout: React.FC<Props> = async (props) => {
+const RootLayout: React.FC<Props> = (props) => {
   return (
     <html lang="ja">
       <body>{props.children}</body>
