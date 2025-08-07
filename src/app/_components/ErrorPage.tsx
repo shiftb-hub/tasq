@@ -9,7 +9,7 @@ export const ErrorPage: React.FC<Props> = (props) => {
   const { message } = props;
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-[460px]">
+      <div className="w-full max-w-lg">
         <PageTitle>
           <FaGhost className="mr-2 inline-block" />
           ERROR

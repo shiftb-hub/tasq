@@ -68,7 +68,10 @@ export const LoginPage: React.FC<Props> = (props) => {
         clearRootError();
         const result = await loginAction(formValues);
         if (result.success) {
-          mutate(null); // SWRのキャッシュを全更新
+          // SWR全体の再検証を非同期で開始（例：タスク一覧などの再取得）
+          await mutate(null);
+          // "/api/me" はログイン状態に関わるため、旧キャッシュが表示されないよう即座に明示的に消す
+          await mutate("/api/me", null, false);
           router.push(result.redirectTo);
           return;
         }
@@ -88,7 +91,7 @@ export const LoginPage: React.FC<Props> = (props) => {
   // フォーム管理とUI表示を同一コンポーネント内で保持（UIは意図的に分離していない）
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-[460px]">
+      <div className="w-full max-w-md">
         <PageTitle>ログイン</PageTitle>
 
         <form

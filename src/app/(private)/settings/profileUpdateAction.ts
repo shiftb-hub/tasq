@@ -5,11 +5,13 @@ import prisma from "@/app/_libs/prisma";
 import { Prisma as PRS } from "@prisma/client";
 import { UserService } from "@/app/_services/userService";
 import { authenticateAppUser } from "@/app/_libs/authenticateUser";
+import { createSupabaseServerClient } from "@/app/_libs/supabase/serverClient";
 
 // 型定義・バリデーションスキーマ
 import { profileUpdateRequestSchema } from "./_types/ProfileUpdateRequest";
 import type { User as AppUser } from "@prisma/client";
 import type { ProfileUpdateRequest } from "./_types/ProfileUpdateRequest";
+import { avatarBucket } from "@/app/_configs/app-config";
 
 // ユーティリティ
 import { dumpError } from "@/app/_libs/dumpException";
@@ -63,6 +65,27 @@ export const profileUpdateAction = async (
       profileImageKey: profileUpdateRequest.profileImageKey ?? null,
     } satisfies PRS.UserUpdateInput);
     if (!result) throw new Error("ユーザー情報の更新に失敗しました");
+
+    // 未使用のアバター画像を一括削除
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase.storage
+      .from(avatarBucket)
+      .list(`${user.id}/`);
+    if (data) {
+      const avatarPathsToRemove = data
+        .map((avatar) => `${user!.id}/${avatar.name}`)
+        .filter((path) => path !== profileUpdateRequest.profileImageKey);
+      if (avatarPathsToRemove.length > 0) {
+        const { error: removeError } = await supabase.storage
+          .from(avatarBucket)
+          .remove(avatarPathsToRemove);
+        if (removeError) {
+          console.error("アバター画像の一括削除に失敗:", removeError.message);
+        } else {
+          console.log(`アバター画像を削除: ${avatarPathsToRemove.length} 件`);
+        }
+      }
+    }
 
     return {
       success: true,

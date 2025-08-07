@@ -12,6 +12,7 @@ import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { FormTextField } from "@/app/_components/FormTextField";
 import { FormTextareaField } from "@/app/_components/FormTextAreaField";
 import { FormTextReadonly } from "@/app/_components/FormTextReadonly";
+import { AvatarManager } from "./AvatarManager";
 import { ChapterSelectField } from "@/app/_components/ChapterSelectField";
 import { SocialAccountVerifyLink } from "./SocialAccountVerifyLink";
 import { MdCancel } from "react-icons/md";
@@ -97,7 +98,6 @@ const ProfileEditorView: React.FC<Props> = (props) => {
   const onSubmit = useCallback(
     async (formValues: ProfileUpdateRequest) => {
       console.log(JSON.stringify(formValues, null, 2)); // デバッグ用
-      // setIsSubmitting(true);
       clearRootError();
       try {
         const result = await profileUpdateAction(formValues);
@@ -131,18 +131,12 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           form.formState.isSubmitting && "cursor-not-allowed opacity-50",
         )}
       >
-        {/* 
-          TODO: アバター画像設定用のコンポーネントを追加
-          - このブランチ（feat/profile-settings）は実装しない
-          - 画像アップロード用のUIコンポーネント
-          - プレビュー表示機能
-          - 画像削除機能 など
-        */}
-
-        {/* FormTextField / ChapterSelectField は useFormContext 経由で
-            formState.isSubmitting を参照し、true のときは自動で disabled になる */}
-
         <FormProvider {...form}>
+          <AvatarManager<ProfileUpdateRequest>
+            userId={initValues.id}
+            fieldKey={c_ProfileImageKey}
+          />
+
           <FormTextField<ProfileUpdateRequest>
             fieldKey={c_Name}
             labelText={`名前（${initValues.role}）`}
@@ -243,10 +237,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
           <FormTextareaField fieldKey={c_Bio} labelText="自己紹介" />
 
           {/* 
-            NOTE: アバター画像のキー（現在はテキストフィールドとして表示）
-            - 将来的にはHiddenフィールドに変更予定
-            - 上記のアバター画像設定UIを通じて値を設定
-            - 現在は開発・デバッグ用としてテキストフィールドで表示
+            TODO: デバッグ用（アバター画像設定のデバッグが十分に完了してから削除）
           */}
           <FormTextField<ProfileUpdateRequest>
             fieldKey={c_ProfileImageKey}

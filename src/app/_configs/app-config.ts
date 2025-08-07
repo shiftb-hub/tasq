@@ -5,7 +5,7 @@ export const isDebugMode = false;
 
 export const appBaseUrl = requireEnv("NEXT_PUBLIC_APP_BASE_URL");
 export const appName = "TASQ";
-export const avatarBucket = "img_avatar";
+export const avatarBucket = "avatars";
 
 // 認証を要求しないパスを定義
 // ここに定義されていないパスに未ログインでアクセスすると /login にリダイレクトされます

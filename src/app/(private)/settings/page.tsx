@@ -29,6 +29,7 @@ export const dynamic = "force-dynamic";
  */
 const toSelfProfile = (user: AppUser, email: string): SelfProfile => {
   return selfProfileSchema.parse({
+    id: user.id,
     name: user.name,
     role: user.role,
     email: email,
@@ -48,11 +49,9 @@ const toSelfProfile = (user: AppUser, email: string): SelfProfile => {
  *  共通ページレイアウトを提供するWrapper関数
  */
 const withPageLayout = (content: React.ReactNode) => (
-  <div className="mb-4 flex justify-center">
-    <div className="w-full max-w-[460px]">
-      <PageTitle>プロフィール設定</PageTitle>
-      {content}
-    </div>
+  <div className="mx-auto w-full max-w-lg space-y-4">
+    <PageTitle>プロフィール設定</PageTitle>
+    {content}
   </div>
 );
 
