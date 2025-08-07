@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { InputHTMLAttributes } from "react";
 import type { FieldValues, Path, PathValue } from "react-hook-form";
 
 import { useFormContext } from "react-hook-form";
 import { createSupabaseBrowserClient } from "@/app/_libs/supabase/browserClient";
+import { useFileDialog } from "@/app/_hooks/useFileDialog";
 
 import {
   Avatar,
@@ -35,35 +36,11 @@ export const AvatarManager = <T extends FieldValues>({
   containerStyles,
 }: Props<T>) => {
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
-  const [uploading, setUploading] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const { watch, setValue } = useFormContext<T>();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // アバター画像キーに基づきて署名付きURLを取得
-  useEffect(() => {
-    const getSignedAvatarUrl = async () => {
-      const imageKey = watch(fieldKey);
-      if (imageKey === "" || imageKey === undefined) return;
-
-      const { data, error } = await supabase.storage
-        .from(avatarBucket)
-        .createSignedUrl(imageKey, 60 * 60);
-      if (error) {
-        console.error("署名付きURL生成エラー:", error);
-        setErrMsg("アバター画像の取得に失敗しました。");
-        setValue(fieldKey, undefined as PathValue<T, typeof fieldKey>);
-        setAvatarUrl(undefined);
-        return;
-      }
-      setAvatarUrl(data.signedUrl);
-      setErrMsg(null); // エラーメッセージをクリア
-    };
-    getSignedAvatarUrl();
-  }, [supabase.storage, setAvatarUrl, watch, fieldKey, setValue]);
-
-  // MIME Type → 拡張子
+  // 許可ファイルタイプ MIME Type → 拡張子
   const mimeToExt: Record<string, string> = useMemo(
     () => ({
       "image/png": "png",
@@ -73,13 +50,43 @@ export const AvatarManager = <T extends FieldValues>({
     [],
   );
 
+  // ファイル選択ダイアログのカスタムフック
+  const { isBusy, setIsBusy, openFileDialog } = useFileDialog(mimeToExt, 2);
+
+  // アバター画像キーに基づいて署名付きURLを取得
+  useEffect(() => {
+    const getSignedAvatarUrl = async () => {
+      const imageKey = watch(fieldKey);
+      if (imageKey === "" || imageKey === undefined) return;
+
+      const { data, error: urlError } = await supabase.storage
+        .from(avatarBucket)
+        .createSignedUrl(imageKey, 60 * 60);
+      if (urlError) {
+        console.error("署名付きURL生成エラー:", urlError);
+        setErrMsg("アバター画像の取得に失敗しました。");
+        setValue(fieldKey, undefined as PathValue<T, typeof fieldKey>);
+        setAvatarUrl(undefined);
+        return;
+      }
+      setAvatarUrl(data.signedUrl);
+    };
+    getSignedAvatarUrl();
+  }, [supabase.storage, setAvatarUrl, watch, fieldKey, setValue]);
+
+  // エラーメッセージを10秒後に自動的にクリア
+  useEffect(() => {
+    if (errMsg) {
+      const timer = setTimeout(() => setErrMsg(null), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [errMsg]);
+
   // アバター画像のアップロード処理
   const uploadAvatar = useCallback(
     async (file: File) => {
       try {
-        setUploading(true);
-        const mimeType = file.type; // ex: "image/png"
-        const ext = mimeToExt[mimeType]; // 拡張子を取得
+        const ext = mimeToExt[file.type];
         if (!ext) throw new Error("許可されていないファイル形式です。");
 
         const fileName = `${nanoid()}.${ext}`;
@@ -98,49 +105,45 @@ export const AvatarManager = <T extends FieldValues>({
 
         const { data, error: urlError } = await supabase.storage
           .from(avatarBucket)
-          .createSignedUrl(filePath, 60 * 60); // 1時間有効
+          .createSignedUrl(filePath, 60 * 60);
 
         if (urlError) {
           console.error("アバター画像のURL取得に失敗: ", urlError);
-          setErrMsg("アバター画像のURL取得に失敗に失敗しました。");
+          setErrMsg("アバター画像のURL取得に失敗しました。");
           return;
         }
+
         setAvatarUrl(data.signedUrl);
+        setErrMsg(null);
       } catch (e) {
         console.error("アバター画像のアップロードに失敗: ", e);
         setErrMsg("アバター画像のアップロードに失敗しました。");
       } finally {
-        setUploading(false);
+        setIsBusy(false); // アップロード処理完了時にローディング停止
       }
     },
-    [mimeToExt, userId, supabase.storage, setValue, fieldKey],
+    [mimeToExt, userId, supabase.storage, setValue, fieldKey, setIsBusy],
   );
 
   // 「画像をアップロード」ボタンのイベントハンドラ
-  const handleUpload = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
+  const handleUpload = useCallback(async () => {
+    setErrMsg(null);
 
-  // ファイル選択時の処理
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+    const { file, error } = await openFileDialog();
 
-      if (mimeToExt[file.type]) {
-        uploadAvatar(file);
-      } else {
-        setErrMsg(
-          "対応していない画像形式です。jpg, png, webp のみ使用可能です。",
-        );
-      }
-      e.target.value = "";
-    },
-    [uploadAvatar, mimeToExt],
-  );
+    if (error) {
+      setErrMsg(error);
+      return;
+    }
+
+    if (file) {
+      await uploadAvatar(file);
+    }
+  }, [openFileDialog, uploadAvatar]);
 
   // アバター画像の削除処理
   const handleDelete = useCallback(() => {
+    setErrMsg(null);
     setValue(fieldKey, undefined as PathValue<T, typeof fieldKey>);
     setAvatarUrl(undefined);
   }, [setValue, fieldKey]);
@@ -171,10 +174,10 @@ export const AvatarManager = <T extends FieldValues>({
           <Button
             type="button"
             size="sm"
-            disabled={uploading}
+            disabled={isBusy}
             onClick={handleUpload}
           >
-            <LuImagePlus />
+            {isBusy ? <ImSpinner3 className="animate-spin" /> : <LuImagePlus />}
             画像をアップロード
           </Button>
         </div>
@@ -184,7 +187,7 @@ export const AvatarManager = <T extends FieldValues>({
             type="button"
             variant="destructive"
             size="sm"
-            disabled={!avatarUrl || uploading}
+            disabled={!avatarUrl || isBusy}
             onClick={handleDelete}
           >
             <LuTrash2 />
@@ -192,14 +195,6 @@ export const AvatarManager = <T extends FieldValues>({
           </Button>
         </div>
       </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={Object.keys(mimeToExt).join(",")}
-        onChange={handleFileSelect}
-        hidden
-      />
     </div>
   );
 };
