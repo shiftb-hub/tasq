@@ -21,7 +21,7 @@ import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { avatarBucket } from "@/app/_configs/app-config";
 
 import { nanoid } from "nanoid";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/app/_libs/utils";
 
 interface Props<T extends FieldValues>
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -149,9 +149,7 @@ export const AvatarManager = <T extends FieldValues>({
   }, [setValue, fieldKey]);
 
   return (
-    <div
-      className={twMerge("flex flex-col items-center gap-y-3", containerStyles)}
-    >
+    <div className={cn("flex flex-col items-center gap-y-3", containerStyles)}>
       <div className="rounded-full border-2 border-gray-300 p-0.5">
         <Avatar className="h-40 w-40">
           <AvatarImage

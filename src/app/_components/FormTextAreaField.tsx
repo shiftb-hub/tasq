@@ -9,7 +9,7 @@ import { Label } from "@/app/_components/ui/label";
 import { Textarea } from "@/app/_components/ui/textarea";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/app/_libs/utils";
 
 interface Props<T extends FieldValues>
   extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -36,7 +36,7 @@ export const FormTextareaField = <T extends FieldValues>({
   const { register, formState } = useFormContext<T>();
   const errMsg = formState.errors[fieldKey]?.message as string | undefined;
   return (
-    <div className={twMerge("flex flex-col gap-y-1.5", containerStyles)}>
+    <div className={cn("flex flex-col gap-y-1.5", containerStyles)}>
       <div className="flex flex-row items-baseline justify-start gap-x-2">
         <Label htmlFor={fieldKey}>{labelText}</Label>
         {exampleText && (

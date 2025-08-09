@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FiExternalLink } from "react-icons/fi";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/app/_libs/utils";
 
 type Props = {
   platformName: string;
@@ -15,7 +15,7 @@ type Props = {
 export const SocialAccountVerifyLink: React.FC<Props> = (props) => {
   const { platformName, url, className = "" } = props;
   return (
-    <div className={twMerge("ml-1 text-right text-xs", className)}>
+    <div className={cn("ml-1 text-right text-xs", className)}>
       <Link
         href={url}
         target="_blank"
