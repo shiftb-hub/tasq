@@ -5,7 +5,7 @@ import type { HTMLAttributes } from "react";
 import { Label } from "@/app/_components/ui/label";
 import { Input } from "@/app/_components/ui/input";
 
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/app/_libs/utils";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   labelText: string;
@@ -23,7 +23,7 @@ export const FormTextReadonly = ({
   ...inputProps
 }: Props) => {
   return (
-    <div className={twMerge("flex flex-col gap-y-1.5", containerStyles)}>
+    <div className={cn("flex flex-col gap-y-1.5", containerStyles)}>
       <Label htmlFor={fieldKey}>{labelText}</Label>
       <Input
         type="text"

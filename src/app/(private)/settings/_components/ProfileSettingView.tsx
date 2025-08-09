@@ -31,7 +31,7 @@ import { mutate } from "swr";
 
 // ユーティリティ
 import { dumpError } from "@/app/_libs/dumpException";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/app/_libs/utils";
 
 const c_Name = "name";
 const c_CurrentChapter = "currentChapter";
@@ -126,7 +126,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
       <form
         noValidate
         onSubmit={form.handleSubmit(onSubmit)}
-        className={twMerge(
+        className={cn(
           "space-y-4",
           form.formState.isSubmitting && "cursor-not-allowed opacity-50",
         )}
