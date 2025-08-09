@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/app/_components/ui/button";
 import { FaCopy } from "react-icons/fa";
 
@@ -11,12 +10,21 @@ type Props = {
 
 export const CopyButton: React.FC<Props> = (props) => {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current != null) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(props.text);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      timeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
     } catch (e) {
       console.error("Failed to copy text: ", e);
     }
