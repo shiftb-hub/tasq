@@ -8,7 +8,7 @@ type Props = {
   text: string;
 };
 
-export const CopyButton: React.FC<Props> = (props) => {
+export const CopyButton: React.FC<Props> = ({ text }) => {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
@@ -22,7 +22,7 @@ export const CopyButton: React.FC<Props> = (props) => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(props.text);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       timeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
     } catch (e) {
