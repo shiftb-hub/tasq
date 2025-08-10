@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import type { TaskBoardHeaderProps } from "../_types/Tasks";
 
@@ -13,15 +15,21 @@ const TaskBoardHeader: React.FC<TaskBoardHeaderProps> = ({
       {/* Task Statistics */}
       <div className="flex gap-4 sm:gap-8">
         <div className="text-center">
-          <p className="text-xl sm:text-2xl font-bold text-gray-900">{totalTasks}</p>
+          <p className="text-xl font-bold text-gray-900 sm:text-2xl">
+            {totalTasks}
+          </p>
           <p className="text-xs text-gray-500">Total Tasks</p>
         </div>
         <div className="text-center">
-          <p className="text-xl sm:text-2xl font-bold text-blue-600">{inProgressTasks}</p>
+          <p className="text-xl font-bold text-blue-600 sm:text-2xl">
+            {inProgressTasks}
+          </p>
           <p className="text-xs text-gray-500">In Progress</p>
         </div>
         <div className="text-center">
-          <p className="text-xl sm:text-2xl font-bold text-green-600">{completedTasks}</p>
+          <p className="text-xl font-bold text-green-600 sm:text-2xl">
+            {completedTasks}
+          </p>
           <p className="text-xs text-gray-500">Completed</p>
         </div>
       </div>
@@ -33,7 +41,7 @@ const TaskBoardHeader: React.FC<TaskBoardHeaderProps> = ({
           <input
             type="text"
             placeholder="タスクを検索..."
-            className="w-40 sm:w-64 rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-40 rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none sm:w-64"
             onChange={(e) => onSearch?.(e.target.value)}
           />
           <svg
@@ -55,7 +63,7 @@ const TaskBoardHeader: React.FC<TaskBoardHeaderProps> = ({
         {onAddTask && (
           <button
             onClick={onAddTask}
-            className="whitespace-nowrap rounded-lg bg-blue-500 px-3 sm:px-4 py-2 text-sm sm:text-base text-white transition-colors hover:bg-blue-600"
+            className="rounded-lg bg-blue-500 px-3 py-2 text-sm whitespace-nowrap text-white transition-colors hover:bg-blue-600 sm:px-4 sm:text-base"
           >
             タスクを追加
           </button>

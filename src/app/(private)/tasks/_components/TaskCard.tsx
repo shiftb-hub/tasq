@@ -25,8 +25,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   return (
-    <div 
-      className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-sm cursor-pointer"
+    <button
+      type="button"
+      className="flex cursor-pointer flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-sm"
       onClick={onClick}
     >
       {/* Card Header */}
@@ -103,7 +104,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           ))}
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

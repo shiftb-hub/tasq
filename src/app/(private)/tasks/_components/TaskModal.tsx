@@ -52,6 +52,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   onDelete,
 }) => {
   const [isEditMode, setIsEditMode] = useState(mode === "edit");
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Omit<Task, "id">>({
     title: "",
     description: "",
@@ -90,14 +91,19 @@ const TaskModal: React.FC<TaskModalProps> = ({
     setIsEditMode(mode === "edit");
   }, [task, mode]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isEditMode && task && onUpdate) {
-      onUpdate({ ...task, ...formData });
-    } else if (mode === "create" && onSave) {
-      onSave(formData);
+    try {
+      setSubmitting(true);
+      if (isEditMode && task && onUpdate) {
+        await Promise.resolve(onUpdate({ ...task, ...formData }));
+      } else if (mode === "create" && onSave) {
+        await Promise.resolve(onSave(formData));
+      }
+      onClose();
+    } finally {
+      setSubmitting(false);
     }
-    onClose();
   };
 
   const handleEditClick = () => {
@@ -306,7 +312,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
                   );
                   return (
                     <button
-                      key={assignee.initials}
+                      key={assignee.name}
                       type="button"
                       onClick={() => {
                         if (isSelected) {
@@ -329,6 +335,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
                           ? "ring-2 ring-blue-500 ring-offset-2"
                           : "opacity-50 hover:opacity-100",
                       )}
+                      aria-pressed={isSelected}
+                      aria-label={`${assignee.name}を${isSelected ? "担当から外す" : "担当に追加"}`}
                       style={{ backgroundColor: assignee.color }}
                     >
                       <span className="text-white">{assignee.initials}</span>
@@ -373,6 +381,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
                         ? "scale-125 opacity-100"
                         : "opacity-50 hover:opacity-100",
                     )}
+                    aria-pressed={formData.emotionTag === emotion}
+                    aria-label={`感情タグ ${emotion} を${formData.emotionTag === emotion ? "解除" : "選択"}`}
                   >
                     {emotion}
                   </button>
@@ -413,7 +423,13 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 <Button type="button" variant="outline" onClick={onClose}>
                   キャンセル
                 </Button>
-                <Button type="submit">保存</Button>
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  aria-busy={submitting}
+                >
+                  保存
+                </Button>
               </>
             ) : (
               <Button type="button" onClick={onClose}>
