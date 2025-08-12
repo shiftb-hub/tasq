@@ -4,11 +4,7 @@ import { useState, useMemo } from "react";
 
 import { Button } from "@/app/_components/ui/button";
 import { Card, CardContent } from "@/app/_components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/app/_components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/app/_components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -30,6 +26,7 @@ import {
 import { PageTitle } from "@/app/_components/PageTitle";
 import { mockStudents } from "./_data/mockStudents";
 import { StudentsSearchFilter } from "./_components/StudentsSearchFilter";
+import { TaskTrend } from "./_components/TaskTrend";
 
 // 既存のコード（コメントアウト）
 // import prisma from "@/app/_libs/prisma";
@@ -60,31 +57,6 @@ import { StudentsSearchFilter } from "./_components/StudentsSearchFilter";
 // };
 
 /**
- * お困りタスク動向の表示用ヘルパー関数
- * @param trend - 変化量（正数=増加、負数=減少、0=変化なし）
- */
-const getTrendDisplay = (trend: number) => {
-  if (trend === 0) {
-    return {
-      text: "0→",
-      color: "text-gray-500",
-    };
-  }
-
-  if (trend > 0) {
-    return {
-      text: `${trend}↑`,
-      color: "text-red-600",
-    };
-  } else {
-    return {
-      text: `${Math.abs(trend)}↓`,
-      color: "text-green-600",
-    };
-  }
-};
-
-/**
  * 受講生一覧ページ
  * @description 学習進捗と受講生情報を管理するページ
  */
@@ -95,11 +67,7 @@ const StudentsPage: React.FC = () => {
   const itemsPerPage = 5;
 
   const [favorites, setFavorites] = useState<Set<string>>(
-    new Set(
-      mockStudents
-        .filter((student) => student.favorite)
-        .map((student) => student.id),
-    ),
+    new Set(mockStudents.filter((student) => student.favorite).map((student) => student.id)),
   );
 
   /**
@@ -140,8 +108,7 @@ const StudentsPage: React.FC = () => {
         student.slackId.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesChapter =
-        chapterFilter === "all" ||
-        student.currentChapter === parseInt(chapterFilter);
+        chapterFilter === "all" || student.currentChapter === parseInt(chapterFilter);
 
       return matchesSearch && matchesChapter;
     });
@@ -188,9 +155,7 @@ const StudentsPage: React.FC = () => {
                         <AvatarImage
                           src={`https://api.dicebear.com/7.x/lorelei/svg?seed=${student.id}`}
                         />
-                        <AvatarFallback>
-                          {student.name.charAt(0)}
-                        </AvatarFallback>
+                        <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{student.name}</p>
@@ -205,9 +170,7 @@ const StudentsPage: React.FC = () => {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <FiBookOpen className="text-muted-foreground h-4 w-4" />
-                      <span className="text-sm font-medium">
-                        {student.currentChapter}章
-                      </span>
+                      <span className="text-sm font-medium">{student.currentChapter}章</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -222,34 +185,19 @@ const StudentsPage: React.FC = () => {
                       ) : (
                         <>
                           <FiCheckCircle className="h-4 w-4 text-green-500" />
-                          <span className="text-muted-foreground text-sm">
-                            0
-                          </span>
+                          <span className="text-muted-foreground text-sm">0</span>
                         </>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {(() => {
-                        const trendDisplay = getTrendDisplay(
-                          student.stuckTasksTrend,
-                        );
-                        return (
-                          <span
-                            className={`text-sm font-medium ${trendDisplay.color}`}
-                          >
-                            {trendDisplay.text}
-                          </span>
-                        );
-                      })()}
+                      <TaskTrend trend={student.stuckTasksTrend} />
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {student.totalTasks}
-                      </span>
+                      <span className="text-sm font-medium">{student.totalTasks}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -309,9 +257,7 @@ const StudentsPage: React.FC = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="flex items-center gap-1"
             >
