@@ -1,8 +1,22 @@
 import React from "react";
-import type { TaskCardProps } from "../_types/Tasks";
-import Image from "next/image";
+import { Assignee, EmotionTag, TaskPriority, TaskType } from "../_types/Tasks";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/app/_components/ui/avatar";
 
-const TaskCard: React.FC<TaskCardProps> = ({
+type Props = {
+  title: string;
+  priority: TaskPriority;
+  type: TaskType;
+  estimate: number;
+  assignees: Assignee[];
+  emotionTag?: EmotionTag;
+  onClick?: () => void;
+};
+
+const TaskCard: React.FC<Props> = ({
   title,
   priority,
   type,
@@ -78,29 +92,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
         {/* Assignees */}
         <div className="flex items-center -space-x-2">
           {assignees.map((assignee, index) => (
-            <div
+            <Avatar
               key={index}
-              className="relative flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-xs font-semibold"
+              className="h-7 w-7 border-2 border-white"
               style={{
-                backgroundColor: assignee.avatarUrl
-                  ? "transparent"
-                  : assignee.color,
                 zIndex: assignees.length - index,
               }}
               title={assignee.name || assignee.initials}
             >
-              {assignee.avatarUrl ? (
-                <Image
-                  src={assignee.avatarUrl}
-                  alt={assignee.initials}
-                  className="h-full w-full rounded-full object-cover"
-                  width={28}
-                  height={28}
-                />
-              ) : (
-                <span className="text-white">{assignee.initials}</span>
-              )}
-            </div>
+              <AvatarImage src={assignee.avatarUrl} alt={assignee.initials} />
+              <AvatarFallback
+                className="text-xs font-semibold text-white"
+                style={{ backgroundColor: assignee.color }}
+              >
+                {assignee.initials}
+              </AvatarFallback>
+            </Avatar>
           ))}
         </div>
       </div>

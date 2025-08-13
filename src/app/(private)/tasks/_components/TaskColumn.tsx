@@ -1,8 +1,22 @@
 import React from "react";
 import TaskCard from "./TaskCard";
-import type { TaskColumnProps } from "../_types/Tasks";
+import { Task } from "../_types/Tasks";
+import { Button } from "@/app/_components/ui/button";
+import { Plus } from "lucide-react";
 
-const TaskColumn: React.FC<TaskColumnProps> = ({ title, tasks, onAddTask, onTaskClick }) => {
+type Props = {
+  title: string;
+  tasks: Task[];
+  onAddTask?: () => void;
+  onTaskClick?: (task: Task) => void;
+};
+
+const TaskColumn: React.FC<Props> = ({
+  title,
+  tasks,
+  onAddTask,
+  onTaskClick,
+}) => {
   // estimate の合計を計算
   const totalEstimate = tasks.reduce((sum, task) => sum + task.estimate, 0);
 
@@ -17,13 +31,14 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ title, tasks, onAddTask, onTask
           </p>
         </div>
         {onAddTask && (
-          <button
+          <Button
             onClick={onAddTask}
-            className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-500 text-white transition-colors hover:bg-blue-600"
+            size="icon"
+            className="w-8　bg-blue-500 h-8 whitespace-nowrap transition-colors hover:bg-blue-600"
             aria-label="タスクを追加"
           >
-            <span className="text-xl leading-none">+</span>
-          </button>
+            <Plus className="h-4 w-4" />
+          </Button>
         )}
       </div>
 

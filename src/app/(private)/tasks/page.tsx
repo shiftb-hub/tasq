@@ -89,7 +89,9 @@ const TaskBoardPage: React.FC = () => {
         priority: "Normal",
         type: "backend",
         estimate: 8,
-        assignees: [{ initials: "C", color: "#84CC16", name: "Chris Anderson" }],
+        assignees: [
+          { initials: "C", color: "#84CC16", name: "Chris Anderson" },
+        ],
       },
     ],
     "In Progress": [
@@ -162,7 +164,9 @@ const TaskBoardPage: React.FC = () => {
         priority: "High Priority",
         type: "backend",
         estimate: 5,
-        assignees: [{ initials: "V", color: "#BE185D", name: "Victoria Clark" }],
+        assignees: [
+          { initials: "V", color: "#BE185D", name: "Victoria Clark" },
+        ],
         emotionTag: "😰",
       },
       {
@@ -268,7 +272,7 @@ const TaskBoardPage: React.FC = () => {
   // タスク数の計算
   const totalTasks = Object.values(sampleTasks).reduce(
     (total, tasks) => total + tasks.length,
-    0
+    0,
   );
   const inProgressTasks = sampleTasks["In Progress"]?.length || 0;
   const completedTasks = sampleTasks["Done"]?.length || 0;
@@ -277,35 +281,31 @@ const TaskBoardPage: React.FC = () => {
     <div className="flex h-screen flex-col bg-gray-100">
       {/* Fixed Header Container */}
       <div className="flex-shrink-0">
-        <div className="sticky top-0 z-30 bg-gray-100 border-b border-gray-200 shadow-sm">
+        <div className="sticky top-0 z-30 border-b border-gray-200 bg-gray-100 shadow-sm">
           <div className="px-4 pt-4 pb-2">
             <TaskBoardHeader
               totalTasks={totalTasks}
               inProgressTasks={inProgressTasks}
               completedTasks={completedTasks}
               onSearch={handleSearch}
-              onAddTask={() => handleAddTask()}
+              onAddTask={handleAddTask}
             />
           </div>
         </div>
       </div>
 
       {/* Scrollable Task Board Container */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-x-auto overflow-y-hidden">
-          <div className="h-full px-4 py-4">
-            <div className="flex h-full gap-6">
-              {Object.entries(sampleTasks).map(([columnTitle, tasks]) => (
-                <TaskColumn
-                  key={columnTitle}
-                  title={columnTitle}
-                  tasks={tasks}
-                  onAddTask={() => handleAddTask(columnTitle)}
-                  onTaskClick={handleTaskClick}
-                />
-              ))}
-            </div>
-          </div>
+      <div className="h-full flex-1 overflow-x-auto overflow-y-hidden px-4 py-4">
+        <div className="flex h-full gap-6">
+          {Object.entries(sampleTasks).map(([columnTitle, tasks]) => (
+            <TaskColumn
+              key={columnTitle}
+              title={columnTitle}
+              tasks={tasks}
+              onAddTask={() => handleAddTask(columnTitle)}
+              onTaskClick={handleTaskClick}
+            />
+          ))}
         </div>
       </div>
 
