@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogDescription,
 } from "@/app/_components/ui/dialog";
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
@@ -22,13 +23,18 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { cn } from "@/app/_libs/utils";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/app/_components/ui/avatar";
 import type {
-  TaskModalProps,
   Task,
   TaskPriority,
   TaskType,
   EmotionTag,
   Assignee,
+  TaskModalMode,
 } from "../_types/Tasks";
 
 // サンプルのアサイニー（実際のアプリではAPIから取得、TAや講師の情報を表示）
@@ -41,7 +47,18 @@ const availableAssignees: Assignee[] = [
   { initials: "D", color: "#6366F1", name: "David Kim" },
 ];
 
-const TaskModal: React.FC<TaskModalProps> = ({
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+  mode: TaskModalMode;
+  task?: Task;
+  columnTitle?: string;
+  onSave?: (task: Omit<Task, "id">) => void;
+  onUpdate?: (task: Task) => void;
+  onDelete?: (taskId: string) => void;
+};
+
+const TaskModal: React.FC<Props> = ({
   isOpen,
   onClose,
   mode,
@@ -175,6 +192,12 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           </div>
         </DialogHeader>
+
+        {mode === "view" && !isEditMode && (
+          <DialogDescription className="text-sm text-gray-500">
+            {task?.description || "詳細なし"}
+          </DialogDescription>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* タイトル */}
@@ -330,16 +353,26 @@ const TaskModal: React.FC<TaskModalProps> = ({
                         }
                       }}
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-all",
+                        "transition-all",
                         isSelected
                           ? "ring-2 ring-blue-500 ring-offset-2"
                           : "opacity-50 hover:opacity-100",
                       )}
                       aria-pressed={isSelected}
                       aria-label={`${assignee.name}を${isSelected ? "担当から外す" : "担当に追加"}`}
-                      style={{ backgroundColor: assignee.color }}
                     >
-                      <span className="text-white">{assignee.initials}</span>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={assignee.avatarUrl}
+                          alt={assignee.initials}
+                        />
+                        <AvatarFallback
+                          className="text-xs font-medium text-white"
+                          style={{ backgroundColor: assignee.color }}
+                        >
+                          {assignee.initials}
+                        </AvatarFallback>
+                      </Avatar>
                     </button>
                   );
                 })}
@@ -347,13 +380,18 @@ const TaskModal: React.FC<TaskModalProps> = ({
             ) : (
               <div className="flex gap-2">
                 {formData.assignees.map((assignee) => (
-                  <div
-                    key={assignee.initials}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium"
-                    style={{ backgroundColor: assignee.color }}
-                  >
-                    <span className="text-white">{assignee.initials}</span>
-                  </div>
+                  <Avatar key={assignee.initials} className="h-8 w-8">
+                    <AvatarImage
+                      src={assignee.avatarUrl}
+                      alt={assignee.initials}
+                    />
+                    <AvatarFallback
+                      className="text-xs font-medium text-white"
+                      style={{ backgroundColor: assignee.color }}
+                    >
+                      {assignee.initials}
+                    </AvatarFallback>
+                  </Avatar>
                 ))}
               </div>
             )}
