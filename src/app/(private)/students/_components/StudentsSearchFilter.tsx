@@ -44,7 +44,7 @@ export const StudentsSearchFilter: React.FC<Props> = ({ onFilterChange }) => {
   };
 
   return (
-    <Card>
+    <Card className="py-2">
       <CardContent className="p-4">
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="relative flex-1">
@@ -56,10 +56,7 @@ export const StudentsSearchFilter: React.FC<Props> = ({ onFilterChange }) => {
               className="pl-10"
             />
           </div>
-          <Select
-            value={chapterFilter}
-            onValueChange={handleChapterFilterChange}
-          >
+          <Select value={chapterFilter} onValueChange={handleChapterFilterChange}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="取り組み中の章" />
             </SelectTrigger>
