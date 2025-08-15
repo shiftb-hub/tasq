@@ -23,7 +23,7 @@ export const roleSchema = z
   .transform((val) => val as Role)
   .optional();
 
-export const chapterSchema = z.int().min(1).max(14).nullable();
+export const chapterSchema = z.number().int().min(1).max(14).nullable();
 
 export const jobSchema = z
   .string()
@@ -83,4 +83,8 @@ export const learningLogDateSchema = z
   })
   .optional();
 
-export const learningLogSpentMinutesSchema = z.int().min(0).max(6000);
+export const learningLogSpentMinutesSchema = z
+  .number()
+  .int()
+  .min(0, { message: "学習時間（分）は0以上で入力してください。" })
+  .max(6000, { message: "学習時間（分）は6000分以内で入力してください。" });
