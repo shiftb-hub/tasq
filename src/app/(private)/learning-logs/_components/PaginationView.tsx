@@ -1,7 +1,5 @@
 "use client";
 
-// 97% written by AI — I just pressed Enter. (>_<)
-
 import { Button } from "@/app/_components/ui/button";
 import {
   Pagination,
@@ -116,8 +114,8 @@ export const PaginationView: React.FC<Props> = ({
       if (clamped !== page) {
         await onPageChange(clamped);
       }
-    } catch (error) {
-      console.error("Page change failed:", error);
+    } catch (e) {
+      console.error("Page change failed:", e);
     }
   };
 

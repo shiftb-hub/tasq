@@ -23,9 +23,6 @@ import type { LearningLog } from "@/app/_types/LearningLog";
 import type { LearningLogsBatch, PageInfo } from "@/app/_types/LearningLog";
 import { buildLearningLogsPageUrl } from "../_helpers/buildLearningLogsPageUrl";
 
-// ユーティリティ
-import { cn } from "@/app/_libs/utils";
-
 // prettier-ignore
 const subTitles = [
   "成長の軌跡", "あなたの努力の証", "積み上げた日々", "未来への記録", "今日も1歩", 
@@ -89,7 +86,7 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
           router.replace(href, { scroll: false });
         });
       } catch (e) {
-        console.error("ページネーションに失敗。", e);
+        console.error("ページネーション処理に失敗。", e);
       }
     },
     [isPending, pageInfo.perPage, router, sortOrder],
