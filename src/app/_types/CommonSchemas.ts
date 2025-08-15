@@ -74,13 +74,21 @@ export const learningLogReflectionsSchema = z
   .max(1024, "内容は1024文字以内で入力してください。");
 
 export const learningLogDateSchema = z
-  .date()
-  .min(new Date("2025-01-01"), {
-    message: "2025年1月1日以降を設定してください。",
-  })
-  .max(new Date("2030-12-31"), {
-    message: "2030年12月31日以前を設定してください。",
-  })
+  .preprocess(
+    (value) => {
+      if (value === undefined) return undefined;
+      if (typeof value === "string") return new Date(value);
+      return value; // 既に Date型 の場合
+    },
+    z
+      .date()
+      .min(new Date("2025-01-01"), {
+        message: "2025年1月1日以降を設定してください。",
+      })
+      .max(new Date("2030-12-31"), {
+        message: "2030年12月31日以前を設定してください。",
+      }),
+  )
   .optional();
 
 export const learningLogSpentMinutesSchema = z

@@ -37,9 +37,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • プログラミングは魔法ではないことを実感
 • 明日はalertを試してみたい`,
     spentMinutes: 120,
-    startedAt: new Date("2024-01-15T09:00:00Z"),
-    endedAt: new Date("2024-01-15T11:00:00Z"),
-    createdAt: new Date("2024-01-15T11:05:00Z"),
+    startedAt: new Date("2025-01-15T09:00:00Z"),
+    endedAt: new Date("2025-01-15T11:00:00Z"),
+    createdAt: new Date("2025-01-15T11:05:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440002",
@@ -55,9 +55,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • package.jsonは設定ファイルだと学習（まだよくわからない）
 • 次回はnpmだけに絞って学習する`,
     spentMinutes: 90,
-    startedAt: new Date("2024-01-16T14:00:00Z"),
-    endedAt: new Date("2024-01-16T15:30:00Z"),
-    createdAt: new Date("2024-01-16T15:35:00Z"),
+    startedAt: new Date("2025-01-16T14:00:00Z"),
+    endedAt: new Date("2025-01-16T15:30:00Z"),
+    createdAt: new Date("2025-01-16T15:35:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440003",
@@ -73,9 +73,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 予約語の衝突問題について学習
 • まだ{}の中で何ができるかよくわからない`,
     spentMinutes: 180,
-    startedAt: new Date("2024-01-17T19:00:00Z"),
-    endedAt: new Date("2024-01-17T22:00:00Z"),
-    createdAt: new Date("2024-01-17T22:10:00Z"),
+    startedAt: new Date("2025-01-17T19:00:00Z"),
+    endedAt: new Date("2025-01-17T22:00:00Z"),
+    createdAt: new Date("2025-01-17T22:10:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440004",
@@ -91,9 +91,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • Reactは普通のJavaScriptとは違うルールがあることを実感
 • 明日はuseEffectに挑戦してみたい（と思ったが怖い）`,
     spentMinutes: 150,
-    startedAt: new Date("2024-01-18T10:30:00Z"),
-    endedAt: new Date("2024-01-18T13:00:00Z"),
-    createdAt: new Date("2024-01-18T13:15:00Z"),
+    startedAt: new Date("2025-01-18T10:30:00Z"),
+    endedAt: new Date("2025-01-18T13:00:00Z"),
+    createdAt: new Date("2025-01-18T13:15:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440005",
@@ -109,9 +109,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • any型は禁じ手だということを学習
 • 型定義ファイルの存在を知って震えた`,
     spentMinutes: 200,
-    startedAt: new Date("2024-01-19T13:00:00Z"),
-    endedAt: new Date("2024-01-19T16:20:00Z"),
-    createdAt: new Date("2024-01-19T16:30:00Z"),
+    startedAt: new Date("2025-01-19T13:00:00Z"),
+    endedAt: new Date("2025-01-19T16:20:00Z"),
+    createdAt: new Date("2025-01-19T16:30:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440006",
@@ -127,9 +127,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • ファイル名がURLになるのは便利だが責任重大
 • まだ全体像が見えないが少しずつ理解していきたい`,
     spentMinutes: 240,
-    startedAt: new Date("2024-01-20T09:00:00Z"),
-    endedAt: new Date("2024-01-20T13:00:00Z"),
-    createdAt: new Date("2024-01-20T13:20:00Z"),
+    startedAt: new Date("2025-01-20T09:00:00Z"),
+    endedAt: new Date("2025-01-20T13:00:00Z"),
+    createdAt: new Date("2025-01-20T13:20:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440007",
@@ -145,9 +145,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 設計は正解がないから怖いが楽しい
 • もっとたくさんコンポーネントを作って慣れたい`,
     spentMinutes: 210,
-    startedAt: new Date("2024-01-21T14:00:00Z"),
-    endedAt: new Date("2024-01-21T17:30:00Z"),
-    createdAt: new Date("2024-01-21T17:45:00Z"),
+    startedAt: new Date("2025-01-21T14:00:00Z"),
+    endedAt: new Date("2025-01-21T17:30:00Z"),
+    createdAt: new Date("2025-01-21T17:45:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440008",
@@ -163,9 +163,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • スタイリング手法が多すぎて選択麻痺状態
 • まずは基本のCSSをしっかり覚えるべきかも`,
     spentMinutes: 160,
-    startedAt: new Date("2024-01-22T10:00:00Z"),
-    endedAt: new Date("2024-01-22T12:40:00Z"),
-    createdAt: new Date("2024-01-22T12:50:00Z"),
+    startedAt: new Date("2025-01-22T10:00:00Z"),
+    endedAt: new Date("2025-01-22T12:40:00Z"),
+    createdAt: new Date("2025-01-22T12:50:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440009",
@@ -181,9 +181,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • Next.jsはフルスタックフレームワークだと理解
 • エラーハンドリングの重要性を痛感`,
     spentMinutes: 190,
-    startedAt: new Date("2024-01-23T15:00:00Z"),
-    endedAt: new Date("2024-01-23T18:10:00Z"),
-    createdAt: new Date("2024-01-23T18:25:00Z"),
+    startedAt: new Date("2025-01-23T15:00:00Z"),
+    endedAt: new Date("2025-01-23T18:10:00Z"),
+    createdAt: new Date("2025-01-23T18:25:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440010",
@@ -199,9 +199,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 本番環境特有の問題があることを知った
 • Next.jsとVercelの相性の良さに感動`,
     spentMinutes: 300,
-    startedAt: new Date("2024-01-24T08:00:00Z"),
-    endedAt: new Date("2024-01-24T13:00:00Z"),
-    createdAt: new Date("2024-01-24T13:15:00Z"),
+    startedAt: new Date("2025-01-24T08:00:00Z"),
+    endedAt: new Date("2025-01-24T13:00:00Z"),
+    createdAt: new Date("2025-01-24T13:15:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440011",
@@ -217,9 +217,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • パフォーマンスを意識する必要があることを知った
 • Reactフックは奥が深すぎて怖い`,
     spentMinutes: 220,
-    startedAt: new Date("2024-01-25T14:30:00Z"),
-    endedAt: new Date("2024-01-25T18:10:00Z"),
-    createdAt: new Date("2024-01-25T18:20:00Z"),
+    startedAt: new Date("2025-01-25T14:30:00Z"),
+    endedAt: new Date("2025-01-25T18:10:00Z"),
+    createdAt: new Date("2025-01-25T18:20:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440012",
@@ -235,9 +235,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • ブランチ戦略というものがあることを知った
 • コミットメッセージの書き方にもルールがあることを学習`,
     spentMinutes: 180,
-    startedAt: new Date("2024-01-26T09:00:00Z"),
-    endedAt: new Date("2024-01-26T12:00:00Z"),
-    createdAt: new Date("2024-01-26T12:15:00Z"),
+    startedAt: new Date("2025-01-26T09:00:00Z"),
+    endedAt: new Date("2025-01-26T12:00:00Z"),
+    createdAt: new Date("2025-01-26T12:15:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440013",
@@ -253,9 +253,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 一貫性のあるコードスタイルの重要性を実感
 • ルールに従うことで読みやすいコードが書けることを理解`,
     spentMinutes: 140,
-    startedAt: new Date("2024-01-27T13:00:00Z"),
-    endedAt: new Date("2024-01-27T15:20:00Z"),
-    createdAt: new Date("2024-01-27T15:30:00Z"),
+    startedAt: new Date("2025-01-27T13:00:00Z"),
+    endedAt: new Date("2025-01-27T15:20:00Z"),
+    createdAt: new Date("2025-01-27T15:30:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440014",
@@ -271,9 +271,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • ORMは便利だがSQLの基礎も大事だと理解
 • データベース設計の奥深さを感じた`,
     spentMinutes: 250,
-    startedAt: new Date("2024-01-28T10:00:00Z"),
-    endedAt: new Date("2024-01-28T14:10:00Z"),
-    createdAt: new Date("2024-01-28T14:20:00Z"),
+    startedAt: new Date("2025-01-28T10:00:00Z"),
+    endedAt: new Date("2025-01-28T14:10:00Z"),
+    createdAt: new Date("2025-01-28T14:20:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440015",
@@ -289,9 +289,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 認証と認可の違いを理解
 • セキュリティホールの怖さを知った`,
     spentMinutes: 270,
-    startedAt: new Date("2024-01-29T11:00:00Z"),
-    endedAt: new Date("2024-01-29T15:30:00Z"),
-    createdAt: new Date("2024-01-29T15:45:00Z"),
+    startedAt: new Date("2025-01-29T11:00:00Z"),
+    endedAt: new Date("2025-01-29T15:30:00Z"),
+    createdAt: new Date("2025-01-29T15:45:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440016",
@@ -307,9 +307,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • デバイスの多様性を実感
 • デザインはコードだけでなくユーザー体験も重要だと気づいた`,
     spentMinutes: 320,
-    startedAt: new Date("2024-01-30T09:00:00Z"),
-    endedAt: new Date("2024-01-30T14:20:00Z"),
-    createdAt: new Date("2024-01-30T14:35:00Z"),
+    startedAt: new Date("2025-01-30T09:00:00Z"),
+    endedAt: new Date("2025-01-30T14:20:00Z"),
+    createdAt: new Date("2025-01-30T14:35:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440017",
@@ -325,9 +325,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • ユーザー体験の重要性を実感
 • 測定しなければ改善できないことを知った`,
     spentMinutes: 280,
-    startedAt: new Date("2024-01-31T13:00:00Z"),
-    endedAt: new Date("2024-01-31T17:40:00Z"),
-    createdAt: new Date("2024-01-31T17:55:00Z"),
+    startedAt: new Date("2025-01-31T13:00:00Z"),
+    endedAt: new Date("2025-01-31T17:40:00Z"),
+    createdAt: new Date("2025-01-31T17:55:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440018",
@@ -343,9 +343,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 品質を保つ仕組みの重要性を学習
 • テストが書けることも技術力の一部だと実感`,
     spentMinutes: 200,
-    startedAt: new Date("2024-02-01T10:30:00Z"),
-    endedAt: new Date("2024-02-01T13:50:00Z"),
-    createdAt: new Date("2024-02-01T14:05:00Z"),
+    startedAt: new Date("2025-02-01T10:30:00Z"),
+    endedAt: new Date("2025-02-01T13:50:00Z"),
+    createdAt: new Date("2025-02-01T14:05:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440019",
@@ -361,9 +361,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • シンプルから始めて複雑にしていく戦略を理解
 • 状態設計もアーキテクチャの一部だと気づいた`,
     spentMinutes: 240,
-    startedAt: new Date("2024-02-02T14:00:00Z"),
-    endedAt: new Date("2024-02-02T18:00:00Z"),
-    createdAt: new Date("2024-02-02T18:15:00Z"),
+    startedAt: new Date("2025-02-02T14:00:00Z"),
+    endedAt: new Date("2025-02-02T18:00:00Z"),
+    createdAt: new Date("2025-02-02T18:15:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440020",
@@ -379,9 +379,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • インフラストラクチャーも code として管理できることを知った
 • 本番環境との差異を減らす重要性を理解`,
     spentMinutes: 300,
-    startedAt: new Date("2024-02-03T09:00:00Z"),
-    endedAt: new Date("2024-02-03T14:00:00Z"),
-    createdAt: new Date("2024-02-03T14:20:00Z"),
+    startedAt: new Date("2025-02-03T09:00:00Z"),
+    endedAt: new Date("2025-02-03T14:00:00Z"),
+    createdAt: new Date("2025-02-03T14:20:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440021",
@@ -397,9 +397,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 型安全性がフロントエンドまで届くことの価値を実感
 • RESTとGraphQLの使い分けを考えるようになった`,
     spentMinutes: 260,
-    startedAt: new Date("2024-02-04T11:00:00Z"),
-    endedAt: new Date("2024-02-04T15:20:00Z"),
-    createdAt: new Date("2024-02-04T15:35:00Z"),
+    startedAt: new Date("2025-02-04T11:00:00Z"),
+    endedAt: new Date("2025-02-04T15:20:00Z"),
+    createdAt: new Date("2025-02-04T15:35:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440022",
@@ -415,9 +415,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 大規模開発での課題と解決策を知った
 • 技術選択が組織運営に与える影響を実感`,
     spentMinutes: 290,
-    startedAt: new Date("2024-02-05T13:30:00Z"),
-    endedAt: new Date("2024-02-05T18:20:00Z"),
-    createdAt: new Date("2024-02-05T18:40:00Z"),
+    startedAt: new Date("2025-02-05T13:30:00Z"),
+    endedAt: new Date("2025-02-05T18:20:00Z"),
+    createdAt: new Date("2025-02-05T18:40:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440023",
@@ -433,9 +433,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • ユーザー体験の向上技術の多様性を知った
 • PWAはWeb技術の集大成だと理解`,
     spentMinutes: 210,
-    startedAt: new Date("2024-02-06T10:00:00Z"),
-    endedAt: new Date("2024-02-06T13:30:00Z"),
-    createdAt: new Date("2024-02-06T13:45:00Z"),
+    startedAt: new Date("2025-02-06T10:00:00Z"),
+    endedAt: new Date("2025-02-06T13:30:00Z"),
+    createdAt: new Date("2025-02-06T13:45:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440024",
@@ -451,9 +451,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 異なる言語をWebで活用する技術に感動
 • 未来のWeb開発の方向性を垣間見た`,
     spentMinutes: 180,
-    startedAt: new Date("2024-02-07T14:00:00Z"),
-    endedAt: new Date("2024-02-07T17:00:00Z"),
-    createdAt: new Date("2024-02-07T17:15:00Z"),
+    startedAt: new Date("2025-02-07T14:00:00Z"),
+    endedAt: new Date("2025-02-07T17:00:00Z"),
+    createdAt: new Date("2025-02-07T17:15:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440025",
@@ -469,9 +469,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • DevOpsという考え方の一端を知った
 • 手作業の削減がいかに重要かを実感`,
     spentMinutes: 230,
-    startedAt: new Date("2024-02-08T09:30:00Z"),
-    endedAt: new Date("2024-02-08T13:20:00Z"),
-    createdAt: new Date("2024-02-08T13:35:00Z"),
+    startedAt: new Date("2025-02-08T09:30:00Z"),
+    endedAt: new Date("2025-02-08T13:20:00Z"),
+    createdAt: new Date("2025-02-08T13:35:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440026",
@@ -487,9 +487,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 新しい価値創造の仕組みを知った
 • 技術の進歩のスピードに圧倒された`,
     spentMinutes: 270,
-    // startedAt: new Date("2024-02-09T11:00:00Z"),
-    // endedAt: new Date("2024-02-09T15:30:00Z"),
-    createdAt: new Date("2024-02-09T15:45:00Z"),
+    // startedAt: new Date("2025-02-09T11:00:00Z"),
+    // endedAt: new Date("2025-02-09T15:30:00Z"),
+    createdAt: new Date("2025-02-09T15:45:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440027",
@@ -505,9 +505,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • ユーザー体験の新しい次元を発見
 • 技術の民主化を身をもって体験`,
     spentMinutes: 0,
-    startedAt: new Date("2024-02-10T13:00:00Z"),
-    endedAt: new Date("2024-02-10T17:10:00Z"),
-    createdAt: new Date("2024-02-10T17:25:00Z"),
+    startedAt: new Date("2025-02-10T13:00:00Z"),
+    endedAt: new Date("2025-02-10T17:10:00Z"),
+    createdAt: new Date("2025-02-10T17:25:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440028",
@@ -523,9 +523,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 技術的配慮が社会貢献につながることを実感
 • ユーザビリティの本当の意味を知った`,
     spentMinutes: 190,
-    // startedAt: new Date("2024-02-11T10:00:00Z"),
-    // endedAt: new Date("2024-02-11T13:10:00Z"),
-    createdAt: new Date("2024-02-11T13:25:00Z"),
+    // startedAt: new Date("2025-02-11T10:00:00Z"),
+    // endedAt: new Date("2025-02-11T13:10:00Z"),
+    createdAt: new Date("2025-02-11T13:25:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440029",
@@ -541,9 +541,9 @@ export const learningLogsMock: LearningLogDevType[] = [
 • システム設計は芸術と科学の融合だと気づいた
 • 組織の成長とシステム構造の関係性を学習`,
     spentMinutes: 310,
-    startedAt: new Date("2024-02-12T09:00:00Z"),
-    endedAt: new Date("2024-02-12T14:10:00Z"),
-    createdAt: new Date("2024-02-12T14:30:00Z"),
+    startedAt: new Date("2025-02-12T09:00:00Z"),
+    endedAt: new Date("2025-02-12T14:10:00Z"),
+    createdAt: new Date("2025-02-12T14:30:00Z"),
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440030",
@@ -560,8 +560,8 @@ export const learningLogsMock: LearningLogDevType[] = [
 • 技術的成長と人間的成長は並行することを学習
 • 明日からも新しい技術に挑戦し続けたい`,
     spentMinutes: 100,
-    startedAt: new Date("2024-02-13T16:00:00Z"),
-    endedAt: new Date("2024-02-13T18:00:00Z"),
-    createdAt: new Date("2024-02-13T18:15:00Z"),
+    startedAt: new Date("2025-02-13T16:00:00Z"),
+    endedAt: new Date("2025-02-13T18:00:00Z"),
+    createdAt: new Date("2025-02-13T18:15:00Z"),
   },
 ];
