@@ -35,7 +35,11 @@ const Page = async (props: { searchParams?: Promise<SearchParams> }) => {
     return <LearningLogView batch={firstBatch} />;
   } catch (e) {
     dumpError(e, "学習ログ");
-    return <ErrorPage message="学習ログの取得に失敗しました。" />;
+    const errMsg =
+      e instanceof Error
+        ? `学習ログの取得に失敗しました: ${e.message}`
+        : "学習ログの取得に失敗しました。しばらく時間をおいてから再試行してください。";
+    return <ErrorPage message={errMsg} />;
   }
 };
 

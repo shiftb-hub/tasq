@@ -1,7 +1,13 @@
 "use client";
 
 // React と フォームライブラリ
-import { useTransition, useCallback, useEffect, useState } from "react";
+import {
+  useTransition,
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import { useRouter } from "next/navigation";
 
 // UIコンポーネント・アイコン
@@ -15,7 +21,7 @@ import { Skeleton } from "@/app/_components/ui/skeleton";
 // 型定義・バリデーションスキーマ
 import type { LearningLog } from "@/app/_types/LearningLog";
 import type { LearningLogsBatch, PageInfo } from "@/app/_types/LearningLog";
-import { learningLogSearchParamsSchema } from "@/app/_types/LearningLog";
+import { buildLearningLogsPageUrl } from "../_helpers/buildLearningLogsPageUrl";
 
 // ユーティリティ
 import { cn } from "@/app/_libs/utils";
@@ -26,8 +32,6 @@ const subTitles = [
   "マイペース更新中", "がんばった証拠", "地味にがんばる記録", "ゆるっと継続中",
   "昨日までのオレ超え", "忘れる前に書いとこ", "がんばりの裏側", "継続の天才（自称）"
 ];
-
-const defaultQuery = learningLogSearchParamsSchema.parse({});
 
 type Props = {
   batch: LearningLogsBatch;
@@ -76,15 +80,11 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
     async (page: number) => {
       if (isPending) return;
       try {
-        const params = new URLSearchParams();
-        // デフォルト値と異なる場合のみクエリパラメータを設定
-        if (page !== defaultQuery.page) params.set("page", String(page));
-        if (sortOrder !== defaultQuery.order) params.set("order", sortOrder);
-        if (pageInfo.perPage !== defaultQuery.per)
-          params.set("per", String(pageInfo.perPage));
-
-        const queryString = params.toString();
-        const href = `/learning-logs${queryString ? `?${queryString}` : ""}`;
+        const href = buildLearningLogsPageUrl(
+          page,
+          sortOrder,
+          pageInfo.perPage,
+        );
         startTransition(() => {
           router.replace(href, { scroll: false });
         });
@@ -101,11 +101,15 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
     disabled: isPending,
   });
 
-  const hasAny = pageInfo.total > 0;
-  const from = hasAny ? (pageInfo.page - 1) * pageInfo.perPage + 1 : 0;
-  const to = hasAny
-    ? Math.min(pageInfo.page * pageInfo.perPage, pageInfo.total)
-    : 0;
+  const paginationInfo = useMemo(() => {
+    const hasAny = pageInfo.total > 0;
+    const from = hasAny ? (pageInfo.page - 1) * pageInfo.perPage + 1 : 0;
+    const to = hasAny
+      ? Math.min(pageInfo.page * pageInfo.perPage, pageInfo.total)
+      : 0;
+    return { hasAny, from, to };
+  }, [pageInfo.total, pageInfo.page, pageInfo.perPage]);
+
   return (
     <>
       <div className="flex flex-col items-center gap-y-0.5">
@@ -131,7 +135,7 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
       </div>
 
       <div className="text-muted-foreground my-1 mr-1 text-xs">
-        全 {pageInfo.total} 件中 {from}-{to} 件を表示
+        {`全 ${pageInfo.total} 件中 ${paginationInfo.from}-${paginationInfo.to} 件を表示`}
       </div>
 
       <LearningLogTable columns={columns} data={logs} disabled={isPending} />
