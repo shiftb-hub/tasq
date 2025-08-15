@@ -27,6 +27,7 @@ export const chapterSchema = z.number().int().min(1).max(14).nullable();
 
 export const jobSchema = z
   .string()
+  .trim()
   .max(16)
   .transform((val) => (val.trim() === "" ? undefined : val))
   .optional();
@@ -62,15 +63,18 @@ export const uuidSchema = z.string().refine(isUUID, {
 // 学習ログ（LearningLog）関連の zod スキーマ
 export const learningLogTitleSchema = z
   .string()
+  .trim()
   .min(1, "タイトルは必須です。")
   .max(64, "タイトルは64文字以内で入力してください。");
 
 export const learningLogDescriptionSchema = z
   .string()
+  .trim()
   .max(1024, "内容は1024文字以内で入力してください。");
 
 export const learningLogReflectionsSchema = z
   .string()
+  .trim()
   .max(1024, "内容は1024文字以内で入力してください。");
 
 export const learningLogDateSchema = z
