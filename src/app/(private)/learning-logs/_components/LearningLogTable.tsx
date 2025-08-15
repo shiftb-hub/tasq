@@ -35,7 +35,7 @@ export const LearningLogTable: <TData>(
   return (
     <div
       className={cn(
-        "rounded-md border transition-opacity duration-400",
+        "rounded-md border transition-opacity duration-300",
         disabled ? "opacity-50" : "opacity-100",
       )}
     >

@@ -62,7 +62,7 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
   }, []);
 
   const onDelete = useCallback(async (id: string) => {
-    // TODO: Implement edit action in another branch
+    // TODO: Implement delete action in another branch
     // NOTE: Temporary console output for verification — remove before production
     console.log("[DEV] Delete action for log ID:", id);
   }, []);
