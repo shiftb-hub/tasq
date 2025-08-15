@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/app/_components/ui/badge";
 import { FiBookOpen, FiStar, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import { TaskTrend } from "./TaskTrend";
-import { Pagination } from "./Pagination";
+import { StudentsPagination } from "./StudentsPagination";
 
 interface Student {
   id: string;
@@ -47,7 +47,8 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
     new Set(students.filter((student) => student.favorite).map((student) => student.id)),
   );
 
-  const itemsPerPage = 5;
+  // 1ページあたりの表示件数
+  const itemsPerPage = 10;
 
   /**
    * お気に入り状態を切り替える
@@ -178,7 +179,7 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
       </Card>
 
       {/* ページネーション */}
-      <Pagination
+      <StudentsPagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
