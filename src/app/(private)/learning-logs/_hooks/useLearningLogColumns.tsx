@@ -1,12 +1,19 @@
-import React, { useMemo, useCallback } from "react";
+// React と ライブラリ
+import React, { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import type { LearningLog } from "@/app/_types/LearningLog";
-import { format } from "date-fns";
-import { ja } from "date-fns/locale";
+
+// UIコンポーネント・アイコン
 import { Button } from "@/app/_components/ui/button";
 import { FiEdit } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
+
+// 型定義・バリデーションスキーマ
+import type { LearningLog } from "@/app/_types/LearningLog";
+
+// ユーティリティ
 import { cn } from "@/app/_libs/utils";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 
 interface RowHandlers {
   onEdit: (id: string) => Promise<void>;
