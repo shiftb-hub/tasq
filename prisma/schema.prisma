@@ -157,7 +157,7 @@ model LearningLog {
   createdAt     DateTime  @default(now()) @map("created_at")
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  task      Task?    @relation(fields: [taskId], references: [id])
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@map("learning_log")
 }

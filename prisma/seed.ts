@@ -683,10 +683,12 @@ const createLearningLogs = async (users: User[], tasks: Task[]) => {
       );
 
       // 開始・終了時刻の設定
-      const startedAt = new Date(
-        createdAt.getTime() - spentMinutes * 60 * 1000,
+      // 学習記録は通常、学習終了後に作成されるため、
+      // endedAtをcreatedAtの少し前に設定
+      const endedAt = new Date(
+        createdAt.getTime() - getRandomInt(1, 10) * 60 * 1000, // 1-10分前
       );
-      const endedAt = createdAt;
+      const startedAt = new Date(endedAt.getTime() - spentMinutes * 60 * 1000);
 
       const learningLog = await prisma.learningLog.create({
         data: {
@@ -1020,7 +1022,9 @@ const main = async () => {
     console.log(`      - 講師-タスク関係: ${seedDataStats.teacherTasks}件`);
     console.log(`      - 対応ログ: ${seedDataStats.assignmentLogs}件`);
     console.log(`      - タスクタグ: ${seedDataStats.taskTags}件`);
-    console.log(`      - タスクアクティビティタイプ: ${seedDataStats.taskActivityTypes}件`);
+    console.log(
+      `      - タスクアクティビティタイプ: ${seedDataStats.taskActivityTypes}件`,
+    );
 
     // テストユーザーをアプリDBに作成（運用フローを模倣）
     // 実際の運用では初回ログイン時に作成されるが、テストのためここで作成
