@@ -3,7 +3,7 @@
 // npx prisma generate
 // npx prisma db seed
 // DBの確認
-// npx prisma studio or  http://127.0.0.1:54323 
+// npx prisma studio or  http://127.0.0.1:54323
 
 generator client {
   provider = "prisma-client-js"
@@ -36,7 +36,7 @@ model User {
   currentChapter  Int?             @map("current_chapter") //STUDENTのみ
   bio             String           @default("") // 自己紹介 biography
   tasks           Task[] // 自分が作成したタスク
-  studyLogs       StudyLog[]
+  learningLogs    LearningLog[]
   teacherTasks    TeacherTask[]    @relation("TeacherBookmarkedTasks") //講師がブックマークしたタスク
   teacherStudents TeacherStudent[] @relation("TeacherToStudent") //講師側がブックマークした生徒
   studentTeachers TeacherStudent[] @relation("StudentToTeacher") //生徒が講師からブックマークされたことを確認
@@ -59,7 +59,7 @@ model Task {
   tags           TaskTag[]
   activityTypes  TaskActivityType[]
   assignmentLog  AssignmentLog? //講師人の対応ログ
-  studyLogs      StudyLog[]
+  learningLogs   LearningLog[]
   teacherTasks   TeacherTask[]      @relation("BookmarkedTasks") //講師人のブックマークしたタスク
   startedAt      DateTime?          @map("started_at")
   endedAt        DateTime?          @map("ended_at")
@@ -144,18 +144,22 @@ model TeacherTask {
   @@map("teacher_task")
 }
 
-model StudyLog {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
-  taskId    String?  @map("task_id")
-  task      Task?    @relation(fields: [taskId], references: [id])
-  time      Int
-  summary   String?
-  trouble   String?
-  createdAt DateTime @default(now()) @map("created_at")
+model LearningLog {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  taskId        String?   @map("task_id")
+  title         String    @default("")
+  description   String    @default("") // 学習内容の詳細
+  reflections   String    @default("") // 振り返り・課題や反省・改善点・学び
+  spentMinutes  Int       @default(0) @map("spent_minutes")
+  startedAt     DateTime? @map("started_at")
+  endedAt       DateTime? @map("ended_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
 
-  @@map("study_log")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("learning_log")
 }
 
 model AssignmentLog {
