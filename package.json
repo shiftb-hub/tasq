@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "cross-env dotenv_config_path=.env.test vitest run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
