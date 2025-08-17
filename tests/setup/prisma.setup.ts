@@ -26,7 +26,7 @@ export async function runInRollbackTx<T>(
     if (e instanceof TxRollback) return result as T;
     throw e;
   }
-  // フォールスルー防止（理論上ここには来ない）
+  // フォールスルー防止（理論上ここには到達しない）
   throw new Error("runInRollbackTx: unreachable (no rollback thrown?)");
 }
 
