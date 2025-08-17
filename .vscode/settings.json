@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["fuga", "Retryable", "tasq", "turbopack", "vercel"]
+  "cSpell.words": ["fuga", "Retryable", "tasq", "turbopack", "vercel"],
+
+  // VSCode拡張機能 Vitest（vitest.explorer）のための設定
+  "vitest.nodeEnv": {
+    "DOTENV_CONFIG_PATH": ".env.test"
+  },
+  "vitest.nodeExecArgs": ["--require", "dotenv/config"],
+  "vitest.rootConfig": "vitest.config.ts",
+  "vitest.logLevel": "info"
 }
