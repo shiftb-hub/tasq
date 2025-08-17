@@ -16,14 +16,14 @@ class TxRollback extends Error {
 export async function runInRollbackTx<T>(
   fn: (tx: Prisma.TransactionClient) => Promise<T>,
 ): Promise<T> {
-  let result!: T;
+  let result: T | undefined;
   try {
     await prisma.$transaction(async (tx) => {
       result = await fn(tx);
       throw new TxRollback();
     });
   } catch (e) {
-    if (e instanceof TxRollback) return result;
+    if (e instanceof TxRollback) return result as T;
     throw e;
   }
   // フォールスルー防止（理論上ここには来ない）
