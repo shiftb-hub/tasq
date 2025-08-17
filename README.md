@@ -2,14 +2,14 @@
 
 ### 1. リポジトリのクローン
 
-```
+```bash
 git clone https://github.com/shiftb-hub/tasq.git
 cd tasq
 ```
 
 上記でクローンすると、カレントフォルダのなかに `tasq` というフォルダが新規作成されて展開されます。別名にしたいとき（たとえば `hoge` というフォルダにクローンしたいとき）は、次のようにしてください。
 
-```
+```bash
 git clone https://github.com/shiftb-hub/tasq.git hoge
 cd hoge
 ```
@@ -24,7 +24,7 @@ npm i
 
 プロジェクトのルートフォルダに `.env` (環境変数の設定ファイル) を新規作成し、以下の内容を記述してください。
 
-```
+```env
 NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000/
 
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
@@ -42,7 +42,7 @@ SB_SERVICE_ROLE_KEY=eyJhb.....
 
 プロジェクトのルートフォルダに `.env.test` (Vitest実行時に参照する環境変数の設定ファイル) を新規作成し、以下の内容を記述してください。
 
-```
+```env
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 DIRECT_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
@@ -76,7 +76,7 @@ npx prisma studio
 
 ### 8. テストの実行（Vitestの実行）
 
-```
+```bash
 npm run test
 ```
 
