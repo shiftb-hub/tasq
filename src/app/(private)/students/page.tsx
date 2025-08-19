@@ -1,39 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-
 import { PageTitle } from "@/app/_components/PageTitle";
+import { PageSubTitle } from "@/app/_components/PageSubTitle";
 import { mockStudents } from "./_data/mockStudents";
 import { StudentsSearchFilter } from "./_components/StudentsSearchFilter";
 import { StudentsTable } from "./_components/StudentsTable";
-
-// 既存のコード（コメントアウト）
-// import prisma from "@/app/_libs/prisma";
-// import { UserService } from "@/app/_services/userService";
-// import { Role } from "@prisma/client";
-
-// interface Props {
-//   children: React.ReactNode;
-// }
-
-// const StudentsPage: React.FC<Props> = async (props) => {
-//   const userService = new UserService(prisma);
-//   const allUsers = await userService.getAll({});
-//   console.log("allUsers", allUsers);
-//   // const allStudents = await userService.getAll({
-//   //   where: { role: "STUDENT" },
-//   // });
-//   // console.log("allStudents", allStudents);
-
-//   return (
-//     <>
-//       <h1>Students Page</h1>
-//       {allUsers.map((user) => (
-//         <div key={user.id}>{user.name}</div>
-//       ))}
-//     </>
-//   );
-// };
 
 /**
  * 受講生一覧ページ
@@ -72,7 +44,10 @@ const StudentsPage: React.FC = () => {
 
   return (
     <div className="container mx-auto space-y-6 p-6 py-20">
-      <PageTitle>受講生一覧</PageTitle>
+      <div className="flex flex-col items-start text-left">
+        <PageTitle className="mb-2">受講生一覧</PageTitle>
+        <PageSubTitle>学習進捗と受講生情報を管理</PageSubTitle>
+      </div>
 
       {/* 検索・フィルター */}
       <StudentsSearchFilter onFilterChange={handleFilterChange} />
