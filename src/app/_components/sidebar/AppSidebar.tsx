@@ -19,7 +19,7 @@ import { Role } from "@prisma/client";
 const MAIN_NAV_ITEMS = [
   { title: "タスク一覧", url: "/tasks", icon: ClipboardList },
   { title: "学習グラフ", url: "/logBoard", icon: BarChart },
-  { title: "学習ログ一覧", url: "/learningLog", icon: BookOpen },
+  { title: "学習ログ一覧", url: "/learning-logs", icon: BookOpen },
   { title: "受講生一覧", url: "/students", icon: Users },
 ];
 
