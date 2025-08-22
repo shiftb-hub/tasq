@@ -12,9 +12,7 @@ import { v4 as uuid } from "uuid";
 describe("LearningLogService create", () => {
   test("LearningLogInsertRequestデータのzod検証", () => {
     for (const [index, request] of mockLearningLogs.entries()) {
-      expect(() => learningLogInsertRequestSchema.parse(request)).not.toThrow(
-        `Index ${index} should be valid LearningLogInsertRequest`,
-      );
+      expect(() => learningLogInsertRequestSchema.parse(request)).not.toThrow();
     }
   });
 

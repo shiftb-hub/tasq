@@ -93,7 +93,3 @@ export class UserPermissionDeniedError extends Error {
     }
   }
 }
-
-export const isPrismaNotFoundError = (error: unknown): boolean => {
-  return error instanceof Error && "code" in error && error.code === "P2025";
-};

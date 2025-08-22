@@ -1,5 +1,7 @@
-import { LearningLog as PrismaLearningLog } from "@prisma/client";
-import { Prisma as PRS } from "@prisma/client";
+import {
+  Prisma as PRS,
+  LearningLog as PrismaLearningLog,
+} from "@prisma/client";
 import {
   LearningLogNotFoundError,
   UserPermissionDeniedError,
