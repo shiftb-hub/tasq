@@ -54,13 +54,16 @@ type ActivityType = {
   description?: string | null;
 };
 
-type StudyLog = {
+type LearningLog = {
   id: string;
   userId: string;
   taskId?: string | null;
-  time: number;
-  summary?: string | null;
-  trouble?: string | null;
+  title: string;
+  description: string;
+  reflections: string;
+  spentMinutes: number;
+  startedAt?: Date | null;
+  endedAt?: Date | null;
   createdAt: Date;
 };
 
@@ -177,8 +180,8 @@ const clearData = async () => {
     console.log("📝 AssignmentLogを削除中...");
     await prisma.assignmentLog.deleteMany();
 
-    console.log("📝 StudyLogを削除中...");
-    await prisma.studyLog.deleteMany();
+    console.log("📝 LearningLogを削除中...");
+    await prisma.learningLog.deleteMany();
 
     console.log("📝 TeacherTaskを削除中...");
     await prisma.teacherTask.deleteMany();
@@ -268,22 +271,34 @@ const japaneseData = {
     "テストコードの作成",
   ],
 
-  // 学習ログの要約テンプレート
-  studySummaries: [
-    "コンポーネントの実装方法について理解が深まった",
-    "エラーハンドリングの重要性を学んだ",
-    "非同期処理の扱い方が分かってきた",
-    "デザインパターンについて新しい知識を得た",
-    "デバッグ手法を身につけることができた",
+  // 学習ログのタイトルテンプレート
+  learningTitles: [
+    "Reactコンポーネントの実装",
+    "エラーハンドリング実装",
+    "非同期処理の学習",
+    "デザインパターンの理解",
+    "デバッグスキル向上",
+    "パフォーマンス最適化",
+    "テスト実装の学習",
+    "UI/UXの改善",
   ],
 
-  // 困ったことのテンプレート
-  troubles: [
-    "型エラーの解決に時間がかかった",
-    "想定通りの動作にならず原因を探るのが大変だった",
-    "ドキュメントの内容が理解しづらかった",
-    "実装方針で迷いが生じた",
-    "パフォーマンスの改善方法が分からなかった",
+  // 学習内容の詳細テンプレート
+  learningDescriptions: [
+    "コンポーネントの実装方法について理解が深まった。Hooksを使った状態管理やライフサイクルの制御方法を学習した。",
+    "エラーハンドリングの重要性を学んだ。try-catchの使い方やカスタムエラークラスの作成方法を習得した。",
+    "非同期処理の扱い方が分かってきた。async/awaitやPromiseの概念をしっかり理解できた。",
+    "デザインパターンについて新しい知識を得た。特にObserverパターンとFactoryパターンの実装を学習した。",
+    "デバッグ手法を身につけることができた。Chrome DevToolsの効果的な使い方を習得した。",
+  ],
+
+  // 振り返り・課題のテンプレート
+  learningReflections: [
+    "型エラーの解決に時間がかかったが、TypeScriptの型システムへの理解が深まった。次回は型定義をより慎重に行いたい。",
+    "想定通りの動作にならず原因を探るのが大変だったが、デバッグスキルが向上した。ログ出力を効果的に使えるようになった。",
+    "ドキュメントの内容が理解しづらかったが、実際にコードを書いて試すことで理解できた。手を動かすことの重要性を再認識した。",
+    "実装方針で迷いが生じたが、先輩エンジニアのアドバイスで解決できた。設計段階での検討が重要だと学んだ。",
+    "パフォーマンスの改善方法が分からなかったが、プロファイリングツールの使い方を学べた。計測の重要性を理解した。",
   ],
 };
 
@@ -640,8 +655,8 @@ const createTaskRelations = async (
 };
 
 // 学習ログデータ生成関数
-const createStudyLogs = async (users: User[], tasks: Task[]) => {
-  const studyLogs: StudyLog[] = [];
+const createLearningLogs = async (users: User[], tasks: Task[]) => {
+  const learningLogs: LearningLog[] = [];
   const students = users.filter((user) => user.role === "STUDENT");
 
   for (const student of students) {
@@ -655,38 +670,46 @@ const createStudyLogs = async (users: User[], tasks: Task[]) => {
       const task = isTaskRelated ? getRandomElement(studentTasks) : null;
 
       // 学習時間（15分-4時間）
-      const time = getRandomInt(15, 240);
+      const spentMinutes = getRandomInt(15, 240);
 
-      // 要約と困ったことの生成（80%の確率で記入）
-      const summary =
-        Math.random() < 0.8
-          ? getRandomElement(japaneseData.studySummaries)
-          : null;
-      const trouble =
-        Math.random() < 0.8 ? getRandomElement(japaneseData.troubles) : null;
+      // タイトル、説明、振り返りの生成
+      const title = getRandomElement(japaneseData.learningTitles);
+      const description = getRandomElement(japaneseData.learningDescriptions);
+      const reflections = getRandomElement(japaneseData.learningReflections);
 
       // 過去30日間のランダムな日時
       const createdAt = new Date(
         Date.now() - getRandomInt(0, 30) * 24 * 60 * 60 * 1000,
       );
 
-      const studyLog = await prisma.studyLog.create({
+      // 開始・終了時刻の設定
+      // 学習記録は通常、学習終了後に作成されるため、
+      // endedAtをcreatedAtの少し前に設定
+      const endedAt = new Date(
+        createdAt.getTime() - getRandomInt(1, 10) * 60 * 1000, // 1-10分前
+      );
+      const startedAt = new Date(endedAt.getTime() - spentMinutes * 60 * 1000);
+
+      const learningLog = await prisma.learningLog.create({
         data: {
           userId: student.id,
           taskId: task?.id || null,
-          time,
-          summary,
-          trouble,
+          title,
+          description,
+          reflections,
+          spentMinutes,
+          startedAt,
+          endedAt,
           createdAt,
         },
       });
 
-      studyLogs.push(studyLog);
+      learningLogs.push(learningLog);
     }
   }
 
-  console.log(`✅ 学習ログを${studyLogs.length}件作成しました`);
-  return studyLogs;
+  console.log(`✅ 学習ログを${learningLogs.length}件作成しました`);
+  return learningLogs;
 };
 
 // 講師-生徒関係データ生成関数
@@ -782,7 +805,7 @@ const validateData = async () => {
     activityTypes: await prisma.activityType.count(),
     taskTags: await prisma.taskTag.count(),
     taskActivityTypes: await prisma.taskActivityType.count(),
-    studyLogs: await prisma.studyLog.count(),
+    learningLogs: await prisma.learningLog.count(),
     teacherStudents: await prisma.teacherStudent.count(),
     teacherTasks: await prisma.teacherTask.count(),
     assignmentLogs: await prisma.assignmentLog.count(),
@@ -850,7 +873,7 @@ const validateData = async () => {
   console.log(`- アクティビティタイプ: ${results.activityTypes}件`);
   console.log(`- タスクタグ: ${results.taskTags}件`);
   console.log(`- タスクアクティビティタイプ: ${results.taskActivityTypes}件`);
-  console.log(`- 学習ログ: ${results.studyLogs}件`);
+  console.log(`- 学習ログ: ${results.learningLogs}件`);
   console.log(`- 講師-生徒関係: ${results.teacherStudents}件`);
   console.log(`- 講師-タスク関係: ${results.teacherTasks}件`);
   console.log(`- 対応ログ: ${results.assignmentLogs}件`);
@@ -942,7 +965,7 @@ const main = async () => {
 
     // 学習ログデータの生成
     logProgress("学習ログデータを生成中...");
-    await createStudyLogs(users, tasks);
+    await createLearningLogs(users, tasks);
 
     // 講師-生徒関係データの生成
     logProgress("講師-生徒関係データを生成中...");
@@ -978,81 +1001,30 @@ const main = async () => {
       }
     }
 
-    // auth.usersと紐付いていないpublic.usersのデータを削除
-    console.log("🧹 auth.usersと紐付いていないpublic.usersのデータを削除中...");
+    // seedで生成したデータは保持し、テストユーザーのみ処理する
+    console.log("🔍 生成されたデータの統計情報を表示...");
+    const seedDataStats = {
+      users: await prisma.user.count(),
+      tasks: await prisma.task.count(),
+      learningLogs: await prisma.learningLog.count(),
+      teacherStudents: await prisma.teacherStudent.count(),
+      teacherTasks: await prisma.teacherTask.count(),
+      assignmentLogs: await prisma.assignmentLog.count(),
+      taskTags: await prisma.taskTag.count(),
+      taskActivityTypes: await prisma.taskActivityType.count(),
+    };
 
-    // Supabase auth.usersのIDリストを取得
-    const authUserIds = new Set<string>();
-    for (const user of testUsers) {
-      authUserIds.add(user.id);
-    }
-
-    // 既存のpublic.usersを確認
-    const existingUsers = await prisma.user.findMany({
-      select: { id: true, name: true },
-    });
-
-    // auth.usersに存在しないユーザーを削除
-    for (const existingUser of existingUsers) {
-      if (!authUserIds.has(existingUser.id)) {
-        // 関連データを先に削除（外部キー制約の順序を考慮）
-
-        // 1. StudyLogを削除
-        await prisma.studyLog.deleteMany({
-          where: { userId: existingUser.id },
-        });
-
-        // 2. ユーザーに関連するタスクを取得
-        const userTasks = await prisma.task.findMany({
-          where: { userId: existingUser.id },
-          select: { id: true },
-        });
-        const taskIds = userTasks.map((task) => task.id);
-
-        // 3. タスクに関連するデータを削除
-        if (taskIds.length > 0) {
-          await prisma.assignmentLog.deleteMany({
-            where: { taskId: { in: taskIds } },
-          });
-          await prisma.teacherTask.deleteMany({
-            where: { taskId: { in: taskIds } },
-          });
-          await prisma.taskActivityType.deleteMany({
-            where: { taskId: { in: taskIds } },
-          });
-          await prisma.taskTag.deleteMany({
-            where: { taskId: { in: taskIds } },
-          });
-          await prisma.studyLog.deleteMany({
-            where: { taskId: { in: taskIds } },
-          });
-        }
-
-        // 4. タスクを削除
-        await prisma.task.deleteMany({ where: { userId: existingUser.id } });
-
-        // 5. 講師・生徒関係を削除
-        await prisma.teacherStudent.deleteMany({
-          where: {
-            OR: [
-              { teacherId: existingUser.id },
-              { studentId: existingUser.id },
-            ],
-          },
-        });
-
-        // 6. 対応ログを削除（responderId）
-        await prisma.assignmentLog.deleteMany({
-          where: { responderId: existingUser.id },
-        });
-
-        // 7. ユーザーを削除
-        await prisma.user.delete({ where: { id: existingUser.id } });
-        console.log(
-          `   └─ 削除: ${existingUser.name} (ID: ${existingUser.id})`,
-        );
-      }
-    }
+    console.log("   └─ 生成済みデータ:");
+    console.log(`      - ユーザー: ${seedDataStats.users}名`);
+    console.log(`      - タスク: ${seedDataStats.tasks}件`);
+    console.log(`      - 学習ログ: ${seedDataStats.learningLogs}件`);
+    console.log(`      - 講師-生徒関係: ${seedDataStats.teacherStudents}件`);
+    console.log(`      - 講師-タスク関係: ${seedDataStats.teacherTasks}件`);
+    console.log(`      - 対応ログ: ${seedDataStats.assignmentLogs}件`);
+    console.log(`      - タスクタグ: ${seedDataStats.taskTags}件`);
+    console.log(
+      `      - タスクアクティビティタイプ: ${seedDataStats.taskActivityTypes}件`,
+    );
 
     // テストユーザーをアプリDBに作成（運用フローを模倣）
     // 実際の運用では初回ログイン時に作成されるが、テストのためここで作成

@@ -15,6 +15,8 @@ export type UserReturnType<
   select?: U;
 };
 
+type DbClient = PrismaClient | PRS.TransactionClient;
+
 /**
  * UserのCRUD操作を行なうサービスクラス
  *
@@ -28,13 +30,9 @@ export type UserReturnType<
  * ```
  */
 class UserService {
-  private prisma: PrismaClient;
+  private readonly prisma: DbClient;
 
-  /**
-   * UserServiceのコンストラクタ
-   * @param prisma - PrismaClientのインスタンス
-   */
-  public constructor(prisma: PrismaClient) {
+  public constructor(prisma: DbClient) {
     this.prisma = prisma;
   }
 
