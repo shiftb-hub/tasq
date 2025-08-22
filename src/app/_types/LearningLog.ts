@@ -11,7 +11,7 @@ import {
 export const learningLogSchema = z.object({
   id: uuidSchema,
   userId: uuidSchema,
-  taskId: uuidSchema,
+  taskId: uuidSchema.optional(), // タスクに紐づく場合は存在する
   title: learningLogTitleSchema,
   description: learningLogDescriptionSchema, // 学習内容の詳細
   reflections: learningLogReflectionsSchema, // 振り返り・課題や反省・改善点・学び
@@ -29,7 +29,8 @@ export const pageInfoSchema = z.object({
   total: z.number().int().min(0), // 総件数
 });
 
-const sortOrderSchema = z.enum(["asc", "desc"]);
+export const sortOrderSchema = z.enum(["asc", "desc"]);
+export type SortOrder = z.infer<typeof sortOrderSchema>;
 
 export type PageInfo = z.infer<typeof pageInfoSchema>;
 
@@ -61,4 +62,32 @@ export const learningLogSearchParamsSchema = z.object({
 
 export type LearningLogSearchParams = z.infer<
   typeof learningLogSearchParamsSchema
+>;
+
+// 挿入・更新の共通入力フィールド（id, userId以外）
+const learningLogUpsertBaseSchema = z.object({
+  taskId: uuidSchema.optional(),
+  title: learningLogTitleSchema,
+  description: learningLogDescriptionSchema,
+  reflections: learningLogReflectionsSchema,
+  spentMinutes: learningLogSpentMinutesSchema,
+  startedAt: learningLogDateSchema,
+  endedAt: learningLogDateSchema,
+});
+
+// 挿入用スキーマ
+export const learningLogInsertRequestSchema = learningLogUpsertBaseSchema;
+
+// 更新用スキーマ（入力フィールド + id）
+export const learningLogUpdateRequestSchema =
+  learningLogUpsertBaseSchema.extend({
+    id: uuidSchema,
+  });
+
+// 型定義
+export type LearningLogInsertRequest = z.infer<
+  typeof learningLogInsertRequestSchema
+>;
+export type LearningLogUpdateRequest = z.infer<
+  typeof learningLogUpdateRequestSchema
 >;
