@@ -14,14 +14,17 @@ import { getMockLearningLogsResponse } from "./_mock/getMockLearningLogsResponse
 export const dynamic = "force-dynamic";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
 
-const Page = async (props: { searchParams?: Promise<SearchParams> }) => {
+const Page: React.FC<Props> = async ({ searchParams }) => {
   try {
     // 認証（問題があれば例外が発生）
     const appUser = await authenticateAppUser();
 
     // クエリパラメータの処理 [例] /learning-logs?page=1&per=5&order=desc
-    const params = await props.searchParams;
+    const params = await searchParams;
     const { page, per, order } = learningLogSearchParamsSchema.parse({
       page: params?.page,
       per: params?.per,
