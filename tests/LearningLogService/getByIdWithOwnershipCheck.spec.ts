@@ -146,9 +146,12 @@ describe("LearningLogService getByIdWithOwnershipCheck", () => {
       expect(selectedLog.userId).toBe(userId);
 
       // (5) 選択していないフィールドは undefined であることを確認
-      expect(selectedLog.description).toBeUndefined();
-      expect(selectedLog.reflections).toBeUndefined();
-      expect(selectedLog.spentMinutes).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- selectで除外されたフィールドの実行時チェックのため
+      expect((selectedLog as any).description).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- selectで除外されたフィールドの実行時チェックのため
+      expect((selectedLog as any).reflections).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- selectで除外されたフィールドの実行時チェックのため
+      expect((selectedLog as any).spentMinutes).toBeUndefined();
     });
   });
 
@@ -211,10 +214,15 @@ describe("LearningLogService getByIdWithOwnershipCheck", () => {
       expect(selectedLog.title).toBe(mockLearningLog.title);
 
       // (5) 選択していないフィールドは undefined であることを確認
-      expect(selectedLog.userId).toBeUndefined();
-      expect(selectedLog.description).toBeUndefined();
-      expect(selectedLog.reflections).toBeUndefined();
-      expect(selectedLog.spentMinutes).toBeUndefined();
+      //     - selectで除外されたフィールドの実行時チェックのため意図的に any 型にキャスト
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((selectedLog as any).userId).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((selectedLog as any).description).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((selectedLog as any).reflections).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((selectedLog as any).spentMinutes).toBeUndefined();
     });
   });
 
@@ -240,16 +248,12 @@ describe("LearningLogService getByIdWithOwnershipCheck", () => {
 
       // (4) ユーザBがselectでuserIdを除外してアクセス → UserPermissionDeniedErrorがスロー
       await expect(
-        learningLogService.getByIdWithOwnershipCheck(
-          userBId,
-          createdLog.id,
-          {
-            select: {
-              id: true,
-              title: true,
-            },
+        learningLogService.getByIdWithOwnershipCheck(userBId, createdLog.id, {
+          select: {
+            id: true,
+            title: true,
           },
-        ),
+        }),
       ).rejects.toThrow(UserPermissionDeniedError);
     });
   });

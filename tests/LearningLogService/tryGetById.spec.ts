@@ -72,9 +72,13 @@ describe("LearningLogService tryGetById", () => {
       expect(selectedLog!.spentMinutes).toBe(mockLearningLog.spentMinutes);
 
       // (4) 選択していないフィールドは undefined であることを確認
-      expect(selectedLog!.title).toBeUndefined();
-      expect(selectedLog!.reflections).toBeUndefined();
-      expect(selectedLog!.userId).toBeUndefined();
+      //     - selectで除外されたフィールドの実行時チェックのため意図的に any 型にキャスト
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((selectedLog as any)!.title).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((selectedLog as any)!.reflections).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((selectedLog as any)!.userId).toBeUndefined();
     });
   });
 

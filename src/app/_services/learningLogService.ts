@@ -18,17 +18,14 @@ import { DbClient } from "@/app/_types/Services";
 
 /**
  * LearningLog のクエリの結果型を取得するためのHelper型
- * @note include と select を同時に指定することはできないので注意！
+ * @note include と select は排他的な関係（同時に指定できない）
  * @template T extends PRS.LearningLogInclude - includeオプションの型
  * @template U extends PRS.LearningLogSelect - selectオプションの型
  */
 export type LearningLogReturnType<
   T extends PRS.LearningLogInclude,
   U extends PRS.LearningLogSelect,
-> = {
-  include?: T;
-  select?: U;
-};
+> = { include: T; select?: never } | { select: U; include?: never };
 
 /**
  * PrismaのLearningLogモデルからLearningLog型への変換
@@ -65,33 +62,81 @@ class LearningLogService {
   }
 
   /**
-   * LogIdをキーとした学習ログ情報の取得（存在しなければ null を返す）
-   * @template T extends PRS.LearningLogInclude - includeオプションの型
-   * @template U extends PRS.LearningLogSelect - selectオプションの型
-   * @param logId - 取得する学習ログのID
-   * @param options - Prismaクエリオプション（include、selectなど）
+   * LogId をキーとした学習ログ情報の取得（存在しなければ null を返す）
+   * - 指定された LogId の学習ログが存在しなければ `null` を返します。
+   *
+   * ### 使用方法
+   * このメソッドはオーバーロードを利用しているため、引数 `options` の
+   * 指定方法によって戻値の型が変わります。次の 3 パターンの利用を想定しています。
+   * 注意：`select` と `include` は同時に指定できません。
+   *
+   * 1. **基本形**（オプションなし）
+   *    ```ts
+   *    const log = await tryGetById(logId);
+   *    // => PrismaLearningLog | null
+   *    ```
+   *    学習ログそのものを取得します。
+   *
+   * 2. **任意のフィールドだけ取得する場合**（`select` を使用）
+   *    ```ts
+   *    const log = await tryGetById(logId, { select: { id: true, title: true } });
+   *    // => { id: string, title: string } | null
+   *    ```
+   *
+   * 3. **関連情報（UserやTask）を同時に取得する場合**（`include` を使用）
+   *    ```ts
+   *    const log = await tryGetById(logId, { include: { user: true } });
+   *    // => { ...log, user: User } | null
+   *    ```
+   *    例えば「この学習ログを書いたユーザー情報」などのリレーションを同時に取得できます。
+   *
    */
+  public async tryGetById(logId: string): Promise<PrismaLearningLog | null>;
+  public async tryGetById<T extends PRS.LearningLogInclude>(
+    logId: string,
+    options: { include: T },
+  ): Promise<PRS.LearningLogGetPayload<{ include: T }> | null>;
+  public async tryGetById<U extends PRS.LearningLogSelect>(
+    logId: string,
+    options: { select: U },
+  ): Promise<PRS.LearningLogGetPayload<{ select: U }> | null>;
   public async tryGetById<
     T extends PRS.LearningLogInclude,
     U extends PRS.LearningLogSelect,
   >(
     logId: string,
     options?: LearningLogReturnType<T, U>,
-  ): Promise<PRS.LearningLogGetPayload<{ include: T; select: U }> | null> {
-    return (await this.prisma.learningLog.findUnique({
+  ): Promise<
+    | PrismaLearningLog
+    | PRS.LearningLogGetPayload<{ include: T }>
+    | PRS.LearningLogGetPayload<{ select: U }>
+    | null
+  > {
+    return await this.prisma.learningLog.findUnique({
       where: { id: logId },
       ...options,
-    })) as PRS.LearningLogGetPayload<{ include: T; select: U }> | null;
+    });
   }
 
   /**
    * 所有権チェック付きでLogIdによる学習ログ情報の取得（該当なしや権限なしの場合は例外をスロー）
-   * @param userId - 所有権を確認するユーザーID（nullの場合は所有権チェックなし）
-   * @param logId - 取得する学習ログのID
-   * @param options - Prismaクエリオプション（include、selectなど）
    * @throws {LearningLogNotFoundError} 指定されたIDの学習ログが存在しない場合
    * @throws {UserPermissionDeniedError} 指定されたユーザーが学習ログの所有者ではない場合
    */
+  public async getByIdWithOwnershipCheck(
+    userId: string | null,
+    logId: string,
+  ): Promise<PrismaLearningLog>;
+  public async getByIdWithOwnershipCheck<T extends PRS.LearningLogInclude>(
+    userId: string | null,
+    logId: string,
+    options: { include: T },
+  ): Promise<PRS.LearningLogGetPayload<{ include: T }>>;
+  public async getByIdWithOwnershipCheck<U extends PRS.LearningLogSelect>(
+    userId: string | null,
+    logId: string,
+    options: { select: U },
+  ): Promise<PRS.LearningLogGetPayload<{ select: U }>>;
   public async getByIdWithOwnershipCheck<
     T extends PRS.LearningLogInclude,
     U extends PRS.LearningLogSelect,
@@ -99,7 +144,11 @@ class LearningLogService {
     userId: string | null,
     logId: string,
     options?: LearningLogReturnType<T, U>,
-  ): Promise<PRS.LearningLogGetPayload<{ include: T; select: U }>> {
+  ): Promise<
+    | PrismaLearningLog
+    | PRS.LearningLogGetPayload<{ include: T }>
+    | PRS.LearningLogGetPayload<{ select: U }>
+  > {
     // userId が指定されている場合は所有権チェックのために先に userId のみを取得
     // - selection で userId が指定されていない場合にも備える
     if (userId) {
@@ -118,10 +167,16 @@ class LearningLogService {
     }
 
     // 所有権確認後、実際のデータを取得
-    const learningLog = await this.tryGetById(logId, options);
+    const learningLog = await this.prisma.learningLog.findUnique({
+      where: { id: logId },
+      ...options,
+    });
     // 学習ログの存在チェック
     if (!learningLog) throw new LearningLogNotFoundError(logId);
-    return learningLog;
+    return learningLog as
+      | PrismaLearningLog
+      | PRS.LearningLogGetPayload<{ include: T }>
+      | PRS.LearningLogGetPayload<{ select: U }>;
   }
 
   // 新規作成 [Create]
