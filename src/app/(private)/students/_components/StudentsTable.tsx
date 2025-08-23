@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/app/_components/ui/button";
 import { Card, CardContent } from "@/app/_components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/_components/ui/avatar";
@@ -113,7 +114,12 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
                         <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{student.name}</p>
+                        <Link
+                          href={`/teacher/${student.id}`}
+                          className="font-medium hover:underline"
+                        >
+                          {student.name}
+                        </Link>
                       </div>
                     </div>
                   </TableCell>
