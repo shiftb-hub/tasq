@@ -108,7 +108,7 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
   }, [pageInfo.total, pageInfo.page, pageInfo.perPage]);
 
   return (
-    <>
+    <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <div className="flex flex-col items-center gap-y-0.5">
         {/* サブタイトルも設定する関係で PageTitleコンポーネントを使用しない */}
         <h1 className="text-3xl font-bold">学習ログ一覧</h1>
@@ -142,6 +142,6 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
         onPageChange={onPageChange}
         disabled={isPending}
       />
-    </>
+    </div>
   );
 };

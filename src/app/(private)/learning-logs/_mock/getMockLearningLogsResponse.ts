@@ -8,11 +8,15 @@ export const getMockLearningLogsResponse = (
 ): LearningLogsBatch => {
   // ソート処理 [primary sort key] startedAt、[secondary sort key] createdAt
   const sorted = [...learningLogsMock].sort((a, b) => {
+    // startedAt が「未設定」のときは常に先頭に配置する（暗黙に入力を促す）
+    const fallbackTime =
+      sortOrder === "desc"
+        ? Number.POSITIVE_INFINITY
+        : Number.NEGATIVE_INFINITY;
     // prettier-ignore
-    const aTime = a.startedAt ? a.startedAt.getTime() : Number.POSITIVE_INFINITY;
+    const aTime = a.startedAt ? a.startedAt.getTime() : fallbackTime;
     // prettier-ignore
-    const bTime = b.startedAt ? b.startedAt.getTime() : Number.POSITIVE_INFINITY;
-
+    const bTime = b.startedAt ? b.startedAt.getTime() : fallbackTime;
     if (aTime !== bTime)
       return sortOrder === "desc" ? bTime - aTime : aTime - bTime;
 

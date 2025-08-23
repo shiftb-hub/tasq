@@ -36,7 +36,7 @@ describe("LearningLogService.getPaginatedBatch - ソート機能", () => {
     });
   });
 
-  test("startedAtがnullのデータが先頭に表示される（降順）", async () => {
+  test("startedAtがnullのデータが先頭に表示される（降順：日付の新しい順）", async () => {
     await runInRollbackTx(async (tx) => {
       const { id: userId } = await createTestUser(tx);
 
@@ -46,8 +46,16 @@ describe("LearningLogService.getPaginatedBatch - ソート機能", () => {
       await createBulkLearningLogs(tx, userId, dummyLogs.slice(0, 3));
 
       // startedAtがnullのデータを作成
-      const nullStartedAtLog = createNullStartedAtLogData();
-      await learningLogService.create(userId, nullStartedAtLog);
+      // - #NULL_OLD が createdAt が 古くなるように作成
+      // - #NULL_NEW が createdAt が 新しくなるように作成
+      const nullStartedAtLog1 = createNullStartedAtLogData();
+      nullStartedAtLog1.title = "#NULL_OLD";
+      await learningLogService.create(userId, nullStartedAtLog1);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const nullStartedAtLog2 = createNullStartedAtLogData();
+      nullStartedAtLog2.title = "#NULL_NEW";
+      await learningLogService.create(userId, nullStartedAtLog2);
 
       // 降順で取得
       const batchDesc = await learningLogService.getPaginatedBatch(
@@ -57,13 +65,15 @@ describe("LearningLogService.getPaginatedBatch - ソート機能", () => {
         "desc",
       );
 
-      // startedAtがnullのデータが先頭に表示されることを確認
-      expect(batchDesc.learningLogs[0].title).toBe("#NULL");
+      // startedAt が null のデータが先頭 かつ createdAtの新しい順に表示されることを確認
+      expect(batchDesc.learningLogs[0].title).toBe("#NULL_NEW");
+      expect(batchDesc.learningLogs[1].title).toBe("#NULL_OLD");
       expect(batchDesc.learningLogs[0].startedAt).toBeUndefined();
+      expect(batchDesc.learningLogs[1].startedAt).toBeUndefined();
     });
   });
 
-  test("startedAtがnullのデータが先頭に表示される（昇順）", async () => {
+  test("startedAtがnullのデータが先頭に表示される（昇順：日付の古い順）", async () => {
     await runInRollbackTx(async (tx) => {
       const { id: userId } = await createTestUser(tx);
 
@@ -73,8 +83,16 @@ describe("LearningLogService.getPaginatedBatch - ソート機能", () => {
       await createBulkLearningLogs(tx, userId, dummyLogs.slice(0, 3));
 
       // startedAtがnullのデータを作成
-      const nullStartedAtLog = createNullStartedAtLogData();
-      await learningLogService.create(userId, nullStartedAtLog);
+      // - #NULL_OLD が createdAt が 古くなるように作成
+      // - #NULL_NEW が createdAt が 新しくなるように作成
+      const nullStartedAtLog1 = createNullStartedAtLogData();
+      nullStartedAtLog1.title = "#NULL_OLD";
+      await learningLogService.create(userId, nullStartedAtLog1);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const nullStartedAtLog2 = createNullStartedAtLogData();
+      nullStartedAtLog2.title = "#NULL_NEW";
+      await learningLogService.create(userId, nullStartedAtLog2);
 
       // 昇順で取得
       const batchAsc = await learningLogService.getPaginatedBatch(
@@ -84,9 +102,12 @@ describe("LearningLogService.getPaginatedBatch - ソート機能", () => {
         "asc",
       );
 
-      // 昇順でもstartedAtがnullのデータが先頭に表示されることを確認
-      expect(batchAsc.learningLogs[0].title).toBe("#NULL");
+      // 昇順でも startedAt が null のデータが先頭に表示されることを確認
+      // - startedAt が nullのデータは createdAt が古い順に表示されることを確認
+      expect(batchAsc.learningLogs[0].title).toBe("#NULL_OLD");
+      expect(batchAsc.learningLogs[1].title).toBe("#NULL_NEW");
       expect(batchAsc.learningLogs[0].startedAt).toBeUndefined();
+      expect(batchAsc.learningLogs[1].startedAt).toBeUndefined();
     });
   });
 
