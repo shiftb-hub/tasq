@@ -100,17 +100,27 @@ class LearningLogService {
     logId: string,
     options?: LearningLogReturnType<T, U>,
   ): Promise<PRS.LearningLogGetPayload<{ include: T; select: U }>> {
+    // userId が指定されている場合は所有権チェックのために先に userId のみを取得
+    // - selection で userId が指定されていない場合にも備える
+    if (userId) {
+      const ownershipCheck = await this.prisma.learningLog.findUnique({
+        where: { id: logId },
+        select: { userId: true },
+      });
+      if (!ownershipCheck) throw new LearningLogNotFoundError(logId);
+      if (ownershipCheck.userId !== userId) {
+        throw new UserPermissionDeniedError({
+          userId,
+          actualRole: "Unknown",
+          message: `User ${userId} does not own LearningLog ${logId}`,
+        });
+      }
+    }
+
+    // 所有権確認後、実際のデータを取得
     const learningLog = await this.tryGetById(logId, options);
     // 学習ログの存在チェック
     if (!learningLog) throw new LearningLogNotFoundError(logId);
-    // 学習ログの所有権チェック
-    if (userId && learningLog.userId !== userId) {
-      throw new UserPermissionDeniedError({
-        userId,
-        actualRole: "Unknown",
-        message: `User ${userId} does not own LearningLog ${logId}`,
-      });
-    }
     return learningLog;
   }
 

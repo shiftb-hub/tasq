@@ -178,4 +178,79 @@ describe("LearningLogService getByIdWithOwnershipCheck", () => {
       expect(retrievedLog.endedAt).toBeNull();
     });
   });
+
+  test("selectでuserIdを除外した場合でも所有者は正常にアクセスできる", async () => {
+    await runInRollbackTx(async (tx) => {
+      // (1) ユーザー作成
+      const userId = uuid();
+      const userName = "検査 官太郎";
+      const userService = new UserService(tx);
+      await userService.createAsStudent(userId, userName);
+
+      // (2) 学習ログ作成
+      const learningLogService = new LearningLogService(tx);
+      const createdLog = await learningLogService.create(
+        userId,
+        mockLearningLog,
+      );
+
+      // (3) selectオプションでuserIdを除外してtitleとidのみ取得
+      const selectedLog = await learningLogService.getByIdWithOwnershipCheck(
+        userId,
+        createdLog.id,
+        {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      );
+
+      // (4) 指定したフィールドが正常に取得できることを確認
+      expect(selectedLog.id).toBe(createdLog.id);
+      expect(selectedLog.title).toBe(mockLearningLog.title);
+
+      // (5) 選択していないフィールドは undefined であることを確認
+      expect(selectedLog.userId).toBeUndefined();
+      expect(selectedLog.description).toBeUndefined();
+      expect(selectedLog.reflections).toBeUndefined();
+      expect(selectedLog.spentMinutes).toBeUndefined();
+    });
+  });
+
+  test("selectでuserIdを除外した場合でも非所有者にはUserPermissionDeniedErrorが発生する", async () => {
+    await runInRollbackTx(async (tx) => {
+      // (1) ユーザA作成
+      const userAId = uuid();
+      const userAName = "品質 管理代";
+      const userService = new UserService(tx);
+      await userService.createAsStudent(userAId, userAName);
+
+      // (2) ユーザB作成
+      const userBId = uuid();
+      const userBName = "不具合 退治丸";
+      await userService.createAsStudent(userBId, userBName);
+
+      // (3) ユーザAの学習ログ作成
+      const learningLogService = new LearningLogService(tx);
+      const createdLog = await learningLogService.create(
+        userAId,
+        mockLearningLog,
+      );
+
+      // (4) ユーザBがselectでuserIdを除外してアクセス → UserPermissionDeniedErrorがスロー
+      await expect(
+        learningLogService.getByIdWithOwnershipCheck(
+          userBId,
+          createdLog.id,
+          {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        ),
+      ).rejects.toThrow(UserPermissionDeniedError);
+    });
+  });
 });
