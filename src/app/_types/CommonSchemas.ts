@@ -53,11 +53,8 @@ export const profileImageKeySchema = z
   .transform((val) => (val.trim() === "" ? undefined : val))
   .optional();
 
-// prettier-ignore
-export const isUUID = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-
-export const uuidSchema = z.string().refine(isUUID, {
-  message: "Invalid UUID format.",
+export const uuidSchema = z.uuidv4({
+  error: "UUIDの形式が正しくありません。",
 });
 
 // 学習ログ（LearningLog）関連の zod スキーマ

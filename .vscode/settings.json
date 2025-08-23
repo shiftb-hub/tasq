@@ -5,6 +5,7 @@
     "Retryable",
     "tasq",
     "turbopack",
+    "uuidv",
     "vercel"
   ],
 
