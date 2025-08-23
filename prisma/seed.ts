@@ -86,10 +86,13 @@ const supabase = createClient(
   process.env.SB_SERVICE_ROLE_KEY,
 );
 
-// 開発用のテストユーザの定義
+// 開発用のテストユーザの定義（作業の便宜上、意図的にUUIDは固定値を使用）
+// - UUIDv4 第3ブロック先頭 → 4（v4指定）
+// - UUIDv4 第4ブロック先頭 → 8（バリアント指定）
+// - 本番運用では必ず uuid ライブラリで生成したUUIDを使用すること
 const testUsers = [
   {
-    id: "11111111-1111-1111-1111-111111111111",
+    id: "11111111-1111-4111-8111-111111111111",
     email: "user1@example.com",
     password: "##user1",
     name: "構文 誤次郎",
@@ -97,7 +100,7 @@ const testUsers = [
     slackId: "@user1",
   },
   {
-    id: "22222222-2222-2222-2222-222222222222",
+    id: "22222222-2222-4222-8222-222222222222",
     email: "user2@example.com",
     password: "##user2",
     name: "仕様 曖昧子",
@@ -105,7 +108,7 @@ const testUsers = [
     slackId: "@user2",
   },
   {
-    id: "33333333-3333-3333-3333-333333333333",
+    id: "33333333-3333-4333-8333-333333333333",
     email: "user3@example.com",
     password: "##user3",
     name: "保守 絶望太",
@@ -114,7 +117,7 @@ const testUsers = [
   },
   // 追加のテストユーザー（7名）
   {
-    id: "44444444-4444-4444-4444-444444444444",
+    id: "44444444-4444-4444-8444-444444444444",
     email: "user4@example.com",
     password: "##user4",
     name: "実装 速太郎",
@@ -122,7 +125,7 @@ const testUsers = [
     slackId: "@user4",
   },
   {
-    id: "55555555-5555-5555-5555-555555555555",
+    id: "55555555-5555-4555-8555-555555555555",
     email: "user5@example.com",
     password: "##user5",
     name: "設計 美代子",
@@ -130,7 +133,7 @@ const testUsers = [
     slackId: "@user5",
   },
   {
-    id: "66666666-6666-6666-6666-666666666666",
+    id: "66666666-6666-4666-8666-666666666666",
     email: "user6@example.com",
     password: "##user6",
     name: "品質 守",
@@ -138,7 +141,7 @@ const testUsers = [
     slackId: "@user6",
   },
   {
-    id: "77777777-7777-7777-7777-777777777777",
+    id: "77777777-7777-4777-8777-777777777777",
     email: "user7@example.com",
     password: "##user7",
     name: "開発 統括太",
@@ -146,7 +149,7 @@ const testUsers = [
     slackId: "@user7",
   },
   {
-    id: "88888888-8888-8888-8888-888888888888",
+    id: "88888888-8888-4888-8888-888888888888",
     email: "user8@example.com",
     password: "##user8",
     name: "技術 伝道師",
@@ -154,7 +157,7 @@ const testUsers = [
     slackId: "@user8",
   },
   {
-    id: "99999999-9999-9999-9999-999999999999",
+    id: "99999999-9999-4999-8999-999999999999",
     email: "user9@example.com",
     password: "##user9",
     name: "運用 監視子",
@@ -162,7 +165,7 @@ const testUsers = [
     slackId: "@user9",
   },
   {
-    id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
     email: "user10@example.com",
     password: "##user10",
     name: "学習 熱心男",
