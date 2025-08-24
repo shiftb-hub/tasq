@@ -1,5 +1,13 @@
 {
-  "cSpell.words": ["fuga", "Retryable", "tasq", "turbopack", "vercel"],
+  "cSpell.words": [
+    "fuga",
+    "modelcontextprotocol",
+    "Retryable",
+    "tasq",
+    "turbopack",
+    "uuidv",
+    "vercel"
+  ],
 
   // VSCode拡張機能 Vitest（vitest.explorer）のための設定
   "vitest.nodeEnv": {
@@ -7,5 +15,6 @@
   },
   "vitest.nodeExecArgs": ["--require", "dotenv/config"],
   "vitest.rootConfig": "vitest.config.ts",
-  "vitest.logLevel": "info"
+  "vitest.logLevel": "info",
+  "postman.settings.dotenv-detection-notification-visibility": false
 }

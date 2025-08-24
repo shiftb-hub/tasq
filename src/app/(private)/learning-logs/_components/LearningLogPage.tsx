@@ -34,7 +34,7 @@ type Props = {
   batch: LearningLogsBatch;
 };
 
-export const LearningLogView: React.FC<Props> = ({ batch }) => {
+export const LearningLogPage: React.FC<Props> = ({ batch }) => {
   const router = useRouter();
   const [logs, setLogs] = useState<LearningLog[]>(batch.learningLogs);
   const [pageInfo, setPageInfo] = useState<PageInfo>(batch.pageInfo);
@@ -108,7 +108,7 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
   }, [pageInfo.total, pageInfo.page, pageInfo.perPage]);
 
   return (
-    <>
+    <div className="mx-auto my-4 w-full max-w-4xl space-y-4 px-4 2xl:px-0">
       <div className="flex flex-col items-center gap-y-0.5">
         {/* サブタイトルも設定する関係で PageTitleコンポーネントを使用しない */}
         <h1 className="text-3xl font-bold">学習ログ一覧</h1>
@@ -142,6 +142,6 @@ export const LearningLogView: React.FC<Props> = ({ batch }) => {
         onPageChange={onPageChange}
         disabled={isPending}
       />
-    </>
+    </div>
   );
 };

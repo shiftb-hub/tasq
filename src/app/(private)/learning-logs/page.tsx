@@ -2,7 +2,7 @@ import { authenticateAppUser } from "@/app/_libs/authenticateUser";
 
 // UIコンポーネント・アイコン
 import { ErrorPage } from "@/app/_components/ErrorPage";
-import { LearningLogView } from "./_components/LearningLogView";
+import { LearningLogPage } from "./_components/LearningLogPage";
 
 // 型定義・バリデーションスキーマ
 import { learningLogSearchParamsSchema } from "@/app/_types/LearningLog";
@@ -35,7 +35,7 @@ const Page: React.FC<Props> = async ({ searchParams }) => {
     // TODO: Implement learning log fetch in another branch
     const firstBatch = getMockLearningLogsResponse(page, per, order);
 
-    return <LearningLogView batch={firstBatch} />;
+    return <LearningLogPage batch={firstBatch} />;
   } catch (e) {
     dumpError(e, "学習ログ");
     const errMsg =

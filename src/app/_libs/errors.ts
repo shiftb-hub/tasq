@@ -37,6 +37,27 @@ export class AppUserNotFoundError extends Error {
 }
 
 /**
+ * 学習ログが見つからなかった場合のエラー
+ */
+export class LearningLogNotFoundError extends Error {
+  readonly learningLogId: string;
+  readonly timestamp: Date;
+
+  constructor(
+    learningLogId: string,
+    message = "Learning log not found in application database",
+  ) {
+    super(message);
+    this.name = "LearningLogNotFoundError";
+    this.learningLogId = learningLogId;
+    this.timestamp = new Date();
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, LearningLogNotFoundError);
+    }
+  }
+}
+
+/**
  * ユーザーが必要な権限を持たないために操作が拒否された場合のエラー
  */
 export class UserPermissionDeniedError extends Error {
