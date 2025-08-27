@@ -56,13 +56,17 @@ const Page: React.FC = () => {
       const raw = window.localStorage.getItem(c_StorageKey);
       if (!raw) return;
       const parsed: Draft = JSON.parse(raw);
+      // spentMinutes は 0 を「未設定」という特殊な値として扱う（フォームには undefined として与える）
+      const parsedSpentMinutes =
+        parsed.spentMinutes === 0 || parsed.spentMinutes === null
+          ? undefined
+          : parsed.spentMinutes;
       // prettier-ignore
       form.reset({
         title: parsed.title ?? "",
         description: parsed.description ?? "",
         reflections: parsed.reflections ?? "",
-        // spentMinutes は 0 を「未設定」という特殊な値として扱う（フォームには undefined として与える）
-        spentMinutes:  parsed.spentMinutes === 0 ? undefined : parsed.spentMinutes,
+        spentMinutes: parsedSpentMinutes,
         startedAt: parsed.startedAt ? draftDateSchema.parse(parsed.startedAt) : undefined,
         endedAt: parsed.endedAt ? draftDateSchema.parse(parsed.endedAt) : undefined,
       });
