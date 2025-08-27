@@ -37,7 +37,7 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
   fieldKey,
   exampleText,
   containerStyles,
-  placeholder = "未設定",
+  placeholder,
   registerOnChange,
   registerOnBlur,
   disabled, // Change disabled to isDisabled
@@ -48,6 +48,8 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
   const errMsg = formState.errors[fieldKey]?.message as string | undefined;
 
   const [hasTemplate, setHasTemplate] = useState(false);
+  const [dynamicPlaceholder, setDynamicPlaceholder] =
+    useState<string>("未設定");
   const currentValue = watch(fieldKey);
 
   const enableTemplate = !!templateStorageKey;
@@ -58,8 +60,14 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
     if (!enableTemplate || !templateStorageKey) return;
 
     const template = localStorage.getItem(templateStorageKey);
-    setHasTemplate(!!(template && template.trim()));
-  }, [enableTemplate, templateStorageKey]);
+    const hasTemplateValue = !!(template && template.trim());
+    setHasTemplate(hasTemplateValue);
+
+    // Props の placeholder が undefined の場合のみ動的に設定
+    if (placeholder === undefined) {
+      setDynamicPlaceholder(hasTemplateValue ? template.trim() : "未設定");
+    }
+  }, [enableTemplate, templateStorageKey, placeholder]);
 
   const handleSaveTemplate = () => {
     if (typeof currentValue === "string" && templateStorageKey) {
@@ -94,7 +102,9 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
         <Textarea
           id={fieldKey}
           aria-invalid={!!errMsg}
-          placeholder={placeholder}
+          placeholder={
+            placeholder !== undefined ? placeholder : dynamicPlaceholder
+          }
           disabled={isDisabled}
           {...register(fieldKey, {
             onChange: registerOnChange,

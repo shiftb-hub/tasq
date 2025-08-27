@@ -38,7 +38,7 @@ const FormTextFieldComponent = <T extends FieldValues>({
   fieldKey,
   exampleText,
   containerStyles,
-  placeholder = "未設定",
+  placeholder,
   registerOnChange,
   registerOnBlur,
   disabled,
@@ -49,6 +49,8 @@ const FormTextFieldComponent = <T extends FieldValues>({
   const errMsg = formState.errors[fieldKey]?.message as string | undefined;
 
   const [hasTemplate, setHasTemplate] = useState(false);
+  const [dynamicPlaceholder, setDynamicPlaceholder] =
+    useState<string>("未設定");
   const currentValue = watch(fieldKey);
 
   const enableTemplate = !!templateStorageKey;
@@ -59,8 +61,14 @@ const FormTextFieldComponent = <T extends FieldValues>({
     if (!enableTemplate || !templateStorageKey) return;
 
     const template = localStorage.getItem(templateStorageKey);
-    setHasTemplate(!!(template && template.trim()));
-  }, [enableTemplate, templateStorageKey]);
+    const hasTemplateValue = !!(template && template.trim());
+    setHasTemplate(hasTemplateValue);
+
+    // Props の placeholder が undefined の場合のみ動的に設定
+    if (placeholder === undefined) {
+      setDynamicPlaceholder(hasTemplateValue ? template.trim() : "未設定");
+    }
+  }, [enableTemplate, templateStorageKey, placeholder]);
 
   const handleSaveTemplate = () => {
     if (typeof currentValue === "string" && templateStorageKey) {
@@ -96,7 +104,9 @@ const FormTextFieldComponent = <T extends FieldValues>({
           type="text"
           id={fieldKey}
           aria-invalid={!!errMsg}
-          placeholder={placeholder}
+          placeholder={
+            placeholder !== undefined ? placeholder : dynamicPlaceholder
+          }
           // 送信中 (isSubmitting === true) はコンポーネントを無効化
           // 後続の {...inputProps} で disabled が指定されていれば、そちらで上書きされる
           disabled={isDisabled}
@@ -153,4 +163,8 @@ const FormTextFieldComponent = <T extends FieldValues>({
 
 FormTextFieldComponent.displayName = "FormTextField";
 
-export const FormTextField = React.memo(FormTextFieldComponent) as <T extends FieldValues>(props: Props<T>) => JSX.Element;
+export const FormTextField = React.memo(FormTextFieldComponent) as <
+  T extends FieldValues,
+>(
+  props: Props<T>,
+) => JSX.Element;
