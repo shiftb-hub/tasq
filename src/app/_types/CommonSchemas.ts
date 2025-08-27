@@ -87,7 +87,12 @@ export const learningLogDateSchema = z
   .optional();
 
 export const learningLogSpentMinutesSchema = z.preprocess(
-  (val) => (Number.isNaN(val) ? 0 : val), // NaN の場合は 0 に変換 (RHF対応)
+  (val) => {
+    // null, undefined, NaN, 空文字列の場合は 0 に変換 (RHF の valueAsNumber 対応)
+    if (val == null || Number.isNaN(val) || val === "") return 0;
+    // 数値でない文字列は coerce で数値変換を試行
+    return typeof val === "string" ? Number(val) : val;
+  },
   z
     .number()
     .int()
