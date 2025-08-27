@@ -72,8 +72,10 @@ const FormTextFieldComponent = <T extends FieldValues>({
 
   const handleSaveTemplate = () => {
     if (typeof currentValue === "string" && templateStorageKey) {
-      localStorage.setItem(templateStorageKey, currentValue.trim());
-      setHasTemplate(true);
+      if (confirm("現在の内容をテンプレート文字列として保存しますか？")) {
+        localStorage.setItem(templateStorageKey, currentValue.trim());
+        setHasTemplate(true);
+      }
     }
   };
 
