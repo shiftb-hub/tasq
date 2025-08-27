@@ -112,12 +112,12 @@ const FormTextFieldComponent = <T extends FieldValues>({
           // 送信中 (isSubmitting === true) はコンポーネントを無効化
           // 後続の {...inputProps} で disabled が指定されていれば、そちらで上書きされる
           disabled={isDisabled}
+          {...inputProps}
           {...register(fieldKey, {
             onChange: registerOnChange,
             onBlur: registerOnBlur,
             valueAsNumber: inputProps.type === "number",
           })}
-          {...inputProps}
         />
         {enableTemplate && (
           <div className="absolute top-1/2 right-2 flex -translate-y-1/2">

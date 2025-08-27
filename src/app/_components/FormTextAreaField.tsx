@@ -108,11 +108,11 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
             placeholder !== undefined ? placeholder : dynamicPlaceholder
           }
           disabled={isDisabled}
+          {...textareaProps}
           {...register(fieldKey, {
             onChange: registerOnChange,
             onBlur: registerOnBlur,
           })}
-          {...textareaProps}
         />
         {enableTemplate && (
           <div className="absolute top-2 right-2 flex">
