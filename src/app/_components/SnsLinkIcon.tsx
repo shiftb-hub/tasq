@@ -6,7 +6,7 @@ type Props = {
   ariaLabel?: string;
 };
 
-const allowedHosts = ["github.com", "instagram.com", "threads.net", "x.com"];
+const allowedHosts = ["github.com", "instagram.com", "threads.com", "x.com"];
 
 /**
  * 外部サイト専用のリンクコンポーネント
