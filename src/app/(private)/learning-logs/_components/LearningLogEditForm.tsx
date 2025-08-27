@@ -76,4 +76,4 @@ export const LearningLogEditForm: React.FC<Props> = React.memo(
   },
 );
 
-LearningLogEditForm.displayName = "LearningLogForm";
+LearningLogEditForm.displayName = "LearningLogEditForm";

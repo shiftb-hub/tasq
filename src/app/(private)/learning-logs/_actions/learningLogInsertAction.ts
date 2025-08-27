@@ -46,8 +46,8 @@ export const learningLogInsertAction = async (
 
     return { success: true } satisfies LearningLogInsertActionResult;
   } catch (e) {
-    dumpError(e, "学習ログの新規作成処理 (ServerAction) ", {
-      user,
+    dumpError(e, "学習ログの新規作成処理 (ServerAction)", {
+      userId: user?.id,
       learningLogInsertRequest,
     });
     return {

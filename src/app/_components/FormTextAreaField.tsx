@@ -40,7 +40,7 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
   placeholder,
   registerOnChange,
   registerOnBlur,
-  disabled, // Change disabled to isDisabled
+  disabled,
   templateStorageKey,
   ...textareaProps
 }: Props<T>) => {
