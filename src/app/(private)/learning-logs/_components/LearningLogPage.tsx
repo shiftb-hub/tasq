@@ -68,10 +68,8 @@ export const LearningLogPage: React.FC<Props> = ({ batch }) => {
   }, []);
 
   const onNewLearningLog = useCallback(async () => {
-    // TODO: Implement create learning log action in another branch
-    // NOTE: Temporary console output for verification — remove before production
-    console.log("[DEV] New learning log creation");
-  }, []);
+    router.push("/learning-logs/new");
+  }, [router]);
 
   const onPageChange = useCallback(
     async (page: number) => {
