@@ -47,7 +47,8 @@ export const LearningLogPage: React.FC<Props> = ({ batch }) => {
     setRandomSubTitle(
       `～ ${subTitles[Math.floor(Math.random() * subTitles.length)]} ～`,
     );
-  }, []);
+    router.prefetch("/learning-logs/new");
+  }, [router]);
 
   useEffect(() => {
     setLogs(batch.learningLogs);

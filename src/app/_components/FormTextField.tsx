@@ -87,6 +87,7 @@ const FormTextFieldComponent = <T extends FieldValues>({
       const newValue = template + (currentValue ? ` ${currentValue}` : "");
       setValue(fieldKey, newValue as PathValue<T, Path<T>>, {
         shouldValidate: true,
+        shouldDirty: true,
       });
     }
   };

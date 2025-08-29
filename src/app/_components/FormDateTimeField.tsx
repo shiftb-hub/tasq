@@ -131,6 +131,7 @@ export const FormDateTimeField = <
         const newDate = setTimeToDate(currentDate, timeValue);
         form.setValue(fieldKey, newDate as PathValue<T, TName>, {
           shouldValidate: true,
+          shouldDirty: true,
         });
       }
     },
@@ -140,6 +141,7 @@ export const FormDateTimeField = <
   const handleClearClick = useCallback(() => {
     form.setValue(fieldKey, undefined as PathValue<T, TName>, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   }, [form, fieldKey]);
 
@@ -150,10 +152,12 @@ export const FormDateTimeField = <
         const newDate = setTimeUnset(date);
         form.setValue(fieldKey, newDate as PathValue<T, TName>, {
           shouldValidate: true,
+          shouldDirty: true,
         });
       } else {
         form.setValue(fieldKey, undefined as PathValue<T, TName>, {
           shouldValidate: true,
+          shouldDirty: true,
         });
       }
     },

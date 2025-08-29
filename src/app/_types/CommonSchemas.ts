@@ -74,17 +74,27 @@ export const learningLogReflectionsSchema = z
   .trim()
   .max(1024, "内容は1024文字以内で入力してください。");
 
+const MIN_DATE = new Date("2025-01-01T00:00:00.000Z");
+const MAX_DATE = new Date("2030-12-31T23:59:59.999Z");
 export const learningLogDateSchema = z
-  .union([z.coerce.date(), z.date(), z.undefined()])
+  .union([z.date(), z.coerce.date()])
+  .optional()
   .refine(
-    (date) =>
-      date === undefined ||
-      (date >= new Date("2025-01-01") && date <= new Date("2030-12-31")),
-    {
-      message: "2025年1月1日から2030年12月31日の間にしてください。",
-    },
-  )
-  .optional();
+    (date) => date === undefined || (date >= MIN_DATE && date <= MAX_DATE),
+    { message: "2025年1月1日から2030年12月31日の間にしてください。" },
+  );
+
+// export const learningLogDateSchema = z
+//   .union([z.coerce.date(), z.date(), z.undefined()])
+//   .refine(
+//     (date) =>
+//       date === undefined ||
+//       (date >= new Date("2025-01-01") && date <= new Date("2030-12-31")),
+//     {
+//       message: "2025年1月1日から2030年12月31日の間にしてください。",
+//     },
+//   )
+//   .optional();
 
 export const learningLogSpentMinutesSchema = z.preprocess(
   (val) => {

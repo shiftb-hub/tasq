@@ -16,7 +16,7 @@ const c_StartedAt = "startedAt" as const;
 const c_EndedAt = "endedAt" as const;
 
 type Props = {
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   disabled: boolean;
   submitButtonText: string;
   errorMessage?: string;
