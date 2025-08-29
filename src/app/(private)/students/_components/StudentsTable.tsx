@@ -162,7 +162,7 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>受講生</TableHead>
+                <TableHead className="pl-6">受講生</TableHead>
                 <TableHead>SlackID</TableHead>
                 <TableHead
                   className={`cursor-pointer transition-colors select-none hover:bg-gray-50 ${
@@ -254,7 +254,7 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
             <TableBody>
               {paginatedStudents.map((student) => (
                 <TableRow key={student.id}>
-                  <TableCell>
+                  <TableCell className="pl-6">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
                         <AvatarImage
