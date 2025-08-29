@@ -86,9 +86,9 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
   const handleSort = (field: SortableField) => {
     if (sortField === field) {
       // 同じフィールドの場合は方向を切り替え
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
-      // 異なるフィールドの場合は新しいフィールドでデフォルト方向（全て数値なので降順）
+      // 異なるフィールドの場合は新しいフィールドでデフォルト方向
       setSortField(field);
       setSortDirection("desc");
     }
