@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/app/_components/ui/button";
 import { Card, CardContent } from "@/app/_components/ui/card";
@@ -14,7 +14,14 @@ import {
   TableRow,
 } from "@/app/_components/ui/table";
 import { Badge } from "@/app/_components/ui/badge";
-import { FiBookOpen, FiStar, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
+import {
+  FiBookOpen,
+  FiStar,
+  FiAlertCircle,
+  FiCheckCircle,
+  FiChevronUp,
+  FiChevronDown,
+} from "react-icons/fi";
 import { TaskTrend } from "./TaskTrend";
 import { StudentsPagination } from "./StudentsPagination";
 
@@ -33,6 +40,9 @@ interface Student {
   updatedAt: string;
 }
 
+type SortableField = "currentChapter" | "stuckTasks" | "stuckTasksTrend" | "totalTasks";
+type SortDirection = "asc" | "desc";
+
 interface Props {
   /** フィルタリング済みの受講生データ */
   students: Student[];
@@ -47,6 +57,8 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
   const [favorites, setFavorites] = useState<Set<string>>(
     new Set(students.filter((student) => student.favorite).map((student) => student.id)),
   );
+  const [sortField, setSortField] = useState<SortableField>("stuckTasks");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   // 1ページあたりの表示件数
   const itemsPerPage = 10;
@@ -68,11 +80,68 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
   };
 
   /**
-   * ページネーション
-   * @description フィルタリングされた受講生をページごとに分割
+   * ソート処理
+   * @param field - ソート対象のフィールド
    */
-  const totalPages = Math.ceil(students.length / itemsPerPage);
-  const paginatedStudents = students.slice(
+  const handleSort = (field: SortableField) => {
+    if (sortField === field) {
+      // 同じフィールドの場合は方向を切り替え
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // 異なるフィールドの場合は新しいフィールドでデフォルト方向（全て数値なので降順）
+      setSortField(field);
+      setSortDirection("desc");
+    }
+    // ソート変更時はページを1に戻す
+    setCurrentPage(1);
+  };
+
+  /**
+   * ソート済み受講生データ
+   * @description フィルタリング済みデータをソートして返す
+   */
+  const sortedStudents = useMemo(() => {
+    return [...students].sort((a, b) => {
+      let valueA: string | number;
+      let valueB: string | number;
+
+      switch (sortField) {
+        case "currentChapter":
+          valueA = a.currentChapter;
+          valueB = b.currentChapter;
+          break;
+        case "stuckTasks":
+          valueA = a.stuckTasks;
+          valueB = b.stuckTasks;
+          break;
+        case "stuckTasksTrend":
+          valueA = a.stuckTasksTrend;
+          valueB = b.stuckTasksTrend;
+          break;
+        case "totalTasks":
+          valueA = a.totalTasks;
+          valueB = b.totalTasks;
+          break;
+        default:
+          return 0;
+      }
+
+      if (valueA < valueB) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+      if (valueA > valueB) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [students, sortField, sortDirection]);
+
+  /**
+   * ページネーション
+   * @description ソート済みの受講生をページごとに分割
+   */
+  const totalPages = Math.ceil(sortedStudents.length / itemsPerPage);
+  const paginatedStudents = sortedStudents.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
@@ -95,10 +164,90 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
               <TableRow>
                 <TableHead>受講生</TableHead>
                 <TableHead>SlackID</TableHead>
-                <TableHead>取組中の章</TableHead>
-                <TableHead>困っているタスク</TableHead>
-                <TableHead>お困りタスク動向</TableHead>
-                <TableHead>全タスク数</TableHead>
+                <TableHead
+                  className={`cursor-pointer transition-colors select-none hover:bg-gray-50 ${
+                    sortField === "currentChapter" ? "bg-blue-50 font-semibold text-blue-700" : ""
+                  }`}
+                  onClick={() => handleSort("currentChapter")}
+                >
+                  <div className="flex items-center gap-2">
+                    取組中の章
+                    {sortField === "currentChapter" ? (
+                      sortDirection === "asc" ? (
+                        <FiChevronUp className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <FiChevronDown className="h-4 w-4 text-blue-600" />
+                      )
+                    ) : (
+                      <div className="h-4 w-4 opacity-30">
+                        <FiChevronUp className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className={`cursor-pointer transition-colors select-none hover:bg-gray-50 ${
+                    sortField === "stuckTasks" ? "bg-blue-50 font-semibold text-blue-700" : ""
+                  }`}
+                  onClick={() => handleSort("stuckTasks")}
+                >
+                  <div className="flex items-center gap-2">
+                    困っているタスク
+                    {sortField === "stuckTasks" ? (
+                      sortDirection === "asc" ? (
+                        <FiChevronUp className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <FiChevronDown className="h-4 w-4 text-blue-600" />
+                      )
+                    ) : (
+                      <div className="h-4 w-4 opacity-30">
+                        <FiChevronUp className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className={`cursor-pointer transition-colors select-none hover:bg-gray-50 ${
+                    sortField === "stuckTasksTrend" ? "bg-blue-50 font-semibold text-blue-700" : ""
+                  }`}
+                  onClick={() => handleSort("stuckTasksTrend")}
+                >
+                  <div className="flex items-center gap-2">
+                    お困りタスク動向
+                    {sortField === "stuckTasksTrend" ? (
+                      sortDirection === "asc" ? (
+                        <FiChevronUp className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <FiChevronDown className="h-4 w-4 text-blue-600" />
+                      )
+                    ) : (
+                      <div className="h-4 w-4 opacity-30">
+                        <FiChevronUp className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className={`cursor-pointer transition-colors select-none hover:bg-gray-50 ${
+                    sortField === "totalTasks" ? "bg-blue-50 font-semibold text-blue-700" : ""
+                  }`}
+                  onClick={() => handleSort("totalTasks")}
+                >
+                  <div className="flex items-center gap-2">
+                    全タスク数
+                    {sortField === "totalTasks" ? (
+                      sortDirection === "asc" ? (
+                        <FiChevronUp className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <FiChevronDown className="h-4 w-4 text-blue-600" />
+                      )
+                    ) : (
+                      <div className="h-4 w-4 opacity-30">
+                        <FiChevronUp className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                </TableHead>
                 <TableHead>お気に入り</TableHead>
               </TableRow>
             </TableHeader>
