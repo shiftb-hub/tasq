@@ -2,6 +2,7 @@
 
 # Claude
 /.claude/settings.local.json
+.mcp.json
 
 # dependencies
 /node_modules

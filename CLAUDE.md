@@ -158,6 +158,14 @@ DIRECT_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 - Custom UI components in `_components/ui/`
 - Responsive design patterns with mobile-first approach
 
+### TypeScript Rules
+- **`any` type is strictly prohibited** in this codebase
+- Always use proper type definitions instead of `any`
+- For database transactions, use `DbClient = PrismaClient | Prisma.TransactionClient`
+- For unknown types, use `unknown` and type guards for safety
+- Use utility types (`Partial<T>`, `Pick<T>`, `Omit<T>`) for complex type manipulations
+- When dealing with external APIs, define proper interfaces or use type assertions with validation
+
 ### Error Handling
 - Centralized error types in `_types/AppErrorCodes.ts`
 - API responses use standardized `ApiResponse<T>` format

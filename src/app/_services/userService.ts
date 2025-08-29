@@ -1,6 +1,7 @@
 import { Role, PrismaClient } from "@prisma/client";
 import { Prisma as PRS } from "@prisma/client";
 import { AppUserNotFoundError } from "@/app/_libs/errors";
+import { DbClient } from "@/app/_types/Services";
 
 /**
  * Prisma UserのincludeとselectオプションをサポートするためのTypeヘルパー
@@ -14,8 +15,6 @@ export type UserReturnType<
   include?: T;
   select?: U;
 };
-
-type DbClient = PrismaClient | PRS.TransactionClient;
 
 /**
  * UserのCRUD操作を行なうサービスクラス
@@ -70,6 +69,35 @@ class UserService {
     options?: UserReturnType<T, U>,
   ): Promise<PRS.UserGetPayload<{ include: T; select: U }>[]> {
     return (await this.prisma.user.findMany({
+      ...options,
+    })) as PRS.UserGetPayload<{ include: T; select: U }>[];
+  }
+
+  /**
+   * 名前による完全一致でユーザーを検索
+   * @template T extends PRS.UserInclude - includeオプションの型
+   * @template U extends PRS.UserSelect - selectオプションの型
+   * @param name - 検索するユーザー名（完全一致）
+   * @param options - Prismaクエリオプション（include、selectなど）
+   * @returns 一致するユーザーの配列のPromise
+   * @example
+   * ```typescript
+   * // 名前で検索
+   * const users = await userService.getByName("田中太郎");
+   * console.log(`見つかったユーザー数: ${users.length}`);
+   *
+   * // 特定フィールドのみ選択
+   * const usersWithIdOnly = await userService.getByName("田中太郎", {
+   *   select: { id: true, name: true }
+   * });
+   * ```
+   */
+  public async getByName<T extends PRS.UserInclude, U extends PRS.UserSelect>(
+    name: string,
+    options?: UserReturnType<T, U>,
+  ): Promise<PRS.UserGetPayload<{ include: T; select: U }>[]> {
+    return (await this.prisma.user.findMany({
+      where: { name },
       ...options,
     })) as PRS.UserGetPayload<{ include: T; select: U }>[];
   }
