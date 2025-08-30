@@ -27,7 +27,7 @@ export const mockStudents = [
     profileImageKey: null,
     role: "STUDENT",
     currentChapter: 8,
-    slackId: "sato_hanako",
+    slackId: null,
     favorite: true,
     totalTasks: 18,
     stuckTasks: 0,
