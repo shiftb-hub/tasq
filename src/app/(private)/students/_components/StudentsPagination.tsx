@@ -20,7 +20,7 @@ interface Props {
  * 受講生用ページネーションコンポーネント
  * @description ShadcnUIを使用したページング機能
  */
-export const StudentsPagination: React.FC<Props> = ({ currentPage, totalPages, onPageChange }) => {
+export const StudentsPagination = ({ currentPage, totalPages, onPageChange }: Props) => {
   const visiblePages = useMemo(() => {
     const pages: (number | "ellipsis")[] = [];
     const maxVisible = 5;

@@ -21,7 +21,7 @@ interface Props {
  * 受講生検索・フィルターコンポーネント
  * @description 受講生一覧の検索とフィルタリング機能を提供
  */
-export const StudentsSearchFilter: React.FC<Props> = ({ onFilterChange }) => {
+export const StudentsSearchFilter = ({ onFilterChange }: Props) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [chapterFilter, setChapterFilter] = useState("all");
 

@@ -52,7 +52,7 @@ interface Props {
  * 受講生テーブル表示コンポーネント
  * @description 受講生の一覧をテーブル形式で表示し、ページネーション機能を提供
  */
-export const StudentsTable: React.FC<Props> = ({ students }) => {
+export const StudentsTable = ({ students }: Props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [favorites, setFavorites] = useState<Set<string>>(
     new Set(students.filter((student) => student.favorite).map((student) => student.id)),

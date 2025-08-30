@@ -11,7 +11,7 @@ import { StudentsTable } from "./_components/StudentsTable";
  * 受講生一覧ページ
  * @description 学習進捗と受講生情報を管理するページ
  */
-const StudentsPage: React.FC = () => {
+const StudentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [chapterFilter, setChapterFilter] = useState("all");
 

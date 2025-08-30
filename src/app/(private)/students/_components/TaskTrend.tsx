@@ -17,7 +17,7 @@ interface Props {
  * お困りタスク動向表示コンポーネント
  * @description タスクの変化量を視覚的に表示
  */
-export const TaskTrend: React.FC<Props> = ({ trend }) => {
+export const TaskTrend = ({ trend }: Props) => {
   const { text, color } = getTrendInfo(trend);
 
   return (
