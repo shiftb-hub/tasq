@@ -6,5 +6,5 @@ interface Props {
 }
 
 export const PageSubTitle: React.FC<Props> = ({ children, className }) => {
-  return <p className={cn("text-lg text-gray-600", className)}>{children}</p>;
+  return <p className={cn("text-center text-lg text-gray-600", className)}>{children}</p>;
 };

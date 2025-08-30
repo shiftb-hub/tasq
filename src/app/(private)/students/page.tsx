@@ -44,10 +44,8 @@ const StudentsPage: React.FC = () => {
 
   return (
     <div className="container mx-auto space-y-6 p-6 py-20">
-      <div className="flex flex-col items-start text-left">
-        <PageTitle className="mb-2">受講生一覧</PageTitle>
-        <PageSubTitle>学習進捗と受講生情報を管理</PageSubTitle>
-      </div>
+      <PageTitle className="mb-2">受講生一覧</PageTitle>
+      <PageSubTitle>学習進捗と受講生情報を管理</PageSubTitle>
 
       {/* 検索・フィルター */}
       <StudentsSearchFilter onFilterChange={handleFilterChange} />
