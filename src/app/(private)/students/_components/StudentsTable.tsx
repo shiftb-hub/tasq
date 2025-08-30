@@ -1,19 +1,8 @@
 "use client";
 
+// React ライブラリ
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Button } from "@/app/_components/ui/button";
-import { Card, CardContent } from "@/app/_components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/app/_components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/app/_components/ui/table";
-import { Badge } from "@/app/_components/ui/badge";
 import {
   FiBookOpen,
   FiStar,
@@ -22,8 +11,24 @@ import {
   FiChevronUp,
   FiChevronDown,
 } from "react-icons/fi";
-import { TaskTrend } from "./TaskTrend";
+
+// UIコンポーネント
+import { Avatar, AvatarFallback, AvatarImage } from "@/app/_components/ui/avatar";
+import { Badge } from "@/app/_components/ui/badge";
+import { Button } from "@/app/_components/ui/button";
+import { Card, CardContent } from "@/app/_components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/app/_components/ui/table";
+
+// ローカルコンポーネント
 import { StudentsPagination } from "./StudentsPagination";
+import { TaskTrend } from "./TaskTrend";
 
 interface Student {
   id: string;
@@ -31,7 +36,7 @@ interface Student {
   profileImageKey: string | null;
   role: string;
   currentChapter: number;
-  slackId: string;
+  slackId: string | null;
   favorite: boolean;
   totalTasks: number;
   stuckTasks: number;
@@ -274,7 +279,7 @@ export const StudentsTable = ({ students }: Props) => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm">{student.slackId}</span>
+                      <span className="text-sm">{student.slackId ?? "未設定"}</span>
                     </div>
                   </TableCell>
                   <TableCell>

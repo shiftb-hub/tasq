@@ -33,7 +33,7 @@ const StudentsPage = () => {
     return mockStudents.filter((student) => {
       const matchesSearch =
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.slackId.toLowerCase().includes(searchTerm.toLowerCase());
+        (student.slackId ?? "").toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesChapter =
         chapterFilter === "all" || student.currentChapter === parseInt(chapterFilter);
