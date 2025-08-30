@@ -61,7 +61,7 @@ export const StudentsTable: React.FC<Props> = ({ students }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   // 1ページあたりの表示件数
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   /**
    * お気に入り状態を切り替える
