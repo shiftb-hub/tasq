@@ -27,7 +27,7 @@ import {
 } from "@/app/_components/ui/table";
 
 // ローカルコンポーネント
-import { StudentsPagination } from "./StudentsPagination";
+import { PaginationView } from "@/app/_components/PaginationView";
 import { TaskTrend } from "./TaskTrend";
 
 interface Student {
@@ -339,10 +339,10 @@ export const StudentsTable = ({ students }: Props) => {
       </Card>
 
       {/* ページネーション */}
-      <StudentsPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
+      <PaginationView
+        pageInfo={{ page: currentPage, perPage: itemsPerPage, total: sortedStudents.length }}
         onPageChange={handlePageChange}
+        disabled={false}
       />
     </div>
   );
