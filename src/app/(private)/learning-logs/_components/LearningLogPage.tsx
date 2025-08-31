@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 // UIコンポーネント・アイコン
 import { Button } from "@/app/_components/ui/button";
 import { LearningLogTable } from "./LearningLogTable";
-import { PaginationView } from "./PaginationView";
+import { PaginationView } from "@/app/_components/PaginationView";
 import { useLearningLogColumns } from "../_hooks/useLearningLogColumns";
 import { MdOutlinePostAdd } from "react-icons/md";
 import { Skeleton } from "@/app/_components/ui/skeleton";
