@@ -18,7 +18,8 @@ export const GET = async () => {
   try {
     console.log("認証処理を開始します");
     const user = await authenticateUser();
-    console.log("認証成功:", user.id, user.name, user.role);
+    // NOTE: 本番では詳細な個人情報を記録しない
+    console.debug("認証成功", { userId: user.id });
 
     console.log("タスク取得処理を開始します");
     const tasks = await taskService.getTasks(user);
@@ -28,6 +29,23 @@ export const GET = async () => {
   } catch (error) {
     console.error("タスク取得でエラーが発生しました:", error);
     dumpError(error, "タスク一覧取得");
+
+    // 認証エラーのチェック
+    if (
+      error instanceof Error &&
+      (
+        error.message === AppErrorCodes.UNAUTHORIZED ||
+        error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
+        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
+      )
+    ) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+          .withDescription("Authentication required")
+          .build(),
+        { status: 401 }
+      );
+    }
 
     // エラーメッセージがAppErrorCodesの値かチェック
     if (error instanceof Error) {
@@ -88,6 +106,23 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json(ResBuilder.success(task).build(), { status: 201 });
   } catch (error) {
     dumpError(error, "タスク作成");
+
+    // 認証エラーのチェック
+    if (
+      error instanceof Error &&
+      (
+        error.message === AppErrorCodes.UNAUTHORIZED ||
+        error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
+        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
+      )
+    ) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+          .withDescription("Authentication required")
+          .build(),
+        { status: 401 }
+      );
+    }
 
     // エラーメッセージがAppErrorCodesの値かチェック
     if (error instanceof Error) {

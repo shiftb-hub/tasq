@@ -45,7 +45,7 @@ export const GET = async () => {
     });
     console.log("ユーザー取得成功:", users.length, "件");
 
-    return NextResponse.json(ResBuilder.success<User[]>(users).build());
+    return NextResponse.json(ResBuilder.success(users).build());
   } catch (e) {
     console.error("ユーザー取得でエラーが発生しました:", e);
     if (

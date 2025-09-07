@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateAppUser as authenticateUser } from "@/app/_libs/authenticateUser";
 import { ApiResponseBuilder as ResBuilder } from "@/app/_types/ApiResponse";
 import { AppErrorCodes } from "@/app/_types/AppErrorCodes";
-import { dumpException } from "@/app/_libs/dumpException";
+import { dumpError } from "@/app/_libs/dumpException";
 import { CreateStatusRequestSchema } from "@/app/_types/StatusRequest";
 import * as statusService from "@/app/_services/statusService";
 
@@ -21,7 +21,7 @@ export const GET = async () => {
       ResBuilder.success(statuses).build()
     );
   } catch (error) {
-    dumpException(error);
+    dumpError(error, "Status GET");
     
     return NextResponse.json(
       ResBuilder.error(AppErrorCodes.INTERNAL_SERVER_ERROR)
@@ -46,7 +46,7 @@ export const POST = async (request: NextRequest) => {
     if (!validationResult.success) {
       return NextResponse.json(
         ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
-          .withDescription(validationResult.error.errors[0].message)
+          .withDescription(validationResult.error.issues[0].message)
           .build(),
         { status: 400 }
       );
@@ -59,7 +59,7 @@ export const POST = async (request: NextRequest) => {
       { status: 201 }
     );
   } catch (error) {
-    dumpException(error);
+    dumpError(error, "Status POST");
     
     if (error instanceof Error && error.message === AppErrorCodes.ADMIN_REQUIRED) {
       return NextResponse.json(

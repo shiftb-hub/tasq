@@ -69,9 +69,10 @@ src/app/
    - `publicPaths`は`app-config.ts`で定義
 
 2. **認証済みユーザー取得**:
+
    ```typescript
-   import { authenticateUser } from "@/app/_libs/authenticateUser";
-   const user = await authenticateUser();
+   import { authenticateAppUser } from "@/app/_libs/authenticateUser";
+   const user = await authenticateAppUser();
    ```
 
 3. **Server Actions**:
@@ -80,6 +81,7 @@ src/app/
 ## データベース設計
 
 主要モデル:
+
 - **User**: ユーザー情報 (生徒/TA/講師/管理者)
 - **Task**: タスク情報
 - **Status**: タスクステータス
@@ -96,6 +98,7 @@ src/app/
 ## フォームバリデーション
 
 Zodスキーマを使用した型安全なバリデーション:
+
 - `LoginRequest.ts`: ログインフォーム
 - `SignupRequest.ts`: サインアップフォーム
 - `ProfileUpdateRequest.ts`: プロフィール更新
@@ -103,6 +106,7 @@ Zodスキーマを使用した型安全なバリデーション:
 ## 環境変数
 
 必須の環境変数 (`.env`):
+
 - `NEXT_PUBLIC_APP_BASE_URL`: アプリケーションのベースURL
 - `DATABASE_URL`, `DIRECT_URL`: Prisma接続文字列
 - `NEXT_PUBLIC_SUPABASE_URL`: SupabaseプロジェクトURL

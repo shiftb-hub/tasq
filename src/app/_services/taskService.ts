@@ -1,10 +1,7 @@
 import prisma from "@/app/_libs/prisma";
 import { Role, User, Prisma } from "@prisma/client";
 import { AppErrorCodes } from "@/app/_types/AppErrorCodes";
-import {
-  CreateTaskRequest,
-  UpdateTaskRequest
-} from "@/app/_types/TaskRequest";
+import { CreateTaskRequest, UpdateTaskRequest } from "@/app/_types/TaskRequest";
 
 /**
  * タスク一覧取得
@@ -24,18 +21,18 @@ export const getTasks = async (user: User) => {
       status: true,
       tags: {
         include: {
-          tag: true
-        }
+          tag: true,
+        },
       },
       activityTypes: {
         include: {
-          activityType: true
-        }
-      }
+          activityType: true,
+        },
+      },
     },
     orderBy: {
-      createdAt: "desc"
-    }
+      createdAt: "desc",
+    },
   });
 };
 
@@ -50,15 +47,15 @@ export const getTask = async (taskId: string, user: User) => {
       status: true,
       tags: {
         include: {
-          tag: true
-        }
+          tag: true,
+        },
       },
       activityTypes: {
         include: {
-          activityType: true
-        }
-      }
-    }
+          activityType: true,
+        },
+      },
+    },
   });
 
   if (!task) {
@@ -80,15 +77,17 @@ export const getTask = async (taskId: string, user: User) => {
  * タスク作成
  */
 export const createTask = async (data: CreateTaskRequest, user: User) => {
-  // デフォルトステータスの取得
+  // デフォルトステータスの取得（最小orderにフォールバック）
   let statusId = data.statusId;
   if (!statusId) {
-    const todoStatus = await prisma.status.findFirst({
-      where: { name: "todo" }
+    const firstStatus = await prisma.status.findFirst({
+      orderBy: { order: "asc" },
+      select: { id: true },
     });
-    if (todoStatus) {
-      statusId = todoStatus.id;
+    if (!firstStatus) {
+      throw new Error(AppErrorCodes.STATUS_NOT_FOUND);
     }
+    statusId = firstStatus.id;
   }
 
   // ユーザーID設定（TEACHER/ADMINのみ他ユーザーのタスク作成可能）
@@ -109,26 +108,26 @@ export const createTask = async (data: CreateTaskRequest, user: User) => {
         relatedChapter: data.relatedChapter,
         startedAt: data.startedAt ? new Date(data.startedAt) : undefined,
         endedAt: data.endedAt ? new Date(data.endedAt) : undefined,
-      }
+      },
     });
 
     // タグ関連付け
-    if (data.tagId) {
-      await tx.taskTag.create({
-        data: {
+    if (data.tagIds && data.tagIds.length > 0) {
+      await tx.taskTag.createMany({
+        data: data.tagIds.map(tagId => ({
           taskId: task.id,
-          tagId: data.tagId
-        }
+          tagId,
+        })),
       });
     }
 
     // ActivityType関連付け
-    if (data.activityTypeId) {
-      await tx.taskActivityType.create({
-        data: {
+    if (data.activityTypeIds && data.activityTypeIds.length > 0) {
+      await tx.taskActivityType.createMany({
+        data: data.activityTypeIds.map(activityTypeId => ({
           taskId: task.id,
-          activityTypeId: data.activityTypeId
-        }
+          activityTypeId,
+        })),
       });
     }
 
@@ -140,15 +139,15 @@ export const createTask = async (data: CreateTaskRequest, user: User) => {
         status: true,
         tags: {
           include: {
-            tag: true
-          }
+            tag: true,
+          },
         },
         activityTypes: {
           include: {
-            activityType: true
-          }
-        }
-      }
+            activityType: true,
+          },
+        },
+      },
     });
   });
 };
@@ -156,7 +155,11 @@ export const createTask = async (data: CreateTaskRequest, user: User) => {
 /**
  * タスク更新
  */
-export const updateTask = async (taskId: string, data: UpdateTaskRequest, user: User) => {
+export const updateTask = async (
+  taskId: string,
+  data: UpdateTaskRequest,
+  user: User,
+) => {
   // 既存タスクの取得と権限チェック
   const existingTask = await getTask(taskId, user);
 
@@ -172,39 +175,39 @@ export const updateTask = async (taskId: string, data: UpdateTaskRequest, user: 
         relatedChapter: data.relatedChapter,
         startedAt: data.startedAt ? new Date(data.startedAt) : undefined,
         endedAt: data.endedAt ? new Date(data.endedAt) : undefined,
-      }
+      },
     });
 
     // タグの更新
-    if (data.tagId !== undefined) {
+    if (data.tagIds !== undefined) {
       // 既存のタグを削除
       await tx.taskTag.deleteMany({
-        where: { taskId }
+        where: { taskId },
       });
       // 新しいタグを追加
-      if (data.tagId) {
-        await tx.taskTag.create({
-          data: {
+      if (data.tagIds && data.tagIds.length > 0) {
+        await tx.taskTag.createMany({
+          data: data.tagIds.map(tagId => ({
             taskId,
-            tagId: data.tagId
-          }
+            tagId,
+          })),
         });
       }
     }
 
     // ActivityTypeの更新
-    if (data.activityTypeId !== undefined) {
+    if (data.activityTypeIds !== undefined) {
       // 既存のActivityTypeを削除
       await tx.taskActivityType.deleteMany({
-        where: { taskId }
+        where: { taskId },
       });
       // 新しいActivityTypeを追加
-      if (data.activityTypeId) {
-        await tx.taskActivityType.create({
-          data: {
+      if (data.activityTypeIds && data.activityTypeIds.length > 0) {
+        await tx.taskActivityType.createMany({
+          data: data.activityTypeIds.map(activityTypeId => ({
             taskId,
-            activityTypeId: data.activityTypeId
-          }
+            activityTypeId,
+          })),
         });
       }
     }
@@ -217,15 +220,15 @@ export const updateTask = async (taskId: string, data: UpdateTaskRequest, user: 
         status: true,
         tags: {
           include: {
-            tag: true
-          }
+            tag: true,
+          },
         },
         activityTypes: {
           include: {
-            activityType: true
-          }
-        }
-      }
+            activityType: true,
+          },
+        },
+      },
     });
   });
 };
@@ -239,7 +242,7 @@ export const deleteTask = async (taskId: string, user: User) => {
 
   // カスケード削除が設定されているため、関連データも自動削除される
   await prisma.task.delete({
-    where: { id: taskId }
+    where: { id: taskId },
   });
 
   return { success: true };

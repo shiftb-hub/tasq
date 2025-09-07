@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticateAppUser as authenticateUser } from "@/app/_libs/authenticateUser";
 import { ApiResponseBuilder as ResBuilder } from "@/app/_types/ApiResponse";
 import { AppErrorCodes } from "@/app/_types/AppErrorCodes";
@@ -20,12 +21,38 @@ type Props = {
  */
 export const GET = async (request: NextRequest, { params }: Props) => {
   try {
+    const idResult = z.string().uuid().safeParse(params.id);
+    if (!idResult.success) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
+          .withDescription("Invalid task id")
+          .build(),
+        { status: 400 },
+      );
+    }
     const user = await authenticateUser();
     const task = await taskService.getTask(params.id, user);
 
     return NextResponse.json(ResBuilder.success(task).build());
   } catch (error) {
     dumpError(error, "タスク詳細取得");
+
+    // 認証エラーのチェック
+    if (
+      error instanceof Error &&
+      (
+        error.message === AppErrorCodes.UNAUTHORIZED ||
+        error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
+        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
+      )
+    ) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+          .withDescription("Authentication required")
+          .build(),
+        { status: 401 }
+      );
+    }
 
     if (
       error instanceof Error &&
@@ -66,6 +93,15 @@ export const GET = async (request: NextRequest, { params }: Props) => {
  */
 export const PUT = async (request: NextRequest, { params }: Props) => {
   try {
+    const idResult = z.string().uuid().safeParse(params.id);
+    if (!idResult.success) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
+          .withDescription("Invalid task id")
+          .build(),
+        { status: 400 },
+      );
+    }
     const user = await authenticateUser();
     const body = await request.json();
 
@@ -89,6 +125,23 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
     return NextResponse.json(ResBuilder.success(task).build());
   } catch (error) {
     dumpError(error, "タスク更新");
+
+    // 認証エラーのチェック
+    if (
+      error instanceof Error &&
+      (
+        error.message === AppErrorCodes.UNAUTHORIZED ||
+        error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
+        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
+      )
+    ) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+          .withDescription("Authentication required")
+          .build(),
+        { status: 401 }
+      );
+    }
 
     if (
       error instanceof Error &&
@@ -129,12 +182,38 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
  */
 export const DELETE = async (request: NextRequest, { params }: Props) => {
   try {
+    const idResult = z.string().uuid().safeParse(params.id);
+    if (!idResult.success) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
+          .withDescription("Invalid task id")
+          .build(),
+        { status: 400 },
+      );
+    }
     const user = await authenticateUser();
     await taskService.deleteTask(params.id, user);
 
     return NextResponse.json(ResBuilder.success({ success: true }).build());
   } catch (error) {
     dumpError(error, "タスク削除");
+
+    // 認証エラーのチェック
+    if (
+      error instanceof Error &&
+      (
+        error.message === AppErrorCodes.UNAUTHORIZED ||
+        error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
+        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
+      )
+    ) {
+      return NextResponse.json(
+        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+          .withDescription("Authentication required")
+          .build(),
+        { status: 401 }
+      );
+    }
 
     if (
       error instanceof Error &&

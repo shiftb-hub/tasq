@@ -13,8 +13,8 @@
 
 ### 3.1 タスク操作権限
 
-| 操作 | STUDENT | TA | TEACHER | ADMIN |
-|------|---------|-----|---------|--------|
+| 操作 | STUDENT               | TA                    | TEACHER       | ADMIN         |
+| ---- | --------------------- | --------------------- | ------------- | ------------- |
 | 作成 | ○（自分のタスクのみ） | ○（自分のタスクのみ） | ○（全タスク） | ○（全タスク） |
 | 取得 | ○（自分のタスクのみ） | ○（自分のタスクのみ） | ○（全タスク） | ○（全タスク） |
 | 更新 | ○（自分のタスクのみ） | ○（自分のタスクのみ） | ○（全タスク） | ○（全タスク） |
@@ -22,10 +22,10 @@
 
 ### 3.2 マスターデータ操作権限
 
-| 対象 | 作成 | 取得 | 更新 | 削除 |
-|------|------|------|------|------|
-| ステータス | ADMINのみ | 全ユーザー | ADMINのみ | ADMINのみ |
-| タグ | ADMINのみ | 全ユーザー | ADMINのみ | ADMINのみ |
+| 対象         | 作成      | 取得       | 更新      | 削除      |
+| ------------ | --------- | ---------- | --------- | --------- |
+| ステータス   | ADMINのみ | 全ユーザー | ADMINのみ | ADMINのみ |
+| タグ         | ADMINのみ | 全ユーザー | ADMINのみ | ADMINのみ |
 | ActivityType | ADMINのみ | 全ユーザー | ADMINのみ | ADMINのみ |
 
 ## 4. APIエンドポイント仕様
@@ -33,19 +33,22 @@
 ### 4.1 タスクAPI
 
 #### 4.1.1 タスク一覧取得
+
 - **エンドポイント**: `GET /api/tasks`
 - **クエリパラメータ**:
   - `userId?: string` - 特定ユーザーのタスクを取得（TEACHER/ADMINのみ使用可）
   - `statusId?: string` - ステータスでフィルタリング
-  - `tagId?: string` - タグでフィルタリング
-  - `activityTypeId?: string` - ActivityTypeでフィルタリング
+  - `tagIds?: string | string[]` - 1件以上のタグIDでフィルタリング（例: `?tagIds=a&tagIds=b` または `?tagIds=a,b`）
+  - `activityTypeIds?: string | string[]` - 1件以上のActivityType IDでフィルタリング
 - **レスポンス**: タスク配列（関連データ含む）
 
 #### 4.1.2 タスク詳細取得
+
 - **エンドポイント**: `GET /api/tasks/[id]`
 - **レスポンス**: タスク詳細（関連データ含む）
 
 #### 4.1.3 タスク作成
+
 - **エンドポイント**: `POST /api/tasks`
 - **リクエストボディ**:
   ```typescript
@@ -54,8 +57,8 @@
     description?: string;
     userId?: string; // TEACHER/ADMINのみ指定可
     statusId: string; // 未指定時はデフォルト「todo」
-    tagId?: string;
-    activityTypeId?: string;
+    tagIds?: string[];
+    activityTypeIds?: string[];
     relatedChapter?: number;
     startedAt?: string;
     endedAt?: string;
@@ -63,22 +66,27 @@
   ```
 
 #### 4.1.4 タスク更新
+
 - **エンドポイント**: `PUT /api/tasks/[id]`
 - **リクエストボディ**: タスク作成と同様（すべてオプショナル）
 
 #### 4.1.5 タスク削除
+
 - **エンドポイント**: `DELETE /api/tasks/[id]`
 
 ### 4.2 ステータスAPI
 
 #### 4.2.1 ステータス一覧取得
+
 - **エンドポイント**: `GET /api/statuses`
 - **レスポンス**: ステータス配列（orderでソート済み）
 
 #### 4.2.2 ステータス詳細取得
+
 - **エンドポイント**: `GET /api/statuses/[id]`
 
 #### 4.2.3 ステータス作成（ADMINのみ）
+
 - **エンドポイント**: `POST /api/statuses`
 - **リクエストボディ**:
   ```typescript
@@ -90,21 +98,26 @@
   ```
 
 #### 4.2.4 ステータス更新（ADMINのみ）
+
 - **エンドポイント**: `PUT /api/statuses/[id]`
 
 #### 4.2.5 ステータス削除（ADMINのみ）
+
 - **エンドポイント**: `DELETE /api/statuses/[id]`
 
 ### 4.3 タグAPI
 
 #### 4.3.1 タグ一覧取得
+
 - **エンドポイント**: `GET /api/tags`
 - **レスポンス**: タグ配列（orderでソート済み）
 
 #### 4.3.2 タグ詳細取得
+
 - **エンドポイント**: `GET /api/tags/[id]`
 
 #### 4.3.3 タグ作成（ADMINのみ）
+
 - **エンドポイント**: `POST /api/tags`
 - **リクエストボディ**:
   ```typescript
@@ -116,21 +129,26 @@
   ```
 
 #### 4.3.4 タグ更新（ADMINのみ）
+
 - **エンドポイント**: `PUT /api/tags/[id]`
 
 #### 4.3.5 タグ削除（ADMINのみ）
+
 - **エンドポイント**: `DELETE /api/tags/[id]`
 
 ### 4.4 ActivityType API
 
 #### 4.4.1 ActivityType一覧取得
+
 - **エンドポイント**: `GET /api/activity_types`
 - **レスポンス**: ActivityType配列（orderでソート済み）
 
 #### 4.4.2 ActivityType詳細取得
+
 - **エンドポイント**: `GET /api/activity_types/[id]`
 
 #### 4.4.3 ActivityType作成（ADMINのみ）
+
 - **エンドポイント**: `POST /api/activity_types`
 - **リクエストボディ**:
   ```typescript
@@ -142,9 +160,11 @@
   ```
 
 #### 4.4.4 ActivityType更新（ADMINのみ）
+
 - **エンドポイント**: `PUT /api/activity_types/[id]`
 
 #### 4.4.5 ActivityType削除（ADMINのみ）
+
 - **エンドポイント**: `DELETE /api/activity_types/[id]`
 
 ## 5. レスポンス形式
@@ -155,16 +175,16 @@
 // 成功時
 {
   success: true,
-  data: T
+  payload: T
 }
 
 // エラー時
 {
   success: false,
+  payload: null,
   error: {
-    code: string,
-    message: string,
-    description?: string
+    appErrorCode: string,
+    description: string
   }
 }
 ```
@@ -187,18 +207,23 @@
 ## 7. 実装上の考慮事項
 
 ### 7.1 トランザクション処理
+
 - タスク作成/更新時のタグ・ActivityType関連付けはトランザクション内で処理
 
 ### 7.2 デフォルト値
+
 - タスク作成時、statusIdが未指定の場合は「todo」ステータスを自動設定
 - 「todo」ステータスはシードデータで作成し、order=1とする
 
 ### 7.3 削除時の整合性
+
 - ステータス、タグ、ActivityType削除時は使用中チェックを実施
 - 使用中の場合はエラーを返却
 
 ### 7.4 関連データの取得
+
 タスク取得時は以下の関連データを含める：
+
 - user（作成者情報）
 - status
 - tags（TaskTag経由）
@@ -207,11 +232,13 @@
 ### 7.5 バリデーション
 
 #### タスク
+
 - title: 必須、最大255文字
 - description: オプショナル、最大1000文字
 - relatedChapter: オプショナル、1以上の整数
 
 #### ステータス/タグ/ActivityType
+
 - name: 必須、最大50文字
 - order: 必須、1以上の整数、ユニーク
 - icon: オプショナル、最大255文字
@@ -241,6 +268,7 @@
 ## 10. テスト要件
 
 各APIに対して以下のテストケースを実装：
+
 - 正常系の動作確認
 - 権限チェックの確認
 - バリデーションエラーの確認
