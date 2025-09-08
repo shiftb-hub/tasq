@@ -40,7 +40,7 @@ const FormTextFieldComponent = <T extends FieldValues>({
   templateStorageKey,
   ...inputProps
 }: Props<T>) => {
-  const { control } = useFormContext<T>();
+  const { control, setValue } = useFormContext<T>();
   const { field } = useController<T, Path<T>>({
     control,
     name: fieldKey,
@@ -122,8 +122,12 @@ const FormTextFieldComponent = <T extends FieldValues>({
     const value = localStorage.getItem(templateStorageKey)?.trim();
     if (!value) return; // テンプレートが空の場合は何もしない
     const parts = [value, currentValue ?? ""].filter(Boolean);
-    field.onChange(parts.join("\n"));
-  }, [inputType, templateStorageKey, currentValue, field]);
+    setValue(fieldKey, parts.join(" ") as PathValue<T, Path<T>>, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  }, [inputType, templateStorageKey, currentValue, setValue, fieldKey]);
 
   // Input要素用の値正規化
   // なぜ: HTML input要素はstring/numberのみ受け付けるため、他の型は空文字に変換して型安全性を確保するため

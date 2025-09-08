@@ -1,7 +1,7 @@
 "use client";
 
 import type { TextareaHTMLAttributes } from "react";
-import type { FieldValues, Path } from "react-hook-form";
+import type { FieldValues, Path, PathValue } from "react-hook-form";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useFormContext, useFormState, useController, useWatch } from "react-hook-form";
@@ -40,7 +40,7 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
   templateStorageKey,
   ...textareaProps
 }: Props<T>) => {
-  const { control } = useFormContext<T>();
+  const { control, setValue } = useFormContext<T>();
   const { field } = useController<T, Path<T>>({
     control,
     name: fieldKey,
@@ -111,8 +111,12 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
     const value = localStorage.getItem(templateStorageKey)?.trim();
     if (!value) return;
     const parts = [value, currentValue ?? ""].filter(Boolean);
-    field.onChange(parts.join("\n"));
-  }, [templateStorageKey, currentValue, field]);
+    setValue(fieldKey, parts.join("\n") as PathValue<T, Path<T>>, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  }, [templateStorageKey, currentValue, setValue, fieldKey]);
 
   return (
     <div className={cn("flex flex-col gap-y-1.5", containerStyles)}>
