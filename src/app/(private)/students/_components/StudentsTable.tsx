@@ -1,7 +1,7 @@
 "use client";
 
 // React ライブラリ
-import { useState, useMemo, useCallback, useTransition } from "react";
+import { useState, useMemo, useCallback, useTransition, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -65,7 +65,8 @@ export const StudentsTable = ({ students }: Props) => {
   const [isPending, startTransition] = useTransition();
 
   // URLクエリから初期値を復元（存在しない場合はデフォルト）
-  const initialPage = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+  const pRaw = Number.parseInt(searchParams.get("page") ?? "1", 10);
+  const initialPage = Number.isFinite(pRaw) && pRaw > 0 ? pRaw : 1;
   const initialSortField = (
     ["currentChapter", "stuckTasks", "stuckTasksTrend", "totalTasks"] as SortableField[]
   ).includes((searchParams.get("sort") as SortableField) ?? "stuckTasks")
@@ -81,6 +82,29 @@ export const StudentsTable = ({ students }: Props) => {
   );
   const [sortField, setSortField] = useState<SortableField>(initialSortField);
   const [sortDirection, setSortDirection] = useState<SortDirection>(initialSortDirection);
+
+  // URL の変更に合わせて state を同期（戻る/進むに追従）
+  useEffect(() => {
+    const pRaw = Number.parseInt(searchParams.get("page") ?? "1", 10);
+    const nextPage = Number.isFinite(pRaw) && pRaw > 0 ? pRaw : 1;
+
+    const allowed: readonly SortableField[] = [
+      "currentChapter",
+      "stuckTasks",
+      "stuckTasksTrend",
+      "totalTasks",
+    ];
+    const s = (searchParams.get("sort") ?? "stuckTasks") as string;
+    const nextField: SortableField = (allowed as readonly string[]).includes(s)
+      ? (s as SortableField)
+      : "stuckTasks";
+
+    const nextDir: SortDirection = (searchParams.get("dir") ?? "desc") === "asc" ? "asc" : "desc";
+
+    setCurrentPage(nextPage);
+    setSortField(nextField);
+    setSortDirection(nextDir);
+  }, [searchParams]);
 
   // 1ページあたりの表示件数
   const itemsPerPage = 5;
