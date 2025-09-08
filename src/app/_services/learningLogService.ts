@@ -189,10 +189,11 @@ class LearningLogService {
     data: LearningLogUpdateRequest,
   ): Promise<LearningLog> {
     await this.getByIdWithOwnershipCheck(userId, logId);
+    const { id: _omitId, ...updateData } = data; // id は更新不可なので除去
     const updatedLearningLog = await this.prisma.learningLog.update({
       where: { id: logId },
       data: {
-        ...data,
+        ...updateData,
         taskId: data.taskId ?? null,
         startedAt: data.startedAt ?? null,
         endedAt: data.endedAt ?? null,
