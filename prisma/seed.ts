@@ -166,42 +166,9 @@ const clearData = async () => {
 // 日本語データ生成のためのユーティリティ
 const japaneseData = {
   // 名前の生成用データ
-  lastNames: [
-    "佐藤",
-    "鈴木",
-    "高橋",
-    "田中",
-    "伊藤",
-    "渡辺",
-    "山本",
-    "中村",
-    "小林",
-    "加藤",
-  ],
-  firstNamesMale: [
-    "太郎",
-    "次郎",
-    "健",
-    "大輔",
-    "翔",
-    "拓海",
-    "悠斗",
-    "陽斗",
-    "大和",
-    "蓮",
-  ],
-  firstNamesFemale: [
-    "花子",
-    "美咲",
-    "愛",
-    "さくら",
-    "葵",
-    "結衣",
-    "陽菜",
-    "凛",
-    "莉子",
-    "美月",
-  ],
+  lastNames: ["佐藤", "鈴木", "高橋", "田中", "伊藤", "渡辺", "山本", "中村", "小林", "加藤"],
+  firstNamesMale: ["太郎", "次郎", "健", "大輔", "翔", "拓海", "悠斗", "陽斗", "大和", "蓮"],
+  firstNamesFemale: ["花子", "美咲", "愛", "さくら", "葵", "結衣", "陽菜", "凛", "莉子", "美月"],
 
   // タスクタイトルのテンプレート
   taskTitles: [
@@ -292,11 +259,7 @@ const createMasterData = async () => {
     statusData.map((status) => prisma.status.create({ data: status })),
   );
 
-  logProgress(
-    "ステータスマスタを生成しました",
-    statuses.length,
-    statusData.length,
-  );
+  logProgress("ステータスマスタを生成しました", statuses.length, statusData.length);
 
   // タグ（感情タグ）マスタの生成
   const tagData = [
@@ -310,9 +273,7 @@ const createMasterData = async () => {
     { name: "自信がない", order: 8, icon: "😰" },
   ];
 
-  const tags = await Promise.all(
-    tagData.map((tag) => prisma.tag.create({ data: tag })),
-  );
+  const tags = await Promise.all(tagData.map((tag) => prisma.tag.create({ data: tag })));
 
   logProgress("タグマスタを生成しました", tags.length, tagData.length);
 
@@ -341,9 +302,7 @@ const createMasterData = async () => {
   ];
 
   const activityTypes = await Promise.all(
-    activityTypeData.map((activityType) =>
-      prisma.activityType.create({ data: activityType }),
-    ),
+    activityTypeData.map((activityType) => prisma.activityType.create({ data: activityType })),
   );
 
   logProgress(
@@ -377,31 +336,23 @@ const createTasks = async (users: User[], statuses: Status[]) => {
 
     for (let i = 0; i < taskCount; i++) {
       // タスクの基本情報生成
-      const title =
-        getRandomElement(japaneseData.taskTitles) + ` - ${student.name}`;
-      const description =
-        Math.random() > 0.3 ? getRandomElement(taskDescriptions) : null;
+      const title = getRandomElement(japaneseData.taskTitles) + ` - ${student.name}`;
+      const description = Math.random() > 0.3 ? getRandomElement(taskDescriptions) : null;
       const status = getRandomElement(statuses);
       const relatedChapter = Math.random() > 0.5 ? getRandomInt(1, 10) : null;
 
       // 日時の生成（過去30日から未来7日の範囲）
       const now = new Date();
-      const createdAt = new Date(
-        now.getTime() - getRandomInt(0, 30) * 24 * 60 * 60 * 1000,
-      );
+      const createdAt = new Date(now.getTime() - getRandomInt(0, 30) * 24 * 60 * 60 * 1000);
       let startedAt = null;
       let endedAt = null;
 
       // ステータスに応じて開始・終了日時を設定
       if (status.name !== "作業中" && Math.random() > 0.3) {
-        startedAt = new Date(
-          createdAt.getTime() + getRandomInt(1, 24) * 60 * 60 * 1000,
-        );
+        startedAt = new Date(createdAt.getTime() + getRandomInt(1, 24) * 60 * 60 * 1000);
 
         if (status.name === "完了" && Math.random() > 0.2) {
-          endedAt = new Date(
-            startedAt.getTime() + getRandomInt(1, 72) * 60 * 60 * 1000,
-          );
+          endedAt = new Date(startedAt.getTime() + getRandomInt(1, 72) * 60 * 60 * 1000);
         }
       }
 
@@ -421,11 +372,7 @@ const createTasks = async (users: User[], statuses: Status[]) => {
       tasks.push(task);
     }
 
-    logProgress(
-      `${student.name}のタスクを作成中`,
-      tasks.length,
-      students.length * 10,
-    );
+    logProgress(`${student.name}のタスクを作成中`, tasks.length, students.length * 10);
   }
 
   console.log(`✅ タスクを${tasks.length}件作成しました`);
@@ -433,20 +380,14 @@ const createTasks = async (users: User[], statuses: Status[]) => {
 };
 
 // タスク関連データ（タグ・アクティビティタイプ）の関連付け
-const createTaskRelations = async (
-  tasks: Task[],
-  tags: Tag[],
-  activityTypes: ActivityType[],
-) => {
+const createTaskRelations = async (tasks: Task[], tags: Tag[], activityTypes: ActivityType[]) => {
   let taskTagCount = 0;
   let taskActivityTypeCount = 0;
 
   for (const task of tasks) {
     // タグの関連付け（1-3個）
     const tagCount = getRandomInt(1, 3);
-    const selectedTags = tags
-      .sort(() => Math.random() - 0.5)
-      .slice(0, tagCount);
+    const selectedTags = tags.sort(() => Math.random() - 0.5).slice(0, tagCount);
 
     for (const tag of selectedTags) {
       await prisma.taskTag.create({
@@ -480,6 +421,46 @@ const createTaskRelations = async (
   );
 };
 
+// 学習ログデータ生成関数のヘルパー関数
+// 引数 date と同日の 00:00〜23:30 の「15分刻み」のうちランダムな開始・終了時刻を生成
+/**
+ * createdAt と同日の 00:00〜23:30(15分刻み)からランダムに startedAt / endedAt を作る。
+ * - 各フィールドは独立に約1/10の確率で null
+ * - nullでない場合、約1/3の確率で 00:00:01 固定
+ * - それ以外は 15分刻みのランダム値（end >= start を保証）
+ */
+export const makeRandomLearningLogDatetime = (
+  date: Date,
+  unsetDateProb = 1 / 10,
+  unsetTimeProb = 1 / 3,
+): { startedAt: Date | null; endedAt: Date | null } => {
+  const y = date.getFullYear();
+  const m = date.getMonth();
+  const d = date.getDate();
+
+  // 00:00〜23:30 の 15分刻み (=95スロット)
+  const slotA = Math.floor(Math.random() * 95);
+  const slotB = Math.floor(Math.random() * 95);
+  const [startSlot, endSlot] = slotA <= slotB ? [slotA, slotB] : [slotB, slotA];
+
+  // ランダムに決めるヘルパー
+  const decideTime = (isStart: boolean, slot: number): Date | null => {
+    // 日付のみ未設定を表す null
+    if (Math.random() < unsetDateProb) return null;
+
+    // 時刻だけ未設定を表す特殊値 00:00:01
+    if (Math.random() < unsetTimeProb) return new Date(y, m, d, 0, 0, 1, 0);
+
+    // 通常の 15分刻み
+    return new Date(y, m, d, 0, slot * 15, 0, 0);
+  };
+
+  const startedAt = decideTime(true, startSlot);
+  const endedAt = decideTime(false, endSlot);
+
+  return { startedAt, endedAt };
+};
+
 // 学習ログデータ生成関数
 const createLearningLogs = async (users: User[], tasks: Task[]) => {
   const learningLogs: LearningLog[] = [];
@@ -495,8 +476,8 @@ const createLearningLogs = async (users: User[], tasks: Task[]) => {
       const isTaskRelated = Math.random() < 0.7 && studentTasks.length > 0;
       const task = isTaskRelated ? getRandomElement(studentTasks) : null;
 
-      // 学習時間（15分-4時間）
-      const spentMinutes = getRandomInt(15, 240);
+      // 学習時間（15分-5時間）
+      const spentMinutes = getRandomInt(1, 20) * 15;
 
       // タイトル、説明、振り返りの生成
       const title = getRandomElement(japaneseData.learningTitles);
@@ -504,17 +485,10 @@ const createLearningLogs = async (users: User[], tasks: Task[]) => {
       const reflections = getRandomElement(japaneseData.learningReflections);
 
       // 過去30日間のランダムな日時
-      const createdAt = new Date(
-        Date.now() - getRandomInt(0, 30) * 24 * 60 * 60 * 1000,
-      );
+      const createdAt = new Date(Date.now() - getRandomInt(0, 30) * 24 * 60 * 60 * 1000);
 
       // 開始・終了時刻の設定
-      // 学習記録は通常、学習終了後に作成されるため、
-      // endedAtをcreatedAtの少し前に設定
-      const endedAt = new Date(
-        createdAt.getTime() - getRandomInt(1, 10) * 60 * 1000, // 1-10分前
-      );
-      const startedAt = new Date(endedAt.getTime() - spentMinutes * 60 * 1000);
+      const { startedAt, endedAt } = makeRandomLearningLogDatetime(createdAt);
 
       const learningLog = await prisma.learningLog.create({
         data: {
@@ -540,9 +514,7 @@ const createLearningLogs = async (users: User[], tasks: Task[]) => {
 
 // 講師-生徒関係データ生成関数
 const createTeacherRelations = async (users: User[], tasks: Task[]) => {
-  const teachers = users.filter(
-    (user) => user.role === "TEACHER" || user.role === "TA",
-  );
+  const teachers = users.filter((user) => user.role === "TEACHER" || user.role === "TA");
   const students = users.filter((user) => user.role === "STUDENT");
   let teacherStudentCount = 0;
   let teacherTaskCount = 0;
@@ -551,9 +523,7 @@ const createTeacherRelations = async (users: User[], tasks: Task[]) => {
   for (const teacher of teachers) {
     // 各講師が2-4名の生徒をブックマーク
     const studentCount = getRandomInt(2, Math.min(4, students.length));
-    const selectedStudents = students
-      .sort(() => Math.random() - 0.5)
-      .slice(0, studentCount);
+    const selectedStudents = students.sort(() => Math.random() - 0.5).slice(0, studentCount);
 
     for (const student of selectedStudents) {
       await prisma.teacherStudent.create({
@@ -567,9 +537,7 @@ const createTeacherRelations = async (users: User[], tasks: Task[]) => {
       // その生徒のタスクからいくつかをブックマーク
       const studentTasks = tasks.filter((task) => task.userId === student.id);
       const taskCount = getRandomInt(1, Math.min(3, studentTasks.length));
-      const selectedTasks = studentTasks
-        .sort(() => Math.random() - 0.5)
-        .slice(0, taskCount);
+      const selectedTasks = studentTasks.sort(() => Math.random() - 0.5).slice(0, taskCount);
 
       for (const task of selectedTasks) {
         const resolved = Math.random() < 0.3; // 30%は解決済み
@@ -603,10 +571,7 @@ const createTeacherRelations = async (users: User[], tasks: Task[]) => {
               assignmentLogs.push(assignmentLog);
             }
           } catch (error) {
-            console.warn(
-              `AssignmentLog作成でエラー (taskId: ${task.id}):`,
-              error,
-            );
+            console.warn(`AssignmentLog作成でエラー (taskId: ${task.id}):`, error);
           }
         }
       }
@@ -716,58 +681,42 @@ const main = async () => {
     console.log("🔐 Supabase認証ユーザーを作成中...");
 
     // まず全ての既存ユーザーをメールアドレスで検索
-    const { data: allAuthUsers, error: listError } =
-      await supabase.auth.admin.listUsers();
+    const { data: allAuthUsers, error: listError } = await supabase.auth.admin.listUsers();
     if (listError) {
       console.error("❌ 既存ユーザーリスト取得エラー:", listError);
     }
 
-    const existingEmails = new Set(
-      allAuthUsers?.users.map((u) => u.email) || [],
-    );
+    const existingEmails = new Set(allAuthUsers?.users.map((u) => u.email) || []);
 
     for (const user of testUsers) {
       try {
         if (existingEmails.has(user.email)) {
           // メールアドレスで既存ユーザーを検索
-          const existingUser = allAuthUsers?.users.find(
-            (u) => u.email === user.email,
-          );
+          const existingUser = allAuthUsers?.users.find((u) => u.email === user.email);
           if (existingUser) {
-            console.log(
-              `✅ Supabase認証ユーザー既存: ${user.email} (ID: ${existingUser.id})`,
-            );
+            console.log(`✅ Supabase認証ユーザー既存: ${user.email} (ID: ${existingUser.id})`);
             // 既存ユーザーのIDをtestUsersに反映
             user.id = existingUser.id;
           }
         } else {
           // ユーザーが存在しない場合は作成（IDは指定しない）
-          const { data, error: createError } =
-            await supabase.auth.admin.createUser({
-              id: user.id, // ★ 事前に指定したIDを使用（テスト用に意図的に設定）
-              email: user.email,
-              password: user.password,
-              email_confirm: true,
-            });
+          const { data, error: createError } = await supabase.auth.admin.createUser({
+            id: user.id, // ★ 事前に指定したIDを使用（テスト用に意図的に設定）
+            email: user.email,
+            password: user.password,
+            email_confirm: true,
+          });
 
           if (createError) {
-            console.error(
-              `❌ Supabase認証ユーザー作成エラー (${user.email}):`,
-              createError,
-            );
+            console.error(`❌ Supabase認証ユーザー作成エラー (${user.email}):`, createError);
           } else if (data?.user) {
-            console.log(
-              `✅ Supabase認証ユーザー作成成功: ${user.email} (ID: ${data.user.id})`,
-            );
+            console.log(`✅ Supabase認証ユーザー作成成功: ${user.email} (ID: ${data.user.id})`);
             // 新しいIDをtestUsersに反映
             user.id = data.user.id;
           }
         }
       } catch (error) {
-        console.error(
-          `❌ Supabase認証ユーザー処理エラー (${user.email}):`,
-          error,
-        );
+        console.error(`❌ Supabase認証ユーザー処理エラー (${user.email}):`, error);
       }
     }
 
@@ -791,9 +740,7 @@ const main = async () => {
       );
 
       if (wasCreated) {
-        console.log(
-          `✅ アプリDBユーザー作成完了: ${user.email} (ID: ${user.id})`,
-        );
+        console.log(`✅ アプリDBユーザー作成完了: ${user.email} (ID: ${user.id})`);
       } else {
         console.log(`ℹ️  アプリDBユーザー既存: ${user.email}`);
       }
@@ -846,9 +793,7 @@ const main = async () => {
     if (validationErrors.length === 0) {
       console.log("\n✅ シードデータの生成が正常に完了しました！");
     } else {
-      console.log(
-        "\n⚠️ シードデータの生成は完了しましたが、検証で問題が見つかりました",
-      );
+      console.log("\n⚠️ シードデータの生成は完了しましたが、検証で問題が見つかりました");
     }
 
     // 追加のテストデータ作成
@@ -857,14 +802,10 @@ const main = async () => {
     // Supabase認証ユーザーの確認（更新されたIDで確認）
     console.log("\n🔍 Supabase認証ユーザーの最終確認...");
     const { data: currentAuthUsers } = await supabase.auth.admin.listUsers();
-    const currentEmails = new Map(
-      currentAuthUsers?.users.map((u) => [u.email, u.id]) || [],
-    );
+    const currentEmails = new Map(currentAuthUsers?.users.map((u) => [u.email, u.id]) || []);
 
     console.log("\n📊 認証状況サマリー:");
-    console.log(
-      `   └─ Supabase Auth: ${currentAuthUsers?.users.length || 0}名`,
-    );
+    console.log(`   └─ Supabase Auth: ${currentAuthUsers?.users.length || 0}名`);
     console.log(`   └─ アプリDB (合計): ${await prisma.user.count()}名`);
     console.log(`      - テストユーザー（ログイン可）: ${testUsers.length}名`);
 
@@ -937,9 +878,7 @@ const main = async () => {
     console.log(`   └─ 講師-タスク関係: ${finalStats.teacherTasks}件`);
     console.log(`   └─ 対応ログ: ${finalStats.assignmentLogs}件`);
     console.log(`   └─ タスクタグ: ${finalStats.taskTags}件`);
-    console.log(
-      `   └─ タスクアクティビティタイプ: ${finalStats.taskActivityTypes}件`,
-    );
+    console.log(`   └─ タスクアクティビティタイプ: ${finalStats.taskActivityTypes}件`);
   } catch (error) {
     console.error("❌ シード処理中にエラーが発生しました:", error);
     throw error;
