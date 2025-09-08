@@ -30,6 +30,11 @@ import {
 // ローカルコンポーネント
 import { PaginationView } from "@/app/_components/PaginationView";
 import { buildStudentsPageUrl } from "../_helpers/buildStudentsPageUrl";
+import {
+  parseStudentsQueryParams,
+  type SortableField,
+  type SortDirection,
+} from "../_helpers/parseStudentsQueryParams";
 import { TaskTrend } from "./TaskTrend";
 
 interface Student {
@@ -47,9 +52,6 @@ interface Student {
   updatedAt: string;
 }
 
-type SortableField = "currentChapter" | "stuckTasks" | "stuckTasksTrend" | "totalTasks";
-type SortDirection = "asc" | "desc";
-
 interface Props {
   /** フィルタリング済みの受講生データ */
   students: Student[];
@@ -65,16 +67,11 @@ export const StudentsTable = ({ students }: Props) => {
   const [isPending, startTransition] = useTransition();
 
   // URLクエリから初期値を復元（存在しない場合はデフォルト）
-  const pRaw = Number.parseInt(searchParams.get("page") ?? "1", 10);
-  const initialPage = Number.isFinite(pRaw) && pRaw > 0 ? pRaw : 1;
-  const initialSortField = (
-    ["currentChapter", "stuckTasks", "stuckTasksTrend", "totalTasks"] as SortableField[]
-  ).includes((searchParams.get("sort") as SortableField) ?? "stuckTasks")
-    ? ((searchParams.get("sort") as SortableField) ?? "stuckTasks")
-    : ("stuckTasks" as SortableField);
-  const initialSortDirection = (
-    (searchParams.get("dir") ?? "desc") === "asc" ? "asc" : "desc"
-  ) as SortDirection;
+  const {
+    page: initialPage,
+    sortField: initialSortField,
+    sortDirection: initialSortDirection,
+  } = parseStudentsQueryParams(searchParams);
 
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [favorites, setFavorites] = useState<Set<string>>(
@@ -85,25 +82,11 @@ export const StudentsTable = ({ students }: Props) => {
 
   // URL の変更に合わせて state を同期（戻る/進むに追従）
   useEffect(() => {
-    const pRaw = Number.parseInt(searchParams.get("page") ?? "1", 10);
-    const nextPage = Number.isFinite(pRaw) && pRaw > 0 ? pRaw : 1;
+    const { page, sortField, sortDirection } = parseStudentsQueryParams(searchParams);
 
-    const allowed: readonly SortableField[] = [
-      "currentChapter",
-      "stuckTasks",
-      "stuckTasksTrend",
-      "totalTasks",
-    ];
-    const s = (searchParams.get("sort") ?? "stuckTasks") as string;
-    const nextField: SortableField = (allowed as readonly string[]).includes(s)
-      ? (s as SortableField)
-      : "stuckTasks";
-
-    const nextDir: SortDirection = (searchParams.get("dir") ?? "desc") === "asc" ? "asc" : "desc";
-
-    setCurrentPage(nextPage);
-    setSortField(nextField);
-    setSortDirection(nextDir);
+    setCurrentPage(page);
+    setSortField(sortField);
+    setSortDirection(sortDirection);
   }, [searchParams]);
 
   // 1ページあたりの表示件数
