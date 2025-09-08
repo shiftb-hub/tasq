@@ -3,7 +3,7 @@
 import type { InputHTMLAttributes } from "react";
 import type { FieldValues, Path, PathValue } from "react-hook-form";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useFormContext, useFormState, useController, useWatch } from "react-hook-form";
 import { LuSave, LuFileText } from "react-icons/lu";
 
@@ -51,6 +51,15 @@ const FormTextFieldComponent = <T extends FieldValues>({
 
   const errMsg = getFieldErrorMessage(errors, fieldKey);
 
+  // 制御系キーを除外して先にスプレッドするために分離
+  const {
+    onChange: _onChange,
+    onBlur: _onBlur,
+    value: _value,
+    defaultValue: _defaultValue,
+    ...restInputProps
+  } = inputProps;
+
   // テンプレート機能の状態管理、テンプレート機能の有効性判定
   const [hasTemplate, setHasTemplate] = useState(false);
   const [dynamicPlaceholder, setDynamicPlaceholder] = useState<string>("");
@@ -64,14 +73,12 @@ const FormTextFieldComponent = <T extends FieldValues>({
   const finalPlaceholder = placeholder ?? dynamicPlaceholder;
 
   // 入力フィールドが変更されたときの処理
-  // RHFのバリデーション発火と、Props に registerOnChange があればそれも発火
+  //  - number のときは "" を許容し、入力中は文字列のまま RHF に渡す（全消しを安定させる）
+  //  - blur で数値/undefined に確定する
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (inputType === "number") {
-        // 数値型の場合、空文字 を undefined に変換して RHF に渡す
-        const raw = e.target.value;
-        const parsed = raw === "" ? undefined : Number(raw);
-        field.onChange(parsed as PathValue<T, Path<T>>);
+        field.onChange(e.target.value as unknown as PathValue<T, Path<T>>);
       } else {
         field.onChange(e);
       }
@@ -80,8 +87,8 @@ const FormTextFieldComponent = <T extends FieldValues>({
     [field, registerOnChange, inputType],
   );
 
-  // 入力フィールドからフォーカスアウトされたときの処理
-  // RHFのバリデーション発火と、Props に registerOnBlur があればそれも発火
+  // 入力フィールドが変更されたときの処理
+  //  - number のときは "" を許容し、入力中は文字列のまま RHF に渡す（全消しを安定させる）
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       field.onBlur();
@@ -148,6 +155,7 @@ const FormTextFieldComponent = <T extends FieldValues>({
 
       <div className="relative">
         <Input
+          {...restInputProps}
           id={fieldKey}
           name={field.name}
           ref={field.ref}
@@ -157,7 +165,6 @@ const FormTextFieldComponent = <T extends FieldValues>({
           aria-invalid={!!errMsg}
           placeholder={finalPlaceholder}
           disabled={isDisabled}
-          {...inputProps}
         />
 
         {enableTemplate && (

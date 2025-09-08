@@ -1,11 +1,5 @@
-import {
-  Prisma as PRS,
-  LearningLog as PrismaLearningLog,
-} from "@prisma/client";
-import {
-  LearningLogNotFoundError,
-  UserPermissionDeniedError,
-} from "@/app/_libs/errors";
+import { Prisma as PRS, LearningLog as PrismaLearningLog } from "@prisma/client";
+import { LearningLogNotFoundError, UserPermissionDeniedError } from "@/app/_libs/errors";
 import {
   SortOrder,
   LearningLog,
@@ -31,9 +25,7 @@ export type LearningLogReturnType<
  * PrismaのLearningLogモデルからLearningLog型への変換
  * （createdAt を除去して、特定属性を null から undefined に変換）
  */
-const toAppLearningLog = (
-  prismaLearningLog: PrismaLearningLog,
-): LearningLog => {
+export const toAppLearningLog = (prismaLearningLog: PrismaLearningLog): LearningLog => {
   const { createdAt, taskId, startedAt, endedAt, ...rest } = prismaLearningLog;
   return {
     ...rest,
@@ -100,10 +92,7 @@ class LearningLogService {
     logId: string,
     options: { select: U },
   ): Promise<PRS.LearningLogGetPayload<{ select: U }> | null>;
-  public async tryGetById<
-    T extends PRS.LearningLogInclude,
-    U extends PRS.LearningLogSelect,
-  >(
+  public async tryGetById<T extends PRS.LearningLogInclude, U extends PRS.LearningLogSelect>(
     logId: string,
     options?: LearningLogReturnType<T, U>,
   ): Promise<
@@ -180,10 +169,7 @@ class LearningLogService {
   }
 
   // 新規作成 [Create]
-  public async create(
-    userId: string,
-    data: LearningLogInsertRequest,
-  ): Promise<LearningLog> {
+  public async create(userId: string, data: LearningLogInsertRequest): Promise<LearningLog> {
     const createdLearningLog = await this.prisma.learningLog.create({
       data: {
         ...data,

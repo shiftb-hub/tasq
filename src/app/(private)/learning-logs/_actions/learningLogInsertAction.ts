@@ -11,7 +11,6 @@ import type { LearningLogInsertRequest } from "@/app/_types/LearningLog";
 
 // ユーティリティ
 import { dumpError } from "@/app/_libs/dumpException";
-import { isDevelopmentEnv } from "@/app/_configs/app-config";
 import { LearningLogService } from "@/app/_services/learningLogService";
 
 // ServerActionの戻り値
@@ -30,11 +29,6 @@ export const learningLogInsertAction = async (
 ): Promise<LearningLogInsertActionResult> => {
   let user: AppUser | null = null;
   try {
-    // TODO:デバッグとUX調整のための遅延（本番では削除）
-    if (isDevelopmentEnv) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-    }
-
     // バックエンド認証（クライアント偽装対策）
     user = await authenticateAppUser();
 
