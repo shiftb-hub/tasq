@@ -74,7 +74,6 @@ const FormTextFieldComponent = <T extends FieldValues>({
 
   // 入力フィールドが変更されたときの処理
   //  - number のときは "" を許容し、入力中は文字列のまま RHF に渡す（全消しを安定させる）
-  //  - blur で数値/undefined に確定する
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (inputType === "number") {

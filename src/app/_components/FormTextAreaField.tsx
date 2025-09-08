@@ -140,7 +140,7 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
       </div>
       <div className="relative">
         <Textarea
-          {...textareaProps}
+          {...restInputProps}
           id={fieldKey}
           name={field.name}
           ref={field.ref}

@@ -139,8 +139,12 @@ DIRECT_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 - Code comments should be in Japanese when appropriate
 
 ### Import Paths
-- Use `@/` alias for src directory imports
-- Organize imports: external libraries first, then internal modules
+- **Same functional module**: Use relative paths for closely related files (same page.tsx and its _components, _types, _hooks, etc.)
+  - Example: `import { Component } from "../_components/Component"`
+- **Different functional modules**: Use `@/` alias for shared modules and distant imports 
+  - Example: `import { service } from "@/app/_services/someService"`
+- **External libraries**: Always import first, before internal modules
+- This approach balances readability and maintainability by keeping related files easily traceable through relative paths while using aliases for cross-module dependencies
 
 ### Component Structure
 - Functional components with TypeScript
