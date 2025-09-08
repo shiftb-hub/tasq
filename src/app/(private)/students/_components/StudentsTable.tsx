@@ -32,6 +32,7 @@ import { PaginationView } from "@/app/_components/PaginationView";
 import { buildStudentsPageUrl } from "../_helpers/buildStudentsPageUrl";
 import {
   parseStudentsQueryParams,
+  STUDENTS_TABLE_DEFAULTS,
   type SortableField,
   type SortDirection,
 } from "../_helpers/parseStudentsQueryParams";
@@ -90,7 +91,7 @@ export const StudentsTable = ({ students }: Props) => {
   }, [searchParams]);
 
   // 1ページあたりの表示件数
-  const itemsPerPage = 5;
+  const itemsPerPage = STUDENTS_TABLE_DEFAULTS.ITEMS_PER_PAGE;
 
   /**
    * お気に入り状態を切り替える

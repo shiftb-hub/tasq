@@ -4,10 +4,11 @@ export type SortDirection = "asc" | "desc";
 /**
  * 受講生テーブルのデフォルト値
  */
-const STUDENTS_TABLE_DEFAULTS = {
+export const STUDENTS_TABLE_DEFAULTS = {
   PAGE: 1,
   SORT_FIELD: "stuckTasks" as SortableField,
   SORT_DIRECTION: "desc" as SortDirection,
+  ITEMS_PER_PAGE: 5,
 } as const;
 
 /**
