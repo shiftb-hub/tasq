@@ -37,11 +37,8 @@ export interface StudentsQueryParams {
  */
 export const parseStudentsQueryParams = (searchParams: URLSearchParams): StudentsQueryParams => {
   // ページ番号の解析
-  const pRaw = Number.parseInt(
-    searchParams.get("page") ?? String(STUDENTS_TABLE_DEFAULTS.PAGE),
-    10,
-  );
-  const page = Number.isFinite(pRaw) && pRaw > 0 ? pRaw : STUDENTS_TABLE_DEFAULTS.PAGE;
+  const rawPage = Number.parseInt(searchParams.get("page") ?? "1", 10);
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
 
   // ソートフィールドの解析
   const s = (searchParams.get("sort") ?? STUDENTS_TABLE_DEFAULTS.SORT_FIELD) as string;

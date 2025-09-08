@@ -188,7 +188,9 @@ export const StudentsTable = ({ students }: Props) => {
   const handlePageChange = useCallback(
     async (page: number) => {
       if (isPending) return;
-      const clamped = Math.max(1, Math.min(page, totalPages));
+      // NaN や無効な値に対するガードを追加
+      const validPage = Number.isFinite(page) ? page : 1;
+      const clamped = Math.max(1, Math.min(validPage, totalPages));
       startTransition(() => {
         setCurrentPage(clamped);
         const href = buildStudentsPageUrl(clamped, sortField, sortDirection, itemsPerPage);
