@@ -10,7 +10,7 @@ import { Button } from "@/app/_components/ui/button";
 
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 import { FormTextField } from "@/app/_components/FormTextField";
-import { FormTextareaField } from "@/app/_components/FormTextAreaField";
+import { FormTextAreaField } from "@/app/_components/FormTextAreaField";
 import { FormTextReadonly } from "@/app/_components/FormTextReadonly";
 import { AvatarManager } from "./AvatarManager";
 import { ChapterSelectField } from "@/app/_components/ChapterSelectField";
@@ -234,7 +234,7 @@ const ProfileEditorView: React.FC<Props> = (props) => {
             />
           </div>
 
-          <FormTextareaField fieldKey={c_Bio} labelText="自己紹介" />
+          <FormTextAreaField fieldKey={c_Bio} labelText="自己紹介" />
 
           {/* 
             TODO: デバッグ用（アバター画像設定のデバッグが十分に完了してから削除）

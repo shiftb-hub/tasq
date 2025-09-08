@@ -65,6 +65,7 @@ export type LearningLogSearchParams = z.infer<
 >;
 
 // 挿入・更新の共通入力フィールド（id, userId以外）
+// ゆるく書いてもらうために「終了日時≥開始日時」などはバリデーションしない
 const learningLogUpsertBaseSchema = z.object({
   taskId: uuidSchema.optional(),
   title: learningLogTitleSchema,

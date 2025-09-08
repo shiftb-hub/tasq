@@ -1,18 +1,22 @@
 "use client";
 
 import type { InputHTMLAttributes } from "react";
-import type { FieldValues, Path } from "react-hook-form";
+import type { FieldValues, Path, PathValue } from "react-hook-form";
 
-import { useFormContext } from "react-hook-form";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useFormContext, useFormState, useController, useWatch } from "react-hook-form";
+import { LuSave, LuFileText } from "react-icons/lu";
 
 import { Label } from "@/app/_components/ui/label";
 import { Input } from "@/app/_components/ui/input";
+import { Button } from "@/app/_components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/_components/ui/tooltip";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 
 import { cn } from "@/app/_libs/utils";
+import { getFieldErrorMessage } from "@/app/_libs/formUtils";
 
-interface Props<T extends FieldValues>
-  extends InputHTMLAttributes<HTMLInputElement> {
+interface Props<T extends FieldValues> extends InputHTMLAttributes<HTMLInputElement> {
   labelText: string;
   fieldKey: Path<T>;
   exampleText?: string;
@@ -20,21 +24,116 @@ interface Props<T extends FieldValues>
   containerStyles?: string;
   registerOnChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   registerOnBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  templateStorageKey?: string;
 }
 
-// レンダリングコストが小さいため memo は省略
-export const FormTextField = <T extends FieldValues>({
+const FormTextFieldComponent = <T extends FieldValues>({
   labelText,
   fieldKey,
   exampleText,
   containerStyles,
-  placeholder = "未設定",
+  placeholder,
   registerOnChange,
   registerOnBlur,
+  disabled,
+  templateStorageKey,
   ...inputProps
 }: Props<T>) => {
-  const { register, formState } = useFormContext<T>();
-  const errMsg = formState.errors[fieldKey]?.message as string | undefined;
+  const { control, setValue } = useFormContext<T>();
+  const { field } = useController<T, Path<T>>({
+    control,
+    name: fieldKey,
+  });
+  const { errors, isSubmitting } = useFormState({ control, name: fieldKey });
+  const currentValue = useWatch({ control, name: fieldKey });
+  const inputType = inputProps.type ?? "text";
+
+  const errMsg = getFieldErrorMessage(errors, fieldKey);
+
+  // テンプレート機能の状態管理、テンプレート機能の有効性判定
+  const [hasTemplate, setHasTemplate] = useState(false);
+  const [dynamicPlaceholder, setDynamicPlaceholder] = useState<string>("");
+  const enableTemplate = !!templateStorageKey;
+
+  // フィールドの無効状態の設定
+  // Props で disabled があれば、それを優先する。なければ isSubmitting を使用
+  const isDisabled = disabled ?? isSubmitting;
+
+  // プレースホルダーテキストの設定
+  const finalPlaceholder = placeholder ?? dynamicPlaceholder;
+
+  // 入力フィールドが変更されたときの処理
+  // RHFのバリデーション発火と、Props に registerOnChange があればそれも発火
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (inputType === "number") {
+        // 数値型の場合、空文字 を undefined に変換して RHF に渡す
+        const raw = e.target.value;
+        const parsed = raw === "" ? undefined : Number(raw);
+        field.onChange(parsed as PathValue<T, Path<T>>);
+      } else {
+        field.onChange(e);
+      }
+      registerOnChange?.(e);
+    },
+    [field, registerOnChange, inputType],
+  );
+
+  // 入力フィールドからフォーカスアウトされたときの処理
+  // RHFのバリデーション発火と、Props に registerOnBlur があればそれも発火
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      field.onBlur();
+      registerOnBlur?.(e);
+    },
+    [field, registerOnBlur],
+  );
+
+  // テンプレートの存在確認と動的プレースホルダーの設定
+  useEffect(() => {
+    if (!templateStorageKey) return;
+    const template = localStorage.getItem(templateStorageKey);
+    const hasValidTemplate = !!(template && template.trim());
+    setHasTemplate(hasValidTemplate);
+
+    if (placeholder === undefined) {
+      setDynamicPlaceholder(hasValidTemplate ? template!.trim() : "未設定");
+    }
+  }, [placeholder, templateStorageKey]);
+
+  // テンプレートの保存処理
+  const handleSaveTemplate = useCallback(() => {
+    if (inputType !== "text") return;
+    if (typeof currentValue === "string" && templateStorageKey) {
+      if (confirm("現在の内容をテンプレート文字列として保存しますか？")) {
+        localStorage.setItem(templateStorageKey, currentValue.trim());
+        setDynamicPlaceholder(currentValue.trim());
+        setHasTemplate(true);
+      }
+    }
+  }, [currentValue, inputType, templateStorageKey]);
+
+  // テンプレートの読込み処理
+  const handleLoadTemplate = useCallback(() => {
+    if (inputType !== "text") return;
+    // テンプレート保存キーが無効な場合は何もしない
+    if (!templateStorageKey) return;
+    const value = localStorage.getItem(templateStorageKey)?.trim();
+    if (!value) return; // テンプレートが空の場合は何もしない
+    const parts = [value, currentValue ?? ""].filter(Boolean);
+    setValue(fieldKey, parts.join(" ") as PathValue<T, Path<T>>, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  }, [inputType, templateStorageKey, currentValue, setValue, fieldKey]);
+
+  // Input要素用の値正規化
+  // なぜ: HTML input要素はstring/numberのみ受け付けるため、他の型は空文字に変換して型安全性を確保するため
+  const inputValue: string | number =
+    typeof field.value === "string" || typeof field.value === "number" ? field.value : "";
+
   return (
     <div className={cn("flex flex-col gap-y-1.5", containerStyles)}>
       <div className="flex flex-row items-baseline justify-start gap-x-2">
@@ -46,21 +145,68 @@ export const FormTextField = <T extends FieldValues>({
           </p>
         )}
       </div>
-      <Input
-        type="text"
-        id={fieldKey}
-        aria-invalid={!!errMsg}
-        placeholder={placeholder}
-        // 送信中 (isSubmitting === true) はコンポーネントを無効化
-        // 後続の {...inputProps} で disabled が指定されていれば、そちらで上書きされる
-        disabled={formState.isSubmitting}
-        {...register(fieldKey, {
-          onChange: registerOnChange,
-          onBlur: registerOnBlur,
-        })}
-        {...inputProps}
-      />
+
+      <div className="relative">
+        <Input
+          id={fieldKey}
+          name={field.name}
+          ref={field.ref}
+          value={inputValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          aria-invalid={!!errMsg}
+          placeholder={finalPlaceholder}
+          disabled={isDisabled}
+          {...inputProps}
+        />
+
+        {enableTemplate && (
+          <div className="absolute top-1/2 right-2 flex -translate-y-1/2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-4 p-0"
+                  onClick={handleSaveTemplate}
+                  disabled={isDisabled || typeof currentValue !== "string"}
+                >
+                  <LuSave className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>現在の内容をテンプレート文字列として保存</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-4 p-0"
+                  onClick={handleLoadTemplate}
+                  disabled={isDisabled || !hasTemplate}
+                >
+                  <LuFileText className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>保存されているテンプレート文字列を挿入</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
+      </div>
+
       <FormErrorMessage msg={errMsg} />
     </div>
   );
 };
+
+FormTextFieldComponent.displayName = "FormTextField";
+
+export const FormTextField = React.memo(FormTextFieldComponent) as <T extends FieldValues>(
+  props: Props<T>,
+) => React.JSX.Element;
