@@ -108,21 +108,10 @@ export const FormDateTimeField = <
   disabled,
 }: Props<T, TName>) => {
   const form = useFormContext<T>();
-  const watchedValue = form.watch(fieldKey);
   disabled = disabled ?? form.formState.isSubmitting;
 
   // 時刻選択肢をメモ化
   const timeOptions = useMemo(() => generateTimeOptions(), []);
-
-  // 日付表示をメモ化
-  const displayDate = useMemo(() => {
-    return watchedValue ? toJaDate(watchedValue) : null;
-  }, [watchedValue]);
-
-  // 時刻文字列をメモ化
-  const timeString = useMemo(() => {
-    return watchedValue ? getTimeString(watchedValue) : "unset";
-  }, [watchedValue]);
 
   const handleTimeChange = useCallback(
     (timeValue: string) => {
@@ -174,7 +163,7 @@ export const FormDateTimeField = <
             <div className="flex w-60 flex-col gap-y-1.5">
               <div className="flex flex-row items-center gap-x-0.5">
                 <FormLabel className="h-4">{labelText}</FormLabel>
-                {watchedValue && (
+                {field.value && (
                   <IoMdCloseCircle
                     onClick={handleClearClick}
                     className={cn("cursor-pointer hover:opacity-50")}
@@ -193,7 +182,7 @@ export const FormDateTimeField = <
                         )}
                         disabled={disabled}
                       >
-                        {displayDate || `日付を選択（オプション）`}
+                        {field.value ? toJaDate(field.value) : `日付を選択（オプション）`}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -210,13 +199,13 @@ export const FormDateTimeField = <
               </div>
             </div>
 
-            {watchedValue && (
+            {field.value && (
               <div className="flex flex-col gap-y-1.5">
                 <Label className="h-4" htmlFor={fieldKey + "_time"}>
                   時刻
                 </Label>
                 <Select
-                  value={timeString}
+                  value={field.value ? getTimeString(field.value) : "unset"}
                   onValueChange={handleTimeChange}
                   disabled={disabled}
                 >

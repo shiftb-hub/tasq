@@ -1,26 +1,22 @@
 "use client";
 
-import type { JSX, TextareaHTMLAttributes } from "react";
-import type { FieldValues, Path, PathValue } from "react-hook-form";
+import type { TextareaHTMLAttributes } from "react";
+import type { FieldValues, Path } from "react-hook-form";
 
-import React, { useState, useEffect } from "react";
-import { useFormContext } from "react-hook-form";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFormContext, useFormState, useController, useWatch } from "react-hook-form";
 import { LuSave, LuFileText } from "react-icons/lu";
 
 import { Label } from "@/app/_components/ui/label";
 import { Textarea } from "@/app/_components/ui/textarea";
 import { Button } from "@/app/_components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/app/_components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/_components/ui/tooltip";
 import { FormErrorMessage } from "@/app/_components/FormErrorMessage";
 
 import { cn } from "@/app/_libs/utils";
+import { getFieldErrorMessage } from "@/app/_libs/formUtils";
 
-interface Props<T extends FieldValues>
-  extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface Props<T extends FieldValues> extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   labelText: string;
   fieldKey: Path<T>;
   exampleText?: string;
@@ -44,52 +40,80 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
   templateStorageKey,
   ...textareaProps
 }: Props<T>) => {
-  const { register, formState, watch, setValue } = useFormContext<T>();
-  const errMsg = formState.errors[fieldKey]?.message as string | undefined;
+  const { control } = useFormContext<T>();
+  const { field } = useController<T, Path<T>>({
+    control,
+    name: fieldKey,
+  });
+  const { errors, isSubmitting } = useFormState({ control, name: fieldKey });
+  const currentValue = useWatch({ control, name: fieldKey });
 
+  const errMsg = getFieldErrorMessage(errors, fieldKey);
+
+  // テンプレート機能の状態管理、テンプレート機能の有効性判定
   const [hasTemplate, setHasTemplate] = useState(false);
-  const [dynamicPlaceholder, setDynamicPlaceholder] =
-    useState<string>("未設定");
-  const currentValue = watch(fieldKey);
-
+  const [dynamicPlaceholder, setDynamicPlaceholder] = useState<string>("");
   const enableTemplate = !!templateStorageKey;
-  const isDisabled = disabled ?? formState.isSubmitting;
 
-  // テンプレートの有無をチェック
+  // フィールドの無効状態を設定
+  // Props で disabled があれば、それを優先する。なければ isSubmitting を使用
+  const isDisabled = disabled ?? isSubmitting;
+
+  // プレースホルダーテキストの設定
+  const finalPlaceholder = placeholder ?? dynamicPlaceholder;
+
+  // 入力フィールドが変更されたときの処理
+  // RHFのバリデーション発火と、Props に registerOnChange があればそれも発火
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      field.onChange(e);
+      registerOnChange?.(e);
+    },
+    [field, registerOnChange],
+  );
+
+  // 入力フィールドからフォーカスアウトされたときの処理
+  // RHFのバリデーション発火と、Props に registerOnBlur があればそれも発火
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLTextAreaElement>) => {
+      field.onBlur();
+      registerOnBlur?.(e);
+    },
+    [field, registerOnBlur],
+  );
+
+  // テンプレートの存在確認と動的プレースホルダーの設定
   useEffect(() => {
-    if (!enableTemplate || !templateStorageKey) return;
-
+    if (!templateStorageKey) return;
     const template = localStorage.getItem(templateStorageKey);
-    const hasTemplateValue = !!(template && template.trim());
-    setHasTemplate(hasTemplateValue);
+    const hasValidTemplate = !!(template && template.trim());
+    setHasTemplate(hasValidTemplate);
 
-    // Props の placeholder が undefined の場合のみ動的に設定
     if (placeholder === undefined) {
-      setDynamicPlaceholder(hasTemplateValue ? template.trim() : "未設定");
+      setDynamicPlaceholder(hasValidTemplate ? template!.trim() : "未設定");
     }
-  }, [enableTemplate, templateStorageKey, placeholder]);
+  }, [placeholder, templateStorageKey]);
 
-  const handleSaveTemplate = () => {
+  // テンプレートの保存処理
+  const handleSaveTemplate = useCallback(() => {
     if (typeof currentValue === "string" && templateStorageKey) {
       if (confirm("現在の内容をテンプレート文字列として保存しますか？")) {
         localStorage.setItem(templateStorageKey, currentValue.trim());
+        setDynamicPlaceholder(currentValue.trim());
         setHasTemplate(true);
       }
     }
-  };
+  }, [currentValue, templateStorageKey]);
 
-  const handleLoadTemplate = () => {
+  // テンプレートの読込み処理（現在値の末尾に追加）
+  const handleLoadTemplate = useCallback(() => {
     if (!templateStorageKey) return;
-    if (typeof window === "undefined") return;
-    const template = localStorage.getItem(templateStorageKey);
-    if (template && template.trim()) {
-      const newValue = template + (currentValue ? `\n${currentValue}` : "");
-      setValue(fieldKey, newValue as PathValue<T, Path<T>>, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  };
+    const value = localStorage.getItem(templateStorageKey)?.trim();
+    if (!value) return;
+    const parts = [value, currentValue ?? ""].filter(Boolean);
+    field.onChange(parts.join("\n"));
+  }, [templateStorageKey, currentValue, field]);
+
   return (
     <div className={cn("flex flex-col gap-y-1.5", containerStyles)}>
       <div className="flex flex-row items-baseline justify-start gap-x-2">
@@ -104,16 +128,16 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
       <div className="relative">
         <Textarea
           id={fieldKey}
+          name={field.name}
+          ref={field.ref}
+          value={typeof field.value === "string" ? field.value : ""}
+          onChange={handleChange}
+          onBlur={handleBlur}
           aria-invalid={!!errMsg}
-          placeholder={
-            placeholder !== undefined ? placeholder : dynamicPlaceholder
-          }
+          placeholder={finalPlaceholder}
           disabled={isDisabled}
+          className="pr-12"
           {...textareaProps}
-          {...register(fieldKey, {
-            onChange: registerOnChange,
-            onBlur: registerOnBlur,
-          })}
         />
         {enableTemplate && (
           <div className="absolute top-2 right-2 flex">
@@ -161,8 +185,6 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
 
 FormTextAreaFieldComponent.displayName = "FormTextAreaField";
 
-export const FormTextAreaField = React.memo(FormTextAreaFieldComponent) as <
-  T extends FieldValues,
->(
+export const FormTextAreaField = React.memo(FormTextAreaFieldComponent) as <T extends FieldValues>(
   props: Props<T>,
-) => JSX.Element;
+) => React.JSX.Element;

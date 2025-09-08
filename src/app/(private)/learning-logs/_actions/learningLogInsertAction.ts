@@ -1,6 +1,7 @@
 "use server";
 
 // DB接続・サービス層・認証
+import prisma from "@/app/_libs/prisma";
 import { authenticateAppUser } from "@/app/_libs/authenticateUser";
 
 // 型定義・バリデーションスキーマ
@@ -11,6 +12,7 @@ import type { LearningLogInsertRequest } from "@/app/_types/LearningLog";
 // ユーティリティ
 import { dumpError } from "@/app/_libs/dumpException";
 import { isDevelopmentEnv } from "@/app/_configs/app-config";
+import { LearningLogService } from "@/app/_services/learningLogService";
 
 // ServerActionの戻り値
 type LearningLogInsertActionResult =
@@ -37,13 +39,11 @@ export const learningLogInsertAction = async (
     user = await authenticateAppUser();
 
     // バックエンドバリデーション（引数改竄対策）
-    learningLogInsertRequest = learningLogInsertRequestSchema.parse(
-      learningLogInsertRequest,
-    );
+    learningLogInsertRequest = learningLogInsertRequestSchema.parse(learningLogInsertRequest);
 
     // 学習ログの新規作成処理（LearningLogService）
-    // DBインサートの処理は別ブランチで実装（現状では処理成功として結果を返す）
-
+    const learningLogService = new LearningLogService(prisma);
+    await learningLogService.create(user.id, learningLogInsertRequest);
     return { success: true } satisfies LearningLogInsertActionResult;
   } catch (e) {
     dumpError(e, "学習ログの新規作成処理 (ServerAction)", {

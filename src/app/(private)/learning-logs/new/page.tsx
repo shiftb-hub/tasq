@@ -1,7 +1,7 @@
 "use client";
 
 // React と フォームライブラリ
-import { useCallback, useEffect, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -18,11 +18,8 @@ import { LearningLogEditForm } from "../_components/LearningLogEditForm";
 // 型定義・バリデーションスキーマ
 import { learningLogDateSchema } from "@/app/_types/CommonSchemas";
 import { learningLogInsertRequestSchema } from "@/app/_types/LearningLog";
-import type { LearningLogInsertRequest } from "@/app/_types/LearningLog";
 
-type learningLogInsertFormValues = z.input<
-  typeof learningLogInsertRequestSchema
->;
+type LearningLogInsertFormValues = z.input<typeof learningLogInsertRequestSchema>;
 
 type Draft = {
   title?: string;
@@ -38,14 +35,15 @@ type Draft = {
 const c_Root = "root" as const;
 const c_StorageKey = "draft:learning-log" as const;
 
-// prettier-ignore
-const draftDateSchema = learningLogDateSchema.catch( undefined as unknown as Date | undefined );
+// 下書きの startedAt / endedAt 用スキーマ
+// もともとの learningLogDateSchema は null を許容しないため、catch で undefined に変換する
+const draftDateSchema = learningLogDateSchema.catch(undefined);
 
 const Page: React.FC = () => {
   const router = useRouter();
 
   const [isPending, startTransition] = useTransition();
-  const form = useForm<learningLogInsertFormValues>({
+  const form = useForm<LearningLogInsertFormValues>({
     resolver: zodResolver(learningLogInsertRequestSchema),
     mode: "onChange",
   });
@@ -58,9 +56,7 @@ const Page: React.FC = () => {
       const parsed: Draft = JSON.parse(raw);
       // spentMinutes は 0 を「未設定」という特殊な値として扱う（フォームには undefined として与える）
       const parsedSpentMinutes =
-        parsed.spentMinutes === 0 || parsed.spentMinutes === null
-          ? undefined
-          : parsed.spentMinutes;
+        parsed.spentMinutes === 0 || parsed.spentMinutes === null ? undefined : parsed.spentMinutes;
       // prettier-ignore
       form.reset({
         title: parsed.title ?? "",
@@ -77,31 +73,25 @@ const Page: React.FC = () => {
   }, [form]);
 
   // デバウンス付きのドラフト自動保存機能
-  const saveDraft = useDebouncedCallback(
-    (values: learningLogInsertFormValues) => {
-      const draft: Draft = {
-        title: values.title,
-        description: values.description,
-        reflections: values.reflections,
-        spentMinutes: (values.spentMinutes ?? undefined) as number | undefined,
-        startedAt: (values.startedAt ?? undefined) as Date | undefined,
-        endedAt: (values.endedAt ?? undefined) as Date | undefined,
-        updatedAt: Date.now(),
-      };
-      window.localStorage.setItem(c_StorageKey, JSON.stringify(draft));
-      console.log(
-        "学習ログを下書き保存しました。\n",
-        JSON.stringify(draft, null, 2),
-      );
-    },
-    2000,
-  );
+  const saveDraft = useDebouncedCallback((values: LearningLogInsertFormValues) => {
+    const draft: Draft = {
+      title: values.title,
+      description: values.description,
+      reflections: values.reflections,
+      spentMinutes: (values.spentMinutes ?? undefined) as number | undefined,
+      startedAt: (values.startedAt ?? undefined) as Date | undefined,
+      endedAt: (values.endedAt ?? undefined) as Date | undefined,
+      updatedAt: Date.now(),
+    };
+    window.localStorage.setItem(c_StorageKey, JSON.stringify(draft));
+    console.log("学習ログを下書き保存しました。\n", JSON.stringify(draft, null, 2));
+  }, 2000);
 
   // フォームの値が更新されたとき saveDraft (useDebouncedCallback) をコール
   useEffect(() => {
     const subscription = form.watch((values) => {
       if (form.formState.isSubmitting || isPending) return;
-      saveDraft(values as unknown as learningLogInsertFormValues);
+      saveDraft(values as LearningLogInsertFormValues);
     });
     return () => {
       subscription.unsubscribe();
@@ -111,7 +101,7 @@ const Page: React.FC = () => {
 
   // フォームの Submit 処理
   const onSubmit = useCallback(
-    async (formValues: learningLogInsertFormValues) => {
+    async (formValues: LearningLogInsertFormValues) => {
       form.clearErrors(c_Root);
       saveDraft.cancel();
       try {
@@ -126,9 +116,7 @@ const Page: React.FC = () => {
           return;
         }
         form.setError(c_Root, {
-          message:
-            result.errorMessageForUser ??
-            "バックエンドで学習ログの保存処理に失敗しました",
+          message: result.errorMessageForUser ?? "バックエンドで学習ログの保存処理に失敗しました",
         });
       } catch {
         form.setError(c_Root, {
@@ -139,19 +127,32 @@ const Page: React.FC = () => {
     [form, router, saveDraft],
   );
 
-  const submitButtonText = isPending
-    ? "画面遷移中..."
-    : form.formState.isSubmitting
-      ? "新規作成中..."
-      : "新規作成";
+  const handleSubmit = useMemo(() => form.handleSubmit(onSubmit), [form, onSubmit]);
+
+  const submitButtonText = useMemo(
+    () =>
+      isPending ? "画面遷移中..." : form.formState.isSubmitting ? "新規作成中..." : "新規作成",
+    [isPending, form.formState.isSubmitting],
+  );
+
+  const formLocked = useMemo(
+    () => isPending || form.formState.isSubmitting,
+    [isPending, form.formState.isSubmitting],
+  );
+
+  const submitDisabled = useMemo(
+    () => isPending || form.formState.isSubmitting || !form.formState.isValid,
+    [isPending, form.formState.isSubmitting, form.formState.isValid],
+  );
 
   return (
     <div className="mx-auto my-4 w-full max-w-lg space-y-4 px-4 lg:px-0">
       <PageTitle>学習ログの新規作成</PageTitle>
       <FormProvider {...form}>
         <LearningLogEditForm
-          onSubmit={form.handleSubmit(onSubmit)}
-          disabled={isPending || form.formState.isSubmitting}
+          onSubmit={handleSubmit}
+          formLocked={formLocked}
+          submitDisabled={submitDisabled}
           submitButtonText={submitButtonText}
           errorMessage={form.formState.errors.root?.message}
         />
