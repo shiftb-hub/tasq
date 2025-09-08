@@ -49,7 +49,7 @@ const toSelfProfile = (user: AppUser, email: string): SelfProfile => {
  *  共通ページレイアウトを提供するWrapper関数
  */
 const withPageLayout = (content: React.ReactNode) => (
-  <div className="mx-auto w-full max-w-lg space-y-4">
+  <div className="mx-auto my-4 w-full max-w-lg space-y-4 px-4 lg:px-0">
     <PageTitle>プロフィール設定</PageTitle>
     {content}
   </div>

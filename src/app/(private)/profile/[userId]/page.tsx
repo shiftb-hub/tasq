@@ -140,7 +140,7 @@ const Page: React.FC<Props> = async ({ params }) => {
 
             {user.threadsId && (
               <SnsLinkIcon
-                url={`https://threads.net/@${encodeURIComponent(user.threadsId)}`}
+                url={`https://threads.com/@${encodeURIComponent(user.threadsId)}`}
               >
                 <BsThreads />
               </SnsLinkIcon>

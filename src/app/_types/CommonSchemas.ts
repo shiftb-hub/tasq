@@ -74,26 +74,38 @@ export const learningLogReflectionsSchema = z
   .trim()
   .max(1024, "内容は1024文字以内で入力してください。");
 
+const MIN_DATE = new Date("2025-01-01T00:00:00.000Z");
+const MAX_DATE = new Date("2030-12-31T23:59:59.999Z");
 export const learningLogDateSchema = z
-  .preprocess(
-    (value) => {
-      if (value === undefined) return undefined;
-      if (typeof value === "string") return new Date(value);
-      return value; // 既に Date型 の場合
-    },
-    z
-      .date()
-      .min(new Date("2025-01-01"), {
-        message: "2025年1月1日以降を設定してください。",
-      })
-      .max(new Date("2030-12-31"), {
-        message: "2030年12月31日以前を設定してください。",
-      }),
-  )
-  .optional();
+  .union([z.date(), z.coerce.date()])
+  .optional()
+  .refine(
+    (date) => date === undefined || (date >= MIN_DATE && date <= MAX_DATE),
+    { message: "2025年1月1日から2030年12月31日の間にしてください。" },
+  );
 
-export const learningLogSpentMinutesSchema = z
-  .number()
-  .int()
-  .min(0, { message: "学習時間（分）は0以上で入力してください。" })
-  .max(6000, { message: "学習時間（分）は6000分以内で入力してください。" });
+// export const learningLogDateSchema = z
+//   .union([z.coerce.date(), z.date(), z.undefined()])
+//   .refine(
+//     (date) =>
+//       date === undefined ||
+//       (date >= new Date("2025-01-01") && date <= new Date("2030-12-31")),
+//     {
+//       message: "2025年1月1日から2030年12月31日の間にしてください。",
+//     },
+//   )
+//   .optional();
+
+export const learningLogSpentMinutesSchema = z.preprocess(
+  (val) => {
+    // null, undefined, NaN, 空文字列の場合は 0 に変換 (RHF の valueAsNumber 対応)
+    if (val == null || Number.isNaN(val) || val === "") return 0;
+    // 数値でない文字列は coerce で数値変換を試行
+    return typeof val === "string" ? Number(val) : val;
+  },
+  z
+    .number()
+    .int()
+    .min(0, { message: "0 分以上を設定してください。" })
+    .max(6000, { message: "6000 分以内を設定してください。" }),
+);
