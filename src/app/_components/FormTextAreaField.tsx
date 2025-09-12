@@ -50,6 +50,15 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
 
   const errMsg = getFieldErrorMessage(errors, fieldKey);
 
+  // 制御系キーを除外して先にスプレッドするために分離
+  const {
+    onChange: _onChange,
+    onBlur: _onBlur,
+    value: _value,
+    defaultValue: _defaultValue,
+    ...restInputProps
+  } = textareaProps;
+
   // テンプレート機能の状態管理、テンプレート機能の有効性判定
   const [hasTemplate, setHasTemplate] = useState(false);
   const [dynamicPlaceholder, setDynamicPlaceholder] = useState<string>("");
@@ -131,6 +140,7 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
       </div>
       <div className="relative">
         <Textarea
+          {...restInputProps}
           id={fieldKey}
           name={field.name}
           ref={field.ref}
@@ -141,7 +151,6 @@ const FormTextAreaFieldComponent = <T extends FieldValues>({
           placeholder={finalPlaceholder}
           disabled={isDisabled}
           className="pr-12"
-          {...textareaProps}
         />
         {enableTemplate && (
           <div className="absolute top-2 right-2 flex">
