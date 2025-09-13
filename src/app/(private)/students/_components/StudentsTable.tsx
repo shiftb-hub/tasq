@@ -38,6 +38,7 @@ import {
 } from "../_helpers/parseStudentsQueryParams";
 import { TaskTrend } from "./TaskTrend";
 import { ToggleFavoriteResult } from "@/app/_types/Student";
+import { useAvatarUrl } from "@/app/_hooks/useAvatarUrl";
 
 interface Student {
   id: string;
@@ -60,6 +61,16 @@ interface Props {
   /** お気に入り切り替えのServer Action */
   onToggleFavorite?: (studentId: string) => Promise<ToggleFavoriteResult>;
 }
+
+const StudentAvatar: React.FC<{ name: string; imageKey: string | null }> = ({ name, imageKey }) => {
+  const avatarUrl = useAvatarUrl(imageKey);
+  return (
+    <Avatar className="h-8 w-8">
+      <AvatarImage src={avatarUrl} alt={name} />
+      <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+    </Avatar>
+  );
+};
 
 /**
  * 受講生テーブル表示コンポーネント
@@ -342,12 +353,7 @@ export const StudentsTable = ({ students, onToggleFavorite }: Props) => {
                 <TableRow key={student.id}>
                   <TableCell className="pl-6">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={`https://api.dicebear.com/7.x/lorelei/svg?seed=${student.id}`}
-                        />
-                        <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
+                      <StudentAvatar name={student.name} imageKey={student.profileImageKey} />
                       <div>
                         <Link
                           href={`/teacher/${student.id}`}
