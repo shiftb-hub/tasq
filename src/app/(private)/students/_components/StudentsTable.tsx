@@ -1,7 +1,8 @@
 "use client";
 
 // React ライブラリ
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useTransition, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   FiBookOpen,
@@ -27,7 +28,14 @@ import {
 } from "@/app/_components/ui/table";
 
 // ローカルコンポーネント
-import { StudentsPagination } from "./StudentsPagination";
+import { PaginationView } from "@/app/_components/PaginationView";
+import { buildStudentsPageUrl } from "../_helpers/buildStudentsPageUrl";
+import {
+  parseStudentsQueryParams,
+  STUDENTS_TABLE_DEFAULTS,
+  type SortableField,
+  type SortDirection,
+} from "../_helpers/parseStudentsQueryParams";
 import { TaskTrend } from "./TaskTrend";
 
 interface Student {
@@ -45,9 +53,6 @@ interface Student {
   updatedAt: string;
 }
 
-type SortableField = "currentChapter" | "stuckTasks" | "stuckTasksTrend" | "totalTasks";
-type SortDirection = "asc" | "desc";
-
 interface Props {
   /** フィルタリング済みの受講生データ */
   students: Student[];
@@ -58,21 +63,41 @@ interface Props {
  * @description 受講生の一覧をテーブル形式で表示し、ページネーション機能を提供
  */
 export const StudentsTable = ({ students }: Props) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // URLクエリから初期値を復元（存在しない場合はデフォルト）
+  const {
+    page: initialPage,
+    sortField: initialSortField,
+    sortDirection: initialSortDirection,
+  } = parseStudentsQueryParams(searchParams);
+
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [favorites, setFavorites] = useState<Set<string>>(
     new Set(students.filter((student) => student.favorite).map((student) => student.id)),
   );
-  const [sortField, setSortField] = useState<SortableField>("stuckTasks");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortField, setSortField] = useState<SortableField>(initialSortField);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(initialSortDirection);
+
+  // URL の変更に合わせて state を同期（戻る/進むに追従）
+  useEffect(() => {
+    const { page, sortField, sortDirection } = parseStudentsQueryParams(searchParams);
+
+    setCurrentPage(page);
+    setSortField(sortField);
+    setSortDirection(sortDirection);
+  }, [searchParams]);
 
   // 1ページあたりの表示件数
-  const itemsPerPage = 5;
+  const itemsPerPage = STUDENTS_TABLE_DEFAULTS.ITEMS_PER_PAGE;
 
   /**
    * お気に入り状態を切り替える
    * @param studentId - 受講生ID
    */
-  const toggleFavorite = (studentId: string) => {
+  const toggleFavorite = useCallback((studentId: string) => {
     setFavorites((prev) => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(studentId)) {
@@ -82,24 +107,29 @@ export const StudentsTable = ({ students }: Props) => {
       }
       return newFavorites;
     });
-  };
+  }, []);
 
   /**
    * ソート処理
    * @param field - ソート対象のフィールド
    */
-  const handleSort = (field: SortableField) => {
-    if (sortField === field) {
-      // 同じフィールドの場合は方向を切り替え
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      // 異なるフィールドの場合は新しいフィールドでデフォルト方向
-      setSortField(field);
-      setSortDirection("desc");
-    }
-    // ソート変更時はページを1に戻す
-    setCurrentPage(1);
-  };
+  const handleSort = useCallback(
+    (field: SortableField) => {
+      const isSame = sortField === field;
+      const nextDir: SortDirection = isSame ? (sortDirection === "asc" ? "desc" : "asc") : "desc";
+      const nextField: SortableField = field;
+      const nextPage = 1;
+
+      startTransition(() => {
+        setSortField(nextField);
+        setSortDirection(nextDir);
+        setCurrentPage(nextPage);
+        const href = buildStudentsPageUrl(nextPage, nextField, nextDir, itemsPerPage);
+        router.replace(href, { scroll: false });
+      });
+    },
+    [sortField, sortDirection, itemsPerPage, router],
+  );
 
   /**
    * ソート済み受講生データ
@@ -146,22 +176,51 @@ export const StudentsTable = ({ students }: Props) => {
    * @description ソート済みの受講生をページごとに分割
    */
   const totalPages = Math.ceil(sortedStudents.length / itemsPerPage);
-  const paginatedStudents = sortedStudents.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+  const paginatedStudents = useMemo(
+    () => sortedStudents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
+    [sortedStudents, currentPage, itemsPerPage],
   );
 
   /**
    * ページ変更ハンドラー
    * @param page - 移動先のページ番号
    */
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = useCallback(
+    async (page: number) => {
+      if (isPending) return;
+      // NaN や無効な値に対するガードを追加
+      const validPage = Number.isFinite(page) ? page : 1;
+      const clamped = Math.max(1, Math.min(validPage, totalPages));
+      startTransition(() => {
+        setCurrentPage(clamped);
+        const href = buildStudentsPageUrl(clamped, sortField, sortDirection, itemsPerPage);
+        router.replace(href, { scroll: false });
+      });
+    },
+    [isPending, totalPages, sortField, sortDirection, itemsPerPage, router],
+  );
+
+  // 件数表示用の計算（LearningLogPageの表示形式に合わせる）
+  const paginationInfo = useMemo(() => {
+    const total = sortedStudents.length;
+    const hasAny = total > 0;
+    const from = hasAny ? (currentPage - 1) * itemsPerPage + 1 : 0;
+    const to = hasAny ? Math.min(currentPage * itemsPerPage, total) : 0;
+    return { total, from, to };
+  }, [sortedStudents.length, currentPage, itemsPerPage]);
+
+  // PaginationView へ渡す pageInfo（useMemo で安定化）
+  const pageInfo = useMemo(
+    () => ({ page: currentPage, perPage: itemsPerPage, total: sortedStudents.length }),
+    [currentPage, itemsPerPage, sortedStudents.length],
+  );
 
   return (
     <div className="space-y-6">
-      {/* 受講生リスト (テーブル表示に固定) */}
+      <div className="text-muted-foreground my-1 mr-1 text-xs">
+        {`全 ${paginationInfo.total} 件中 ${paginationInfo.from}-${paginationInfo.to} 件を表示`}
+      </div>
+
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -339,11 +398,7 @@ export const StudentsTable = ({ students }: Props) => {
       </Card>
 
       {/* ページネーション */}
-      <StudentsPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      <PaginationView pageInfo={pageInfo} onPageChange={handlePageChange} disabled={isPending} />
     </div>
   );
 };
