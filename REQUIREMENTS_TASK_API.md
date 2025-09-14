@@ -140,16 +140,16 @@
 
 #### 4.4.1 ActivityType一覧取得
 
-- **エンドポイント**: `GET /api/activity_types`
+- **エンドポイント**: `GET /api/activity-types`
 - **レスポンス**: ActivityType配列（orderでソート済み）
 
 #### 4.4.2 ActivityType詳細取得
 
-- **エンドポイント**: `GET /api/activity_types/[id]`
+- **エンドポイント**: `GET /api/activity-types/[id]`
 
 #### 4.4.3 ActivityType作成（ADMINのみ）
 
-- **エンドポイント**: `POST /api/activity_types`
+- **エンドポイント**: `POST /api/activity-types`
 - **リクエストボディ**:
   ```typescript
   {
@@ -161,11 +161,11 @@
 
 #### 4.4.4 ActivityType更新（ADMINのみ）
 
-- **エンドポイント**: `PUT /api/activity_types/[id]`
+- **エンドポイント**: `PUT /api/activity-types/[id]`
 
 #### 4.4.5 ActivityType削除（ADMINのみ）
 
-- **エンドポイント**: `DELETE /api/activity_types/[id]`
+- **エンドポイント**: `DELETE /api/activity-types/[id]`
 
 ## 5. レスポンス形式
 

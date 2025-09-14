@@ -157,12 +157,12 @@ Body (JSON):
 
 #### ActivityType一覧取得
 ```
-GET http://localhost:3000/api/activity_types
+GET http://localhost:3000/api/activity-types
 ```
 
 #### ActivityType作成（ADMINのみ）
 ```
-POST http://localhost:3000/api/activity_types
+POST http://localhost:3000/api/activity-types
 Body (JSON):
 {
   "name": "コーディング",

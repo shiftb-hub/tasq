@@ -9,9 +9,9 @@ import * as statusService from "@/app/_services/statusService";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 /**
@@ -21,7 +21,8 @@ type Props = {
 export const GET = async (request: NextRequest, { params }: Props) => {
   try {
     await authenticateUser();
-    const status = await statusService.getStatus(params.id);
+    const { id } = await params;
+    const status = await statusService.getStatus(id);
     
     return NextResponse.json(
       ResBuilder.success(status).build()
@@ -83,7 +84,8 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
       );
     }
     
-    const status = await statusService.updateStatus(params.id, validationResult.data, user);
+    const { id } = await params;
+    const status = await statusService.updateStatus(id, validationResult.data, user);
     
     return NextResponse.json(
       ResBuilder.success(status).build()
@@ -141,7 +143,8 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
 export const DELETE = async (request: NextRequest, { params }: Props) => {
   try {
     const user = await authenticateUser();
-    await statusService.deleteStatus(params.id, user);
+    const { id } = await params;
+    await statusService.deleteStatus(id, user);
     
     return NextResponse.json(
       ResBuilder.success({ success: true }).build()

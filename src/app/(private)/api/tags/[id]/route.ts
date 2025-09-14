@@ -9,9 +9,9 @@ import * as tagService from "@/app/_services/tagService";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 /**
@@ -21,7 +21,8 @@ type Props = {
 export const GET = async (_req: NextRequest, { params }: Props) => {
   try {
     await authenticateUser();
-    const tag = await tagService.getTag(params.id);
+    const { id } = await params;
+    const tag = await tagService.getTag(id);
     
     return NextResponse.json(
       ResBuilder.success(tag).build()
@@ -29,30 +30,28 @@ export const GET = async (_req: NextRequest, { params }: Props) => {
   } catch (error) {
     dumpError(error, "Tag operation");
     
-    // 認証エラーのチェック
-    if (
-      error instanceof Error &&
-      (
+    // 認証エラーのチェック + 個別エラー
+    if (error instanceof Error) {
+      if (
         error.message === AppErrorCodes.UNAUTHORIZED ||
         error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
         error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
-      )
-    ) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
-          .withDescription("Authentication required")
-          .build(),
-        { status: 401 }
-      );
-    }
-    
-    if (error instanceof Error && error.message === AppErrorCodes.TAG_NOT_FOUND) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.TAG_NOT_FOUND)
-          .withDescription("Tag not found")
-          .build(),
-        { status: 404 }
-      );
+      ) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+            .withDescription("Authentication required")
+            .build(),
+          { status: 401 }
+        );
+      }
+      if (error.message === AppErrorCodes.TAG_NOT_FOUND) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.TAG_NOT_FOUND)
+            .withDescription("Tag not found")
+            .build(),
+          { status: 404 }
+        );
+      }
     }
     
     return NextResponse.json(
@@ -84,7 +83,8 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
       );
     }
     
-    const tag = await tagService.updateTag(params.id, validationResult.data, user);
+    const { id } = await params;
+    const tag = await tagService.updateTag(id, validationResult.data, user);
     
     return NextResponse.json(
       ResBuilder.success(tag).build()
@@ -92,39 +92,36 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
   } catch (error) {
     dumpError(error, "Tag operation");
     
-    // 認証エラーのチェック
-    if (
-      error instanceof Error &&
-      (
+    // 認証エラーのチェック + 個別エラー
+    if (error instanceof Error) {
+      if (
         error.message === AppErrorCodes.UNAUTHORIZED ||
         error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
         error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
-      )
-    ) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
-          .withDescription("Authentication required")
-          .build(),
-        { status: 401 }
-      );
-    }
-    
-    if (error instanceof Error && error.message === AppErrorCodes.ADMIN_REQUIRED) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.ADMIN_REQUIRED)
-          .withDescription("Admin privileges required")
-          .build(),
-        { status: 403 }
-      );
-    }
-    
-    if (error instanceof Error && error.message === AppErrorCodes.TAG_NOT_FOUND) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.TAG_NOT_FOUND)
-          .withDescription("Tag not found")
-          .build(),
-        { status: 404 }
-      );
+      ) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+            .withDescription("Authentication required")
+            .build(),
+          { status: 401 }
+        );
+      }
+      if (error.message === AppErrorCodes.ADMIN_REQUIRED) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.ADMIN_REQUIRED)
+            .withDescription("Admin privileges required")
+            .build(),
+          { status: 403 }
+        );
+      }
+      if (error.message === AppErrorCodes.TAG_NOT_FOUND) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.TAG_NOT_FOUND)
+            .withDescription("Tag not found")
+            .build(),
+          { status: 404 }
+        );
+      }
     }
     
     return NextResponse.json(
@@ -143,54 +140,51 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
 export const DELETE = async (_req: NextRequest, { params }: Props) => {
   try {
     const user = await authenticateUser();
-    await tagService.deleteTag(params.id, user);
+    const { id } = await params;
+    await tagService.deleteTag(id, user);
     
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     dumpError(error, "Tag operation");
     
-    // 認証エラーのチェック
-    if (
-      error instanceof Error &&
-      (
+    // 認証エラーのチェック + 個別エラー
+    if (error instanceof Error) {
+      if (
         error.message === AppErrorCodes.UNAUTHORIZED ||
         error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
         error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
-      )
-    ) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
-          .withDescription("Authentication required")
-          .build(),
-        { status: 401 }
-      );
-    }
-    
-    if (error instanceof Error && error.message === AppErrorCodes.ADMIN_REQUIRED) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.ADMIN_REQUIRED)
-          .withDescription("Admin privileges required")
-          .build(),
-        { status: 403 }
-      );
-    }
-    
-    if (error instanceof Error && error.message === AppErrorCodes.TAG_NOT_FOUND) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.TAG_NOT_FOUND)
-          .withDescription("Tag not found")
-          .build(),
-        { status: 404 }
-      );
-    }
-    
-    if (error instanceof Error && error.message === AppErrorCodes.TAG_IN_USE) {
-      return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.TAG_IN_USE)
-          .withDescription("Tag is in use and cannot be deleted")
-          .build(),
-        { status: 409 }
-      );
+      ) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
+            .withDescription("Authentication required")
+            .build(),
+          { status: 401 }
+        );
+      }
+      if (error.message === AppErrorCodes.ADMIN_REQUIRED) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.ADMIN_REQUIRED)
+            .withDescription("Admin privileges required")
+            .build(),
+          { status: 403 }
+        );
+      }
+      if (error.message === AppErrorCodes.TAG_NOT_FOUND) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.TAG_NOT_FOUND)
+            .withDescription("Tag not found")
+            .build(),
+          { status: 404 }
+        );
+      }
+      if (error.message === AppErrorCodes.TAG_IN_USE) {
+        return NextResponse.json(
+          ResBuilder.error(AppErrorCodes.TAG_IN_USE)
+            .withDescription("Tag is in use and cannot be deleted")
+            .build(),
+          { status: 409 }
+        );
+      }
     }
     
     return NextResponse.json(

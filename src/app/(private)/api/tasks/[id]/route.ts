@@ -10,9 +10,9 @@ import * as taskService from "@/app/_services/taskService";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 /**
@@ -21,7 +21,8 @@ type Props = {
  */
 export const GET = async (request: NextRequest, { params }: Props) => {
   try {
-    const idResult = z.string().uuid().safeParse(params.id);
+    const { id } = await params;
+    const idResult = z.string().uuid().safeParse(id);
     if (!idResult.success) {
       return NextResponse.json(
         ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
@@ -31,7 +32,7 @@ export const GET = async (request: NextRequest, { params }: Props) => {
       );
     }
     const user = await authenticateUser();
-    const task = await taskService.getTask(params.id, user);
+    const task = await taskService.getTask(id, user);
 
     return NextResponse.json(ResBuilder.success(task).build());
   } catch (error) {
@@ -93,7 +94,8 @@ export const GET = async (request: NextRequest, { params }: Props) => {
  */
 export const PUT = async (request: NextRequest, { params }: Props) => {
   try {
-    const idResult = z.string().uuid().safeParse(params.id);
+    const { id } = await params;
+    const idResult = z.string().uuid().safeParse(id);
     if (!idResult.success) {
       return NextResponse.json(
         ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
@@ -117,7 +119,7 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
     }
 
     const task = await taskService.updateTask(
-      params.id,
+      id,
       validationResult.data,
       user,
     );
@@ -182,7 +184,8 @@ export const PUT = async (request: NextRequest, { params }: Props) => {
  */
 export const DELETE = async (request: NextRequest, { params }: Props) => {
   try {
-    const idResult = z.string().uuid().safeParse(params.id);
+    const { id } = await params;
+    const idResult = z.string().uuid().safeParse(id);
     if (!idResult.success) {
       return NextResponse.json(
         ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
@@ -192,7 +195,7 @@ export const DELETE = async (request: NextRequest, { params }: Props) => {
       );
     }
     const user = await authenticateUser();
-    await taskService.deleteTask(params.id, user);
+    await taskService.deleteTask(id, user);
 
     return NextResponse.json(ResBuilder.success({ success: true }).build());
   } catch (error) {

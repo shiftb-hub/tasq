@@ -18,24 +18,22 @@ export const GET = async () => {
     return NextResponse.json(ResBuilder.success(activityTypes).build());
   } catch (error) {
     dumpError(error, "ActivityType operation");
-    
+
     // 認証エラーのチェック
     if (
       error instanceof Error &&
-      (
-        error.message === AppErrorCodes.UNAUTHORIZED ||
+      (error.message === AppErrorCodes.UNAUTHORIZED ||
         error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
-        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
-      )
+        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND)
     ) {
       return NextResponse.json(
         ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
           .withDescription("Authentication required")
           .build(),
-        { status: 401 }
+        { status: 401 },
       );
     }
-    
+
     return NextResponse.json(
       ResBuilder.error(AppErrorCodes.INTERNAL_SERVER_ERROR)
         .withDescription("An unexpected error occurred")
@@ -53,7 +51,7 @@ export const POST = async (request: NextRequest) => {
     if (!validation.success) {
       return NextResponse.json(
         ResBuilder.error(AppErrorCodes.TASK_VALIDATION_ERROR)
-          .withDescription(validation.error.errors[0].message)
+          .withDescription(validation.error.issues[0].message)
           .build(),
         { status: 400 },
       );
@@ -62,27 +60,27 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json(ResBuilder.success(created).build(), { status: 201 });
   } catch (error) {
     dumpError(error, "ActivityType operation");
-    
+
     // 認証エラーのチェック
     if (
       error instanceof Error &&
-      (
-        error.message === AppErrorCodes.UNAUTHORIZED ||
+      (error.message === AppErrorCodes.UNAUTHORIZED ||
         error.message === AppErrorCodes.APP_USER_NOT_FOUND ||
-        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND
-      )
+        error.message === AppErrorCodes.SUPABASE_USER_NOT_FOUND)
     ) {
       return NextResponse.json(
         ResBuilder.error(AppErrorCodes.UNAUTHORIZED)
           .withDescription("Authentication required")
           .build(),
-        { status: 401 }
+        { status: 401 },
       );
     }
-    
+
     if (error instanceof Error && error.message === AppErrorCodes.ADMIN_REQUIRED) {
       return NextResponse.json(
-        ResBuilder.error(AppErrorCodes.ADMIN_REQUIRED).withDescription("Admin privileges required").build(),
+        ResBuilder.error(AppErrorCodes.ADMIN_REQUIRED)
+          .withDescription("Admin privileges required")
+          .build(),
         { status: 403 },
       );
     }
@@ -94,3 +92,4 @@ export const POST = async (request: NextRequest) => {
     );
   }
 };
+
