@@ -37,6 +37,8 @@ import {
   type SortDirection,
 } from "../_helpers/parseStudentsQueryParams";
 import { TaskTrend } from "./TaskTrend";
+import { ToggleFavoriteResult } from "@/app/_types/Student";
+import { useAvatarUrl } from "@/app/_hooks/useAvatarUrl";
 
 interface Student {
   id: string;
@@ -56,13 +58,25 @@ interface Student {
 interface Props {
   /** フィルタリング済みの受講生データ */
   students: Student[];
+  /** お気に入り切り替えのServer Action */
+  onToggleFavorite?: (studentId: string) => Promise<ToggleFavoriteResult>;
 }
+
+const StudentAvatar: React.FC<{ name: string; imageKey: string | null }> = ({ name, imageKey }) => {
+  const avatarUrl = useAvatarUrl(imageKey);
+  return (
+    <Avatar className="h-8 w-8">
+      <AvatarImage src={avatarUrl} alt={name} />
+      <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+    </Avatar>
+  );
+};
 
 /**
  * 受講生テーブル表示コンポーネント
  * @description 受講生の一覧をテーブル形式で表示し、ページネーション機能を提供
  */
-export const StudentsTable = ({ students }: Props) => {
+export const StudentsTable = ({ students, onToggleFavorite }: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -97,17 +111,36 @@ export const StudentsTable = ({ students }: Props) => {
    * お気に入り状態を切り替える
    * @param studentId - 受講生ID
    */
-  const toggleFavorite = useCallback((studentId: string) => {
+  const toggleFavorite = async (studentId: string) => {
+    // 楽観的更新
     setFavorites((prev) => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(studentId)) {
-        newFavorites.delete(studentId);
-      } else {
-        newFavorites.add(studentId);
-      }
-      return newFavorites;
+      const next = new Set(prev);
+      if (next.has(studentId)) next.delete(studentId);
+      else next.add(studentId);
+      return next;
     });
-  }, []);
+
+    if (!onToggleFavorite) return;
+
+    try {
+      const res = await onToggleFavorite(studentId);
+      // サーバー結果と同期
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        if (res.favorite) next.add(studentId);
+        else next.delete(studentId);
+        return next;
+      });
+    } catch (e) {
+      // 失敗時はロールバック
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        if (next.has(studentId)) next.delete(studentId);
+        else next.add(studentId);
+        return next;
+      });
+    }
+  };
 
   /**
    * ソート処理
@@ -320,12 +353,7 @@ export const StudentsTable = ({ students }: Props) => {
                 <TableRow key={student.id}>
                   <TableCell className="pl-6">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={`https://api.dicebear.com/7.x/lorelei/svg?seed=${student.id}`}
-                        />
-                        <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
+                      <StudentAvatar name={student.name} imageKey={student.profileImageKey} />
                       <div>
                         <Link
                           href={`/teacher/${student.id}`}

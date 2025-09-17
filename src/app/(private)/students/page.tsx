@@ -1,58 +1,26 @@
-"use client";
+import prisma from "@/app/_libs/prisma";
+import { authenticateAppUser } from "@/app/_libs/authenticateUser";
+import { StudentService } from "@/app/_services/studentService";
+import { StudentsPageClient } from "./_components/StudentsPageClient";
+import { toggleFavoriteAction } from "./_actions/toggleFavorite";
 
-import { useState, useMemo } from "react";
-import { PageTitle } from "@/app/_components/PageTitle";
-import { PageSubTitle } from "@/app/_components/PageSubTitle";
-import { mockStudents } from "./_data/mockStudents";
-import { StudentsSearchFilter } from "./_components/StudentsSearchFilter";
-import { StudentsTable } from "./_components/StudentsTable";
+export const dynamic = "force-dynamic";
 
 /**
- * 受講生一覧ページ
- * @description 学習進捗と受講生情報を管理するページ
+ * 受講生一覧ページ（SSR + Server Actions）
+ * - Server Component で受講生データを取得
+ * - お気に入り切り替えは Server Action を子へ渡す
  */
-const StudentsPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [chapterFilter, setChapterFilter] = useState("all");
+const StudentsPage = async () => {
+  // 教員としてログインしている前提で現在ユーザーを取得
+  const teacher = await authenticateAppUser();
 
-  /**
-   * 検索・フィルター変更ハンドラー
-   * @param searchValue - 検索語
-   * @param chapterValue - 章フィルター
-   */
-  const handleFilterChange = (searchValue: string, chapterValue: string) => {
-    setSearchTerm(searchValue);
-    setChapterFilter(chapterValue);
-  };
-
-  /**
-   * フィルタリングとソート
-   * @description 検索語と章フィルターに基づいて受講生をフィルタリング
-   */
-  const filteredStudents = useMemo(() => {
-    return mockStudents.filter((student) => {
-      const matchesSearch =
-        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (student.slackId ?? "").toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesChapter =
-        chapterFilter === "all" || student.currentChapter === parseInt(chapterFilter);
-
-      return matchesSearch && matchesChapter;
-    });
-  }, [searchTerm, chapterFilter]);
+  // Prisma 経由でサービス層から集計済みデータを取得
+  const service = new StudentService(prisma);
+  const students = await service.getStudentsWithStats(teacher.id);
 
   return (
-    <div className="container mx-auto space-y-6 p-6 py-20">
-      <PageTitle className="mb-2">受講生一覧</PageTitle>
-      <PageSubTitle>学習進捗と受講生情報を管理</PageSubTitle>
-
-      {/* 検索・フィルター */}
-      <StudentsSearchFilter onFilterChange={handleFilterChange} />
-
-      {/* 受講生リスト */}
-      <StudentsTable students={filteredStudents} />
-    </div>
+    <StudentsPageClient students={students} onToggleFavorite={toggleFavoriteAction} />
   );
 };
 
