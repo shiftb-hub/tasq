@@ -15,10 +15,14 @@ export const dynamic = "force-dynamic";
 
 // ユーザ一覧を取得するAPI（テスト用）
 export const GET = async () => {
+  console.log("GET /api/playground/users が呼び出されました");
+
   try {
+    console.log("認証処理を開始します");
     // 認証とユーザ情報の取得
     // 失敗時は SupabaseUserNotFoundError / AppUserNotFoundError がスローされる
     const appUser = await authenticateAppUser();
+    console.log("認証成功:", appUser.id, appUser.name, appUser.role);
 
     // // 必要に応じて権限チェックを行う
     // if (appUser.role === Role.STUDENT) {
@@ -31,6 +35,7 @@ export const GET = async () => {
     //   });
     // }
 
+    console.log("ユーザー取得処理を開始します");
     const userService = new UserService(prisma);
     const users = await userService.getAll({
       select: {
@@ -38,9 +43,11 @@ export const GET = async () => {
         name: true,
       },
     });
-    return NextResponse.json(ResBuilder.success<User[]>(users).build());
+    console.log("ユーザー取得成功:", users.length, "件");
+
+    return NextResponse.json(ResBuilder.success(users).build());
   } catch (e) {
-    console.error(e);
+    console.error("ユーザー取得でエラーが発生しました:", e);
     if (
       e instanceof SupabaseUserNotFoundError ||
       e instanceof AppUserNotFoundError
